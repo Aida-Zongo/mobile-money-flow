@@ -75,18 +75,22 @@ export const useNotifications = create<NotificationStore>((set, get) => ({
   }
 }));
 
+import { playSound } from './sounds';
+
 // Fonctions utilitaires pour les notifications courantes
 export const notificationActions = {
   transactionAdded: (amount: number, type: 'expense' | 'revenue') => ({
     title: type === 'expense' ? 'Dépense ajoutée' : 'Revenu ajouté',
     message: `${type === 'expense' ? '-' : '+'}${amount.toLocaleString()} FCFA`,
     type: 'success' as const,
+    sound: 'transaction' as const,
   }),
 
   budgetExceeded: (category: string, budget: number, spent: number) => ({
     title: 'Budget dépassé',
     message: `${category}: ${spent.toLocaleString()} FCFA / ${budget.toLocaleString()} FCFA`,
     type: 'warning' as const,
+    sound: 'warning' as const,
     actionUrl: '/budgets',
     actionText: 'Voir les budgets',
   }),
@@ -95,18 +99,21 @@ export const notificationActions = {
     title: 'Solde faible',
     message: `Votre solde est de ${balance.toLocaleString()} FCFA`,
     type: 'warning' as const,
+    sound: 'warning' as const,
   }),
 
   welcomeBack: (userName: string) => ({
     title: 'Bon retour !',
     message: `Ravi de vous revoir, ${userName} !`,
     type: 'info' as const,
+    sound: 'success' as const,
   }),
 
   expenseLimit: (category: string, limit: number) => ({
     title: 'Limite de dépense atteinte',
     message: `Vous avez atteint votre limite pour ${category}`,
     type: 'warning' as const,
+    sound: 'warning' as const,
     actionUrl: '/expenses',
     actionText: 'Voir les dépenses',
   }),
@@ -115,7 +122,29 @@ export const notificationActions = {
     title: 'Rapport mensuel disponible',
     message: `Vos dépenses de ${month}: ${totalExpenses.toLocaleString()} FCFA`,
     type: 'info' as const,
+    sound: 'notification' as const,
     actionUrl: '/statistics',
     actionText: 'Voir les statistiques',
   }),
+
+  newFeature: (featureName: string) => ({
+    title: 'Nouvelle fonctionnalité !',
+    message: `Découvrez ${featureName} dès maintenant.`,
+    type: 'info' as const,
+    sound: 'notification' as const,
+  }),
+};
+
+// Fonction améliorée pour ajouter une notification avec son
+export const addNotificationWithSound = (notification: Omit<Notification, 'id' | 'timestamp' | 'read'> & { sound?: keyof typeof NotificationSounds }) => {
+  const { useNotifications } = require('./notifications').default;
+  const { addNotification } = useNotifications.getState();
+  
+  // Ajouter la notification
+  addNotification(notification);
+  
+  // Jouer le son si spécifié
+  if (notification.sound) {
+    playSound(notification.sound);
+  }
 };
