@@ -2,7 +2,7 @@ const { defineConfig } = require('cypress');
 
 module.exports = defineConfig({
   e2e: {
-    baseUrl: 'http://localhost:3005',
+    baseUrl: 'http://localhost:3007',
     supportFile: 'cypress/support/commands.js',
     specPattern: 'cypress/e2e/**/*.cy.js',
     video: false,
