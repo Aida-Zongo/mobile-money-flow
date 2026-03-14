@@ -43,6 +43,13 @@ export default function RegisterPage() {
           name: name, 
           email: email 
         }));
+        
+        // Notification de bienvenue
+        if (typeof window !== 'undefined') {
+          setTimeout(() => {
+            alert(`🎉 Bienvenue ${name} !\n\nVotre compte MoneyFlow a été créé avec succès.`);
+          }, 500);
+        }
       }
       router.push('/dashboard');
     } catch (err: any) {

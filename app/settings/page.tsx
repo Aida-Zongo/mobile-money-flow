@@ -1,13 +1,154 @@
-"use client"
+'use client';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { AuthGuard } from '@/components/AuthGuard';
+import { Button } from '@/components/ui/button';
+import { Settings, User, Bell, Shield, Smartphone, Globe, CreditCard } from 'lucide-react';
+import Link from 'next/link';
 
-import { useState } from "react"
-import Link from "next/link"
-import { Navbar } from "@/components/navbar"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
+export default function SettingsPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    // Rediriger automatiquement vers la page profil
+    router.replace('/profile');
+  }, [router]);
+
+  return (
+    <AuthGuard>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white shadow-sm border-b">
+          <div className="max-w-4xl mx-auto px-4 py-4">
+            <div className="flex items-center gap-3">
+              <Link href="/dashboard" className="text-blue-600 hover:text-blue-800">
+                ← Retour au dashboard
+              </Link>
+              <h1 className="text-2xl font-bold text-gray-900">Paramètres</h1>
+            </div>
+          </div>
+        </div>
+
+        {/* Contenu */}
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <div className="bg-white rounded-xl shadow-sm p-8">
+            {/* Message de redirection */}
+            <div className="text-center py-12">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-6">
+                <User className="w-8 h-8 text-blue-600" />
+              </div>
+              
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                Redirection vers le profil
+              </h2>
+              
+              <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                Pour accéder à vos informations personnelles et modifier votre profil, 
+                vous allez être redirigé automatiquement vers la page profil.
+              </p>
+
+              <div className="animate-pulse">
+                <div className="inline-flex items-center gap-2 text-blue-600">
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+                  <span>Redirection en cours...</span>
+                </div>
+              </div>
+
+              {/* Bouton manuel au cas où la redirection ne fonctionne pas */}
+              <div className="mt-8">
+                <p className="text-sm text-gray-500 mb-4">
+                  Si la redirection ne fonctionne pas, cliquez sur le bouton ci-dessous :
+                </p>
+                <Button 
+                  onClick={() => router.push('/profile')}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Accéder à mon profil
+                  </div>
+                </Button>
+              </div>
+            </div>
+
+            {/* Options rapides */}
+            <div className="mt-12 pt-8 border-t border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">Accès rapide</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Link
+                  href="/profile"
+                  className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <User className="w-5 h-5 text-gray-600" />
+                  <div>
+                    <div className="font-medium text-gray-900">Mon profil</div>
+                    <div className="text-sm text-gray-500">Informations personnelles</div>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/expenses"
+                  className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <CreditCard className="w-5 h-5 text-gray-600" />
+                  <div>
+                    <div className="font-medium text-gray-900">Dépenses</div>
+                    <div className="text-sm text-gray-500">Gérer les transactions</div>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/budgets"
+                  className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <Shield className="w-5 h-5 text-gray-600" />
+                  <div>
+                    <div className="font-medium text-gray-900">Budgets</div>
+                    <div className="text-sm text-gray-500">Limites et alertes</div>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/statistics"
+                  className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <Bell className="w-5 h-5 text-gray-600" />
+                  <div>
+                    <div className="font-medium text-gray-900">Notifications</div>
+                    <div className="text-sm text-gray-500">Préférences d'alerte</div>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/settings/security"
+                  className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <Smartphone className="w-5 h-5 text-gray-600" />
+                  <div>
+                    <div className="font-medium text-gray-900">Sécurité</div>
+                    <div className="text-sm text-gray-500">Mot de passe et 2FA</div>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/settings/privacy"
+                  className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <Globe className="w-5 h-5 text-gray-600" />
+                  <div>
+                    <div className="font-medium text-gray-900">Confidentialité</div>
+                    <div className="text-sm text-gray-500">Données et partage</div>
+                  </div>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </AuthGuard>
+  );
+}
 import {
   Sheet,
   SheetContent,

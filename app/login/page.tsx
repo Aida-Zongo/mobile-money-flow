@@ -24,6 +24,13 @@ export default function LoginPage() {
             name: 'Test User', 
             email: email 
           }));
+          
+          // Notification de bienvenue
+          if (typeof window !== 'undefined') {
+            setTimeout(() => {
+              alert(`🎉 Bon retour ${email} !\n\nConnexion réussie à MoneyFlow.`);
+            }, 500);
+          }
         }
         router.push('/dashboard');
       } else {

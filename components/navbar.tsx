@@ -6,6 +6,7 @@ import { Home, Wallet, BarChart3, Bell, ChevronDown, LogOut, Settings, User, Tre
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
 import { DataSync } from "@/lib/data-sync"
+import { NotificationDropdown } from "@/components/NotificationDropdown"
 
 const navItems = [
   { href: "/dashboard", label: "Accueil", icon: Home },
@@ -87,12 +88,7 @@ export function Navbar() {
           {isLoggedIn ? (
             <>
               {/* Notifications */}
-              <button className="relative w-10 h-10 rounded-xl bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors">
-                <Bell className="w-5 h-5 text-muted-foreground" />
-                {hasNotifications && (
-                  <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full" />
-                )}
-              </button>
+              <NotificationDropdown />
 
               {/* Divider */}
               <div className="h-6 w-px bg-border mx-2" />
