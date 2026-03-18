@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowDown, ArrowUp, Wallet, TrendingUp, TrendingDown } from "lucide-react"
+import { ArrowDown, ArrowUp, Wallet, TrendingUp, TrendingDown, DollarSign, X, Minus, Plus, ShoppingCart } from "lucide-react"
 import { Navbar } from "@/components/navbar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DataSync, formatMoney } from "@/lib/data-sync"
@@ -287,43 +287,78 @@ function DashboardContent() {
 
         {/* Formulaire Modal Revenu */}
         {showRevenueForm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
-              <h3 className="text-lg font-semibold mb-4">Ajouter un Revenu</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Montant (FCFA)</label>
-                  <input
-                    type="number"
-                    value={formData.amount}
-                    onChange={(e) => setFormData({...formData, amount: e.target.value})}
-                    placeholder="50000"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Description</label>
-                  <input
-                    type="text"
-                    value={formData.label}
-                    onChange={(e) => setFormData({...formData, label: e.target.value})}
-                    placeholder="Salaire, Prime, etc."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  />
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100 opacity-100">
+              {/* Header avec dégradé vert */}
+              <div className="bg-gradient-to-r from-emerald-500 to-green-600 px-6 py-4 rounded-t-2xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                      <ArrowUp className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white">Ajouter un Revenu</h3>
+                      <p className="text-emerald-100 text-sm">Enrichissez votre finances</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setShowRevenueForm(false)}
+                    className="text-white/80 hover:text-white transition-colors"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
                 </div>
               </div>
-              <div className="flex gap-3 mt-6">
+              
+              <div className="p-6 space-y-6">
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Montant (FCFA)</label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                      <DollarSign className="w-5 h-5 text-emerald-500" />
+                    </div>
+                    <input
+                      type="number"
+                      value={formData.amount}
+                      onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                      placeholder="50 000"
+                      className="w-full pl-12 pr-4 py-3 border-2 border-emerald-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-lg font-semibold transition-all duration-200 bg-emerald-50/50"
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                      <TrendingUp className="w-5 h-5 text-emerald-500" />
+                    </div>
+                    <input
+                      type="text"
+                      value={formData.label}
+                      onChange={(e) => setFormData({...formData, label: e.target.value})}
+                      placeholder="Salaire, Prime, Freelance..."
+                      className="w-full pl-12 pr-4 py-3 border-2 border-emerald-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-lg transition-all duration-200 bg-emerald-50/50"
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex gap-3 px-6 pb-6">
                 <button
                   onClick={() => setShowRevenueForm(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-semibold transition-all duration-200"
                 >
                   Annuler
                 </button>
                 <button
                   onClick={handleSubmitTransaction}
-                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl hover:from-emerald-600 hover:to-green-700 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
                 >
-                  Ajouter
+                  <span className="flex items-center justify-center gap-2">
+                    <Plus className="w-5 h-5" />
+                    Ajouter le Revenu
+                  </span>
                 </button>
               </div>
             </div>
@@ -332,43 +367,78 @@ function DashboardContent() {
 
         {/* Formulaire Modal Dépense */}
         {showExpenseForm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
-              <h3 className="text-lg font-semibold mb-4">Ajouter une Dépense</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Montant (FCFA)</label>
-                  <input
-                    type="number"
-                    value={formData.amount}
-                    onChange={(e) => setFormData({...formData, amount: e.target.value})}
-                    placeholder="5000"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Description</label>
-                  <input
-                    type="text"
-                    value={formData.label}
-                    onChange={(e) => setFormData({...formData, label: e.target.value})}
-                    placeholder="Courses, Transport, etc."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                  />
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100 opacity-100">
+              {/* Header avec dégradé rouge */}
+              <div className="bg-gradient-to-r from-red-500 to-rose-600 px-6 py-4 rounded-t-2xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                      <ArrowDown className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white">Ajouter une Dépense</h3>
+                      <p className="text-red-100 text-sm">Maîtrisez vos dépenses</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setShowExpenseForm(false)}
+                    className="text-white/80 hover:text-white transition-colors"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
                 </div>
               </div>
-              <div className="flex gap-3 mt-6">
+              
+              <div className="p-6 space-y-6">
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Montant (FCFA)</label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                      <Wallet className="w-5 h-5 text-red-500" />
+                    </div>
+                    <input
+                      type="number"
+                      value={formData.amount}
+                      onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                      placeholder="5 000"
+                      className="w-full pl-12 pr-4 py-3 border-2 border-red-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-lg font-semibold transition-all duration-200 bg-red-50/50"
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                      <ShoppingCart className="w-5 h-5 text-red-500" />
+                    </div>
+                    <input
+                      type="text"
+                      value={formData.label}
+                      onChange={(e) => setFormData({...formData, label: e.target.value})}
+                      placeholder="Courses, Transport, Loisirs..."
+                      className="w-full pl-12 pr-4 py-3 border-2 border-red-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-lg transition-all duration-200 bg-red-50/50"
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex gap-3 px-6 pb-6">
                 <button
                   onClick={() => setShowExpenseForm(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-semibold transition-all duration-200"
                 >
                   Annuler
                 </button>
                 <button
                   onClick={handleSubmitTransaction}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:from-red-600 hover:to-rose-700 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
                 >
-                  Ajouter
+                  <span className="flex items-center justify-center gap-2">
+                    <Minus className="w-5 h-5" />
+                    Ajouter la Dépense
+                  </span>
                 </button>
               </div>
             </div>
@@ -396,67 +466,96 @@ function AllTransactionsModal({ isOpen, onClose, transactions }: { isOpen: boole
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[80vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-semibold">Toutes les Transactions</h3>
-          <button 
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-2xl"
-          >
-            ×
-          </button>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[85vh] overflow-hidden transform transition-all duration-300">
+        {/* Header avec dégradé */}
+        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4 rounded-t-2xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white">Historique Complet</h3>
+                <p className="text-indigo-100 text-sm">Toutes vos transactions</p>
+              </div>
+            </div>
+            <button 
+              onClick={onClose}
+              className="text-white/80 hover:text-white transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
         </div>
         
-        <div className="space-y-4">
+        <div className="p-6 overflow-y-auto max-h-[60vh]">
           {transactions.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-gray-500">Aucune transaction enregistrée</p>
+            <div className="text-center py-12">
+              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Wallet className="w-10 h-10 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">Aucune transaction</h3>
+              <p className="text-gray-500">Commencez par ajouter votre première transaction</p>
             </div>
           ) : (
-            transactions.map((transaction, index) => (
-              <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-                <div className="flex items-center space-x-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold ${transaction.type === 'revenu' ? 'bg-green-500' : 'bg-red-500'}`}>
-                    {transaction.type === 'revenu' ? '+' : '-'}
-                  </div>
-                  <div>
-                    <p className="font-medium">{transaction.label}</p>
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <span>{transaction.category}</span>
-                      <span>•</span>
-                      <span>{transaction.date}</span>
-                      {transaction.isToday && (
-                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
-                          Aujourd'hui
+            <div className="space-y-3">
+              {transactions.map((transaction, index) => (
+                <div key={transaction.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:bg-gradient-to-r hover:from-gray-50 hover:to-white transition-all duration-200 group">
+                  <div className="flex items-center space-x-4">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold shadow-lg ${transaction.type === 'revenu' ? 'bg-gradient-to-br from-emerald-500 to-green-600' : 'bg-gradient-to-br from-red-500 to-rose-600'}`}>
+                      {transaction.type === 'revenu' ? '+' : '-'}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 group-hover:text-gray-900">{transaction.label}</p>
+                      <div className="flex items-center gap-3 text-sm text-gray-500">
+                        <span className="px-2 py-1 bg-gray-100 rounded-full font-medium">
+                          {transaction.category}
                         </span>
-                      )}
+                        <span>•</span>
+                        <span>{transaction.date}</span>
+                        {transaction.isToday && (
+                          <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full font-medium text-xs">
+                            Aujourd'hui
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
+                  <div className="text-right">
+                    <p className={`font-bold text-xl ${transaction.type === 'revenu' ? 'text-emerald-600' : 'text-red-600'} group-hover:text-2xl transition-all duration-200`}>
+                      {transaction.type === 'revenu' ? '+' : '-'}{formatMoney(transaction.amount)}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {transaction.time}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className={`font-bold text-lg ${transaction.type === 'revenu' ? 'text-green-600' : 'text-red-600'}`}>
-                    {transaction.type === 'revenu' ? '+' : '-'}{formatMoney(transaction.amount)}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {transaction.time}
-                  </p>
-                </div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </div>
         
-        <div className="flex justify-between items-center pt-4 border-t">
-          <div className="text-sm text-gray-600">
-            Total: {transactions.length} transaction{transactions.length > 1 ? 's' : ''}
+        {/* Footer */}
+        <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 rounded-b-2xl">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <div className="text-sm text-gray-600">
+                <span className="font-semibold">{transactions.length}</span> transaction{transactions.length > 1 ? 's' : ''}
+              </div>
+              <div className="text-sm text-gray-600">
+                Total: <span className="font-bold text-lg text-gray-800">
+                  {formatMoney(transactions.reduce((sum, t) => sum + (t.type === 'revenu' ? t.amount : -t.amount), 0))}
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl hover:from-indigo-600 hover:to-purple-700 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+            >
+              Fermer
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
-          >
-            Fermer
-          </button>
         </div>
       </div>
     </div>
