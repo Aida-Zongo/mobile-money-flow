@@ -63,6 +63,7 @@ function DashboardContent() {
   // Ajout de transaction avec formulaire
   const [showRevenueForm, setShowRevenueForm] = useState(false)
   const [showExpenseForm, setShowExpenseForm] = useState(false)
+  const [showAllTransactions, setShowAllTransactions] = useState(false)
   const [formData, setFormData] = useState({
     amount: '',
     label: '',
@@ -273,8 +274,8 @@ function DashboardContent() {
               {transactions.length > 5 && (
                 <div className="text-center pt-4">
                   <button 
-                    onClick={() => console.log("Voir toutes les transactions")}
-                    className="text-sm text-primary hover:underline"
+                    onClick={() => setShowAllTransactions(true)}
+                    className="text-sm bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
                   >
                     Voir toutes les transactions ({transactions.length - 5} supplémentaires)
                   </button>
@@ -374,6 +375,13 @@ function DashboardContent() {
           </div>
         )}
       </div>
+      
+      {/* Modal pour afficher toutes les transactions */}
+      <AllTransactionsModal 
+        isOpen={showAllTransactions}
+        onClose={() => setShowAllTransactions(false)}
+        transactions={transactions}
+      />
     </main>
   )
 }
@@ -381,4 +389,76 @@ function DashboardContent() {
 export default function DashboardPage() {
   // Plus besoin de AuthGuard - si on arrive ici, c'est qu'on est déjà connecté !
   return <DashboardContent />
+}
+
+// Modal pour afficher toutes les transactions
+function AllTransactionsModal({ isOpen, onClose, transactions }: { isOpen: boolean; onClose: () => void; transactions: any[] }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[80vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-semibold">Toutes les Transactions</h3>
+          <button 
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 text-2xl"
+          >
+            ×
+          </button>
+        </div>
+        
+        <div className="space-y-4">
+          {transactions.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">Aucune transaction enregistrée</p>
+            </div>
+          ) : (
+            transactions.map((transaction, index) => (
+              <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                <div className="flex items-center space-x-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold ${transaction.type === 'revenu' ? 'bg-green-500' : 'bg-red-500'}`}>
+                    {transaction.type === 'revenu' ? '+' : '-'}
+                  </div>
+                  <div>
+                    <p className="font-medium">{transaction.label}</p>
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <span>{transaction.category}</span>
+                      <span>•</span>
+                      <span>{transaction.date}</span>
+                      {transaction.isToday && (
+                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
+                          Aujourd'hui
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className={`font-bold text-lg ${transaction.type === 'revenu' ? 'text-green-600' : 'text-red-600'}`}>
+                    {transaction.type === 'revenu' ? '+' : '-'}{formatMoney(transaction.amount)}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {transaction.time}
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+        
+        <div className="flex justify-between items-center pt-4 border-t">
+          <div className="text-sm text-gray-600">
+            Total: {transactions.length} transaction{transactions.length > 1 ? 's' : ''}
+          </div>
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
+          >
+            Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
