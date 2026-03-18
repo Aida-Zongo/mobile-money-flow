@@ -24,14 +24,16 @@ function DashboardContent() {
       const user = DataSync.getCurrentUser()
       const initialBalance = DataSync.getInitialBalance()
       const stats = DataSync.getStatistics()
+      const allTransactions = DataSync.getTransactions()
       
       setSoldeInitial(initialBalance)
-      setTransactions(DataSync.getTransactions())
+      setTransactions(allTransactions)
       setRevenusActuels(stats.totalRevenues)
       setDepensesActuelles(stats.totalExpenses)
       setSoldeActuel(stats.currentBalance)
       
       console.log('📊 Données synchronisées:', stats)
+      console.log('🔍 Debug - Transactions chargées:', allTransactions.length, allTransactions)
     }
     
     loadInitialData()
@@ -98,6 +100,13 @@ function DashboardContent() {
     DataSync.addTransaction(transaction)
     console.log("💾 Transaction ajoutée:", transaction)
     console.log("💰 Nouveau solde:", DataSync.getCurrentBalance())
+    
+    // Debug : Vérifier que les transactions sont bien sauvegardées
+    setTimeout(() => {
+      const allTransactions = DataSync.getTransactions()
+      console.log("🔍 Debug - Toutes les transactions:", allTransactions)
+      console.log("🔍 Debug - Nombre de transactions:", allTransactions.length)
+    }, 100)
     
     // Fermer le formulaire
     setShowRevenueForm(false)
@@ -220,29 +229,57 @@ function DashboardContent() {
         {transactions.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Transactions Récentes</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>Transactions Récentes</CardTitle>
+                <div className="text-sm text-muted-foreground">
+                  {transactions.length} transaction{transactions.length > 1 ? 's' : ''} au total
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {transactions.slice(0, 5).map((transaction) => (
-                  <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/30 transition-colors">
                     <div className="flex items-center space-x-3">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold ${transaction.type === 'revenu' ? 'bg-green-500' : 'bg-red-500'}`}>
                         {transaction.type === 'revenu' ? '+' : '-'}
                       </div>
                       <div>
                         <p className="font-medium">{transaction.label}</p>
-                        <p className="text-sm text-muted-foreground">{transaction.date}</p>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <span>{transaction.category}</span>
+                          <span>•</span>
+                          <span>{transaction.date}</span>
+                          {transaction.isToday && (
+                            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
+                              Aujourd'hui
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className={`font-bold ${transaction.type === 'revenu' ? 'text-green-600' : 'text-red-600'}`}>
                         {transaction.type === 'revenu' ? '+' : '-'}{formatMoney(transaction.amount)}
                       </p>
+                      <p className="text-xs text-muted-foreground">
+                        {transaction.time}
+                      </p>
                     </div>
                   </div>
                 ))}
               </div>
+              
+              {transactions.length > 5 && (
+                <div className="text-center pt-4">
+                  <button 
+                    onClick={() => console.log("Voir toutes les transactions")}
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Voir toutes les transactions ({transactions.length - 5} supplémentaires)
+                  </button>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
