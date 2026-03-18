@@ -50,14 +50,37 @@ function DashboardContent() {
     }
   }, [])
   
-  // Ajout de transaction
-  const saveTransaction = (type: 'revenu' | 'depense', label: string, amount: number) => {
+  // Ajout de transaction avec formulaire
+  const [showRevenueForm, setShowRevenueForm] = useState(false)
+  const [showExpenseForm, setShowExpenseForm] = useState(false)
+  const [formData, setFormData] = useState({
+    amount: '',
+    label: '',
+    type: 'revenu' as 'revenu' | 'depense'
+  })
+
+  const saveTransaction = (type: 'revenu' | 'depense', label?: string, amount?: number) => {
+    if (type === 'revenu') {
+      setShowRevenueForm(true)
+      setFormData({ type: 'revenu', label: '', amount: '' })
+    } else {
+      setShowExpenseForm(true)
+      setFormData({ type: 'depense', label: '', amount: '' })
+    }
+  }
+
+  const handleSubmitTransaction = () => {
+    if (!formData.amount || !formData.label) {
+      alert('Veuillez remplir tous les champs')
+      return
+    }
+
     const transaction = {
       id: Date.now(),
-      type: type,
-      label: label,
-      amount: amount,
-      category: type === 'revenu' ? 'salary' : 'other',
+      type: formData.type,
+      label: formData.label,
+      amount: parseFloat(formData.amount),
+      category: formData.type === 'revenu' ? 'salary' : 'other',
       operator: 'cash',
       date: new Date().toISOString().split('T')[0],
       time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
@@ -68,7 +91,10 @@ function DashboardContent() {
     console.log("💾 Transaction ajoutée:", transaction)
     console.log("💰 Nouveau solde:", DataSync.getCurrentBalance())
     
-    // Pas besoin de recharger, la synchronisation automatique mettra à jour les données
+    // Fermer le formulaire
+    setShowRevenueForm(false)
+    setShowExpenseForm(false)
+    setFormData({ amount: '', label: '', type: 'revenu' })
   }
 
   return (
@@ -149,7 +175,7 @@ function DashboardContent() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card 
             className="hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => saveTransaction('revenu', 'Salaire', 50000)}
+            onClick={() => saveTransaction('revenu')}
           >
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
@@ -166,7 +192,7 @@ function DashboardContent() {
 
           <Card 
             className="hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => saveTransaction('depense', 'Dépense quotidienne', 5000)}
+            onClick={() => saveTransaction('depense')}
           >
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
@@ -211,6 +237,96 @@ function DashboardContent() {
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* Formulaire Modal Revenu */}
+        {showRevenueForm && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+              <h3 className="text-lg font-semibold mb-4">Ajouter un Revenu</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Montant (FCFA)</label>
+                  <input
+                    type="number"
+                    value={formData.amount}
+                    onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                    placeholder="50000"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Description</label>
+                  <input
+                    type="text"
+                    value={formData.label}
+                    onChange={(e) => setFormData({...formData, label: e.target.value})}
+                    placeholder="Salaire, Prime, etc."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setShowRevenueForm(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleSubmitTransaction}
+                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                >
+                  Ajouter
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Formulaire Modal Dépense */}
+        {showExpenseForm && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+              <h3 className="text-lg font-semibold mb-4">Ajouter une Dépense</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Montant (FCFA)</label>
+                  <input
+                    type="number"
+                    value={formData.amount}
+                    onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                    placeholder="5000"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Description</label>
+                  <input
+                    type="text"
+                    value={formData.label}
+                    onChange={(e) => setFormData({...formData, label: e.target.value})}
+                    placeholder="Courses, Transport, etc."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setShowExpenseForm(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleSubmitTransaction}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                >
+                  Ajouter
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </main>

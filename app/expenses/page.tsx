@@ -7,9 +7,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import AuthRequired from "@/components/auth-required"
 import { DataSync, formatMoney, formatDate } from "@/lib/data-sync"
-import AuthGuard from "@/components/AuthGuard"
+// Plus besoin de AuthRequired/AuthGuard - si on est sur ces pages, on est déjà connecté
 import {
   Sheet,
   SheetContent,
@@ -373,9 +372,6 @@ function ExpensesContent() {
 }
 
 export default function ExpensesPage() {
-  return (
-    <AuthGuard>
-      <ExpensesContent />
-    </AuthGuard>
-  )
+  // Plus besoin de AuthGuard - si on arrive ici, c'est qu'on est déjà connecté !
+  return <ExpensesContent />
 }

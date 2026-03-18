@@ -7,8 +7,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import AuthRequired from "@/components/auth-required"
 import { DataSync, formatMoney, formatDate } from "@/lib/data-sync"
+// Plus besoin de AuthRequired - si on est sur ces pages, on est déjà connecté
 import {
   Sheet,
   SheetContent,
@@ -26,6 +26,11 @@ import {
 } from "@/components/ui/select"
 
 export default function RevenuesPage() {
+  // Plus besoin de AuthRequired - si on arrive ici, c'est qu'on est déjà connecté !
+  return <RevenuesContent />
+}
+
+function RevenuesContent() {
   const [revenues, setRevenues] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [isSheetOpen, setIsSheetOpen] = useState(false)
@@ -138,17 +143,15 @@ export default function RevenuesPage() {
                   {new Date().toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}
                 </p>
               </div>
-              <AuthRequired action="add" message="Pour ajouter des revenus, veuillez créer un compte gratuitement et accéder à toutes les fonctionnalités.">
-                <div className="flex gap-3">
-                  <Button
-                    onClick={() => setIsSheetOpen(true)}
-                    className="rounded-full bg-primary hover:bg-primary/90 btn-primary-shadow gap-2"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Ajouter
-                  </Button>
-                </div>
-              </AuthRequired>
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => setIsSheetOpen(true)}
+                  className="rounded-full bg-primary hover:bg-primary/90 btn-primary-shadow gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Ajouter
+                </Button>
+              </div>
             </div>
           </div>
           
@@ -254,15 +257,13 @@ export default function RevenuesPage() {
               }
             </p>
             {!searchTerm && (
-              <AuthRequired action="add" message="Pour ajouter des revenus, veuillez créer un compte gratuitement et accéder à toutes les fonctionnalités.">
-                <Button
-                  onClick={() => setIsSheetOpen(true)}
-                  className="rounded-full bg-primary hover:bg-primary/90"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Ajouter un revenu
-                </Button>
-              </AuthRequired>
+              <Button
+                onClick={() => setIsSheetOpen(true)}
+                className="rounded-full bg-primary hover:bg-primary/90"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Ajouter un revenu
+              </Button>
             )}
           </div>
         )}
