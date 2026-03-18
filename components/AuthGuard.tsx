@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getMoneyFlowUser } from '@/lib/storage';
+import { getMoneyFlowUser, getUser } from '@/lib/storage';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -16,7 +16,14 @@ export default function AuthGuard({
   const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
-    const user = getMoneyFlowUser();
+    // Vérifier d'abord le système standard (token/user)
+    let user = getUser();
+    
+    // Si pas trouvé, vérifier le système MoneyFlow
+    if (!user) {
+      user = getMoneyFlowUser();
+    }
+    
     if (!user) {
       router.push('/login');
       return;

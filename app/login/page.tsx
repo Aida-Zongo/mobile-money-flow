@@ -19,8 +19,15 @@ export default function LoginPage() {
       // Simulation de login pour les tests
       if (email && password) {
         if (typeof window !== 'undefined') {
-          localStorage.setItem('token', 'test-token');
+          // Utiliser les deux systèmes pour éviter les conflits
+          localStorage.setItem('token', 'test-token-' + Date.now());
           localStorage.setItem('user', JSON.stringify({ 
+            name: 'Test User', 
+            email: email 
+          }));
+          
+          // Aussi sauvegarder dans le système MoneyFlow
+          localStorage.setItem('moneyflow_user', JSON.stringify({ 
             name: 'Test User', 
             email: email 
           }));
@@ -28,11 +35,15 @@ export default function LoginPage() {
           // Notification de bienvenue
           if (typeof window !== 'undefined') {
             setTimeout(() => {
-              alert(`🎉 Bon retour ${email} !\n\nConnexion réussie à MoneyFlow.`);
+              alert(`🎉 Bon retour ${email} !\n\nConnexion réussie à MoneyFlow.\nVous allez être redirigé vers votre tableau de bord.`);
             }, 500);
           }
         }
-        router.push('/dashboard');
+        
+        // Petite attente pour que l'utilisateur voie le message
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 1500);
       } else {
         setError('Veuillez remplir tous les champs');
       }

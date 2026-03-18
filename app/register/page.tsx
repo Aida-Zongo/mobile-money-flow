@@ -38,8 +38,15 @@ export default function RegisterPage() {
       
       // Simulation de register pour les tests
       if (typeof window !== 'undefined') {
-        localStorage.setItem('token', 'test-token');
+        // Utiliser les deux systèmes pour éviter les conflits
+        localStorage.setItem('token', 'test-token-' + Date.now());
         localStorage.setItem('user', JSON.stringify({ 
+          name: name, 
+          email: email 
+        }));
+        
+        // Aussi sauvegarder dans le système MoneyFlow
+        localStorage.setItem('moneyflow_user', JSON.stringify({ 
           name: name, 
           email: email 
         }));
@@ -47,11 +54,15 @@ export default function RegisterPage() {
         // Notification de bienvenue
         if (typeof window !== 'undefined') {
           setTimeout(() => {
-            alert(`🎉 Bienvenue ${name} !\n\nVotre compte MoneyFlow a été créé avec succès.`);
+            alert(`🎉 Bienvenue ${name} !\n\nVotre compte MoneyFlow a été créé avec succès.\nVous allez être redirigé vers votre tableau de bord.`);
           }, 500);
         }
       }
-      router.push('/dashboard');
+      
+      // Petite attente pour que l'utilisateur voie le message
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 1500);
     } catch (err: any) {
       setError('Erreur d\'inscription: ' + err.message);
     } finally {
