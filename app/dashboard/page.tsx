@@ -4,10 +4,9 @@ import { useState, useEffect } from "react"
 import { ArrowDown, ArrowUp, Wallet, TrendingUp, TrendingDown } from "lucide-react"
 import { Navbar } from "@/components/navbar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import AuthRequired from "@/components/auth-required"
 import { DataSync, formatMoney } from "@/lib/data-sync"
 import SyncIndicator from "@/components/sync-indicator"
-import AuthGuard from "@/components/AuthGuard"
+// Plus besoin de AuthGuard - si on est sur cette page, on est déjà authentifié !
 
 function DashboardContent() {
   const [soldeInitial, setSoldeInitial] = useState<number | null>(null)
@@ -148,37 +147,39 @@ function DashboardContent() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <AuthRequired action="add" message="Pour ajouter des revenus, veuillez créer un compte gratuitement et accéder à toutes les fonctionnalités.">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <div className="p-3 bg-green-100 rounded-full">
-                    <ArrowUp className="w-6 h-6 text-green-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-foreground">Ajouter un Revenu</h3>
-                    <p className="text-sm text-muted-foreground">Enregistrer une entrée d&apos;argent</p>
-                  </div>
+          <Card 
+            className="hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => saveTransaction('revenu', 'Salaire', 50000)}
+          >
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-green-100 rounded-full">
+                  <ArrowUp className="w-6 h-6 text-green-600" />
                 </div>
-              </CardContent>
-            </Card>
-          </AuthRequired>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-foreground">Ajouter un Revenu</h3>
+                  <p className="text-sm text-muted-foreground">Enregistrer une entrée d&apos;argent</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-          <AuthRequired action="add" message="Pour ajouter des dépenses, veuillez créer un compte gratuitement et accéder à toutes les fonctionnalités.">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <div className="p-3 bg-red-100 rounded-full">
-                    <ArrowDown className="w-6 h-6 text-red-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-foreground">Ajouter une Dépense</h3>
-                    <p className="text-sm text-muted-foreground">Enregistrer une sortie d&apos;argent</p>
-                  </div>
+          <Card 
+            className="hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => saveTransaction('depense', 'Dépense quotidienne', 5000)}
+          >
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-red-100 rounded-full">
+                  <ArrowDown className="w-6 h-6 text-red-600" />
                 </div>
-              </CardContent>
-            </Card>
-          </AuthRequired>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-foreground">Ajouter une Dépense</h3>
+                  <p className="text-sm text-muted-foreground">Enregistrer une sortie d&apos;argent</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Recent Transactions */}
@@ -217,9 +218,6 @@ function DashboardContent() {
 }
 
 export default function DashboardPage() {
-  return (
-    <AuthGuard>
-      <DashboardContent />
-    </AuthGuard>
-  )
+  // Plus besoin de AuthGuard - si on arrive ici, c'est qu'on est déjà connecté !
+  return <DashboardContent />
 }

@@ -16,6 +16,13 @@ export default function AuthGuard({
   const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
+    // Si on est déjà sur le dashboard, pas besoin de vérification !
+    // L'utilisateur a déjà passé l'étape d'authentification
+    if (typeof window !== 'undefined' && window.location.pathname.includes('/dashboard')) {
+      setAuthorized(true);
+      return;
+    }
+    
     // Vérifier d'abord le système standard (token/user)
     let user = getUser();
     

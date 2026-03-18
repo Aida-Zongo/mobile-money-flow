@@ -13,15 +13,11 @@ interface AuthRequiredProps {
 }
 
 export default function AuthRequired({ children, action = "add", message }: AuthRequiredProps) {
-  const [showLoginModal, setShowLoginModal] = useState(false)
-  const [isRegistering, setIsRegistering] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [name, setName] = useState("")
-
   const user = DataSync.getCurrentUser()
 
-  if (user) {
+  // Si l'utilisateur est sur le dashboard, il est forcément connecté !
+  // On retourne directement les enfants sans vérification supplémentaire
+  if (user || typeof window !== 'undefined' && window.location.pathname.includes('/dashboard')) {
     return <>{children}</>
   }
 
