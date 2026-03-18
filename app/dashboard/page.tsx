@@ -132,20 +132,43 @@ function DashboardContent() {
         </div>
 
         {/* Hero Card - Solde */}
-        <div className="bg-gradient-to-r from-[#0A7B5E] to-[#0D9B76] text-white rounded-xl p-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-white/20 rounded-xl">
-                <Wallet className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-white/80">Solde Actuel</p>
-                <p className="text-3xl font-bold text-white">{formatMoney(soldeActuel)}</p>
-              </div>
+        <div className="bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 text-white rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -translate-y-32 translate-x-32"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full translate-y-24 -translate-x-24"></div>
+          </div>
+          
+          {/* Content */}
+          <div className="relative z-10">
+            {/* Welcome Message */}
+            <div className="mb-6">
+              <h1 className="text-2xl font-bold text-white mb-2">
+                👋 Bienvenue sur MoneyFlow !
+              </h1>
+              <p className="text-white/90 text-lg">
+                Gérez vos finances avec style et simplicité
+              </p>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-white/80">Ce mois</p>
-              <p className="text-lg font-semibold">{new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}</p>
+            
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="p-4 bg-white/20 backdrop-blur-sm rounded-xl border border-white/30">
+                  <Wallet className="w-10 h-10 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white/90 mb-1">Votre Solde Actuel</p>
+                  <p className="text-4xl font-bold text-white">{formatMoney(soldeActuel)}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full border border-white/30 mb-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium">Actif</span>
+                </div>
+                <p className="text-sm text-white/80">Ce mois</p>
+                <p className="text-lg font-semibold">{new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}</p>
+              </div>
             </div>
           </div>
         </div>
