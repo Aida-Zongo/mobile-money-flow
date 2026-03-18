@@ -25,6 +25,52 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+// 🎨 PALETTE COHÉRENTE MONEYFLOW
+const COLORS = {
+  primary: {
+    50: '#f0fdf4',   // emerald-50
+    100: '#dcfce7',  // emerald-100
+    200: '#bbf7d0',  // emerald-200
+    300: '#86efac',  // emerald-300
+    400: '#4ade80',  // emerald-400
+    500: '#22c55e',  // emerald-500
+    600: '#16a34a',  // emerald-600
+    700: '#15803d',  // emerald-700
+    800: '#166534',  // emerald-800
+    900: '#14532d',  // emerald-900
+  },
+  success: {
+    bg: '#dcfce7',    // green-100
+    border: '#bbf7d0',  // green-200
+    text: '#16a34a',    // green-600
+    hover: '#bbf7d0',  // green-100 hover
+  },
+  warning: {
+    bg: '#fef3c7',    // amber-100
+    border: '#fde68a',  // amber-200
+    text: '#d97706',    // amber-600
+    hover: '#fde68a',  // amber-100 hover
+  },
+  danger: {
+    bg: '#fee2e2',    // red-100
+    border: '#fecaca',  // red-200
+    text: '#dc2626',    // red-600
+    hover: '#fecaca',  // red-100 hover
+  },
+  neutral: {
+    50: '#f8fafc',   // slate-50
+    100: '#f1f5f9',  // slate-100
+    200: '#e2e8f0',  // slate-200
+    300: '#cbd5e1',  // slate-300
+    400: '#94a3b8',  // slate-400
+    500: '#64748b',  // slate-500
+    600: '#475569',  // slate-600
+    700: '#334155',  // slate-700
+    800: '#1e293b',  // slate-800
+    900: '#0f172a',  // slate-900
+  }
+}
+
 function ExpensesContent() {
   const [expenses, setExpenses] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState("")

@@ -33,6 +33,52 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 
+// 🎨 PALETTE COHÉRENTE MONEYFLOW
+const COLORS = {
+  primary: {
+    50: '#f0fdf4',   // emerald-50
+    100: '#dcfce7',  // emerald-100
+    200: '#bbf7d0',  // emerald-200
+    300: '#86efac',  // emerald-300
+    400: '#4ade80',  // emerald-400
+    500: '#22c55e',  // emerald-500
+    600: '#16a34a',  // emerald-600
+    700: '#15803d',  // emerald-700
+    800: '#166534',  // emerald-800
+    900: '#14532d',  // emerald-900
+  },
+  success: {
+    bg: '#dcfce7',    // green-100
+    border: '#bbf7d0',  // green-200
+    text: '#16a34a',    // green-600
+    hover: '#bbf7d0',  // green-100 hover
+  },
+  warning: {
+    bg: '#fef3c7',    // amber-100
+    border: '#fde68a',  // amber-200
+    text: '#d97706',    // amber-600
+    hover: '#fde68a',  // amber-100 hover
+  },
+  danger: {
+    bg: '#fee2e2',    // red-100
+    border: '#fecaca',  // red-200
+    text: '#dc2626',    // red-600
+    hover: '#fecaca',  // red-100 hover
+  },
+  neutral: {
+    50: '#f8fafc',   // slate-50
+    100: '#f1f5f9',  // slate-100
+    200: '#e2e8f0',  // slate-200
+    300: '#cbd5e1',  // slate-300
+    400: '#94a3b8',  // slate-400
+    500: '#64748b',  // slate-500
+    600: '#475569',  // slate-600
+    700: '#334155',  // slate-700
+    800: '#1e293b',  // slate-800
+    900: '#0f172a',  // slate-900
+  }
+}
+
 function BudgetsContent() {
   const [budgets, setBudgets] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState("")
@@ -47,16 +93,16 @@ function BudgetsContent() {
   const [totalBudget, setTotalBudget] = useState(0)
   const [totalSpent, setTotalSpent] = useState(0)
 
-  // Catégories de base (modifiables par l'utilisateur)
-  const [categories, setCategories] = useState([
-    { id: "alimentation", label: "Alimentation", color: "#F5A623", icon: "🍔" },
-    { id: "transport", label: "Transport", color: "#F97316", icon: "🚗" },
-    { id: "logement", label: "Logement", color: "#3B82F6", icon: "🏠" },
-    { id: "sante", label: "Santé", color: "#EF4444", icon: "🏥" },
-    { id: "education", label: "Éducation", color: "#8B5CF6", icon: "📚" },
-    { id: "loisirs", label: "Loisirs", color: "#EC4899", icon: "🎮" },
-    { id: "shopping", label: "Shopping", color: "#14B8A6", icon: "🛍️" },
-    { id: "autre", label: "Autre", color: "#6B7280", icon: "📦" },
+  // Catégories de base avec palette cohérente
+  const [categories] = useState([
+    { id: 'food', name: 'Alimentation', icon: '🍔', color: COLORS.primary[100] },
+    { id: 'transport', name: 'Transport', icon: '🚗', color: COLORS.primary[100] },
+    { id: 'shopping', name: 'Shopping', icon: '🛍', color: COLORS.primary[100] },
+    { id: 'bills', name: 'Factures', icon: '📄', color: COLORS.primary[100] },
+    { id: 'entertainment', name: 'Loisirs', icon: '🎮', color: COLORS.primary[100] },
+    { id: 'health', name: 'Santé', icon: '🏥', color: COLORS.primary[100] },
+    { id: 'education', name: 'Éducation', icon: '📚', color: COLORS.primary[100] },
+    { id: 'other', name: 'Autres', icon: '📌', color: COLORS.primary[100] }
   ])
 
   // Synchronisation des données
@@ -159,9 +205,9 @@ function BudgetsContent() {
 
   const getBudgetProgress = (budget: any) => {
     const percentage = (budget.spent || 0) / budget.limit * 100
-    if (percentage >= 100) return 'bg-red-500'
-    if (percentage >= 80) return 'bg-yellow-500'
-    return 'bg-green-500'
+    if (percentage >= 100) return COLORS.danger.text
+    if (percentage >= 80) return COLORS.warning.text
+    return COLORS.success.text
   }
 
   const formatAmount = (amount: number) => {
@@ -483,7 +529,7 @@ function BudgetsContent() {
               >
                 Annuler
               </Button>
-              <Button onClick={handleSaveBudget} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+              <Button onClick={handleSaveBudget} className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
                 Créer le budget
               </Button>
             </SheetFooter>
