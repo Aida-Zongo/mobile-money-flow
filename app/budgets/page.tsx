@@ -185,7 +185,7 @@ function BudgetsContent() {
             <Button
               onClick={() => setShowCategoryDialog(true)}
               variant="outline"
-              className="rounded-full border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary"
+              className="rounded-full border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700"
             >
               <Settings className="w-4 h-4" />
               Catégories
@@ -193,7 +193,7 @@ function BudgetsContent() {
             <Button
               onClick={() => setIsSheetOpen(true)}
               variant="outline"
-              className="rounded-full border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary"
+              className="rounded-full border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700"
             >
               <Plus className="w-4 h-4" />
               Nouveau Budget
@@ -208,13 +208,13 @@ function BudgetsContent() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total Budget</p>
-                  <p className="text-2xl font-black text-primary mt-1">{formatAmount(totalBudget)}</p>
+                  <p className="text-2xl font-black text-emerald-600 mt-1">{formatAmount(totalBudget)}</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     {budgets.length} budget{budgets.length > 1 ? 's' : ''}
                   </p>
                 </div>
-                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center ring-2 ring-offset-2 ring-primary/20">
-                  <Target className="w-7 h-7 text-primary" />
+                <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center ring-2 ring-offset-2 ring-emerald-200">
+                  <Target className="w-7 h-7 text-emerald-600" />
                 </div>
               </div>
             </CardContent>
@@ -483,7 +483,7 @@ function BudgetsContent() {
               >
                 Annuler
               </Button>
-              <Button onClick={handleSaveBudget}>
+              <Button onClick={handleSaveBudget} className="bg-emerald-600 hover:bg-emerald-700 text-white">
                 Créer le budget
               </Button>
             </SheetFooter>
