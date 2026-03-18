@@ -7,9 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import AuthRequired from "@/components/auth-required"
 import { DataSync, formatMoney, formatDate } from "@/lib/data-sync"
-import AuthGuard from "@/components/AuthGuard"
+// Plus besoin de AuthRequired/AuthGuard - si on est sur ces pages, on est déjà connecté
 import {
   Sheet,
   SheetContent,
@@ -183,23 +182,22 @@ function BudgetsContent() {
             </p>
           </div>
           <div className="flex gap-3">
-            <AuthRequired action="add" message="Pour créer des budgets, veuillez créer un compte gratuitement et accéder à toutes les fonctionnalités.">
-              <Button
-                onClick={() => setShowCategoryDialog(true)}
-                variant="outline"
-                className="rounded-lg border-border h-10 px-4 gap-2"
-              >
-                <Settings className="w-4 h-4" />
-                Catégories
-              </Button>
-              <Button
-                onClick={() => setIsSheetOpen(true)}
-                className="rounded-lg bg-primary hover:bg-primary/90 h-10 px-4 gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                Nouveau Budget
-              </Button>
-            </AuthRequired>
+            <Button
+              onClick={() => setShowCategoryDialog(true)}
+              variant="outline"
+              className="rounded-full border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary"
+            >
+              <Settings className="w-4 h-4" />
+              Catégories
+            </Button>
+            <Button
+              onClick={() => setIsSheetOpen(true)}
+              variant="outline"
+              className="rounded-full border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary"
+            >
+              <Plus className="w-4 h-4" />
+              Nouveau Budget
+            </Button>
           </div>
         </div>
 
@@ -534,9 +532,6 @@ function BudgetsContent() {
 }
 
 export default function BudgetsPage() {
-  return (
-    <AuthGuard>
-      <BudgetsContent />
-    </AuthGuard>
-  )
+  // Plus besoin de AuthGuard - si on arrive ici, c'est qu'on est déjà connecté !
+  return <BudgetsContent />
 }

@@ -34,7 +34,8 @@ const KEYS = {
   TRANSACTIONS: 'userTransactions',
   BUDGETS: 'userBudgets',
   INITIAL_BALANCE: 'soldeInitial',
-  HAS_VISITED: 'hasVisitedBefore'
+  HAS_VISITED: 'hasVisitedBefore',
+  LAST_SYNC: 'lastSyncTimestamp' // Pour la communication entre pages
 }
 
 // Fonctions de synchronisation
@@ -54,8 +55,10 @@ export class DataSync {
     localStorage.setItem(KEYS.BUDGETS, JSON.stringify([]))
     localStorage.setItem(KEYS.INITIAL_BALANCE, '0')
     localStorage.setItem(KEYS.HAS_VISITED, 'true')
+    localStorage.setItem(KEYS.LAST_SYNC, Date.now().toString())
 
     console.log('🆕 Nouveau compte initialisé:', newUser)
+    this.triggerGlobalSync('account-initialized', newUser)
     return newUser
   }
 
@@ -63,6 +66,29 @@ export class DataSync {
   static getCurrentUser(): UserData | null {
     const userData = localStorage.getItem(KEYS.USER)
     return userData ? JSON.parse(userData) : null
+  }
+
+  // Déclencher une synchronisation globale entre toutes les pages
+  static triggerGlobalSync(eventType: string, data?: any) {
+    const event = new CustomEvent('global-sync', {
+      detail: { type: eventType, data, timestamp: Date.now() }
+    })
+    window.dispatchEvent(event)
+    
+    // Mettre à jour le timestamp de dernière synchronisation
+    localStorage.setItem(KEYS.LAST_SYNC, Date.now().toString())
+    
+    console.log(`🌐 Synchronisation globale: ${eventType}`, data)
+  }
+
+  // Écouter les synchronisations globales
+  static onGlobalSync(callback: (event: CustomEvent) => void) {
+    window.addEventListener('global-sync', callback as EventListener)
+  }
+
+  // Nettoyer les écouteurs globaux
+  static cleanupGlobalSync(callback: (event: CustomEvent) => void) {
+    window.removeEventListener('global-sync', callback as EventListener)
   }
 
   // Obtenir toutes les transactions
@@ -79,8 +105,9 @@ export class DataSync {
     
     console.log('💾 Transaction ajoutée:', transaction)
     
-    // Déclencher un événement de synchronisation
+    // Déclencher synchronisation locale ET globale
     this.syncEvent('transaction-added', transaction)
+    this.triggerGlobalSync('transaction-added', transaction)
     
     return transaction
   }

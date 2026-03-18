@@ -36,17 +36,25 @@ function DashboardContent() {
     
     loadInitialData()
     
-    // Écouter les événements de synchronisation
+    // Écouter les événements de synchronisation LOCAUX
     const handleSync = (event: CustomEvent) => {
       console.log('🔄 Événement de synchronisation reçu:', event.detail)
       loadInitialData() // Recharger les données
     }
     
-    DataSync.onSync(handleSync)
+    // Écouter les événements de synchronisation GLOBAUX (entre pages)
+    const handleGlobalSync = (event: CustomEvent) => {
+      console.log('🌐 Synchronisation globale reçue:', event.detail)
+      loadInitialData() // Recharger toutes les données
+    }
     
-    // Nettoyer l'écouteur
+    DataSync.onSync(handleSync)
+    DataSync.onGlobalSync(handleGlobalSync)
+    
+    // Nettoyer les écouteurs
     return () => {
       DataSync.cleanup(handleSync)
+      DataSync.cleanupGlobalSync(handleGlobalSync)
     }
   }, [])
   
