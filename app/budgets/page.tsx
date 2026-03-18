@@ -174,7 +174,7 @@ function BudgetsContent() {
     const newCategory = {
       id: newCategoryName.toLowerCase().replace(/\s+/g, '_'),
       label: newCategoryName,
-      color: "#" + Math.floor(Math.random()*16777215).toString(16),
+      color: COLORS.primary[100], // Utiliser la couleur verte cohérente
       icon: "📁"
     }
 
@@ -205,9 +205,9 @@ function BudgetsContent() {
 
   const getBudgetProgress = (budget: any) => {
     const percentage = (budget.spent || 0) / budget.limit * 100
-    if (percentage >= 100) return COLORS.danger.text
-    if (percentage >= 80) return COLORS.warning.text
-    return COLORS.success.text
+    if (percentage >= 100) return 'bg-red-500'
+    if (percentage >= 80) return 'bg-yellow-500'
+    return 'bg-green-500'
   }
 
   const formatAmount = (amount: number) => {
@@ -341,7 +341,7 @@ function BudgetsContent() {
                         <div className="flex items-center gap-3">
                           <div 
                             className="w-10 h-10 rounded-xl flex items-center justify-center text-lg"
-                            style={{ backgroundColor: category.color + '20' }}
+                            style={{ backgroundColor: COLORS.primary[100] }}
                           >
                             {category.icon}
                           </div>
@@ -411,7 +411,7 @@ function BudgetsContent() {
                           </div>
                           <span className={`text-sm font-medium ${
                             percentage >= 100 ? 'text-red-600' : 
-                            percentage >= 80 ? 'text-yellow-600' : 'text-green-600'
+                            percentage >= 80 ? 'text-yellow-600' : 'text-emerald-600'
                           }`}>
                             {Math.round(percentage)}%
                           </span>
