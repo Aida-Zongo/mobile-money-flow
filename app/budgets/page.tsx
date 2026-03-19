@@ -2,13 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { Plus, Search, Calendar, TrendingUp, Target, PieChart, Settings, Trash2, ChevronDown, ArrowRight } from "lucide-react"
-import { Navbar } from "@/components/navbar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { DataSync, formatMoney, formatDate } from "@/lib/data-sync"
-// Plus besoin de AuthRequired/AuthGuard - si on est sur ces pages, on est déjà connecté
 import {
   Sheet,
   SheetContent,
@@ -33,114 +31,64 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 
-// 🎨 PALETTE COHÉRENTE MONEYFLOW
-const COLORS = {
-  primary: {
-    50: '#f0fdf4',   // emerald-50
-    100: '#dcfce7',  // emerald-100
-    200: '#bbf7d0',  // emerald-200
-    300: '#86efac',  // emerald-300
-    400: '#4ade80',  // emerald-400
-    500: '#22c55e',  // emerald-500
-    600: '#16a34a',  // emerald-600
-    700: '#15803d',  // emerald-700
-    800: '#166534',  // emerald-800
-    900: '#14532d',  // emerald-900
-  },
-  success: {
-    bg: '#dcfce7',    // green-100
-    border: '#bbf7d0',  // green-200
-    text: '#16a34a',    // green-600
-    hover: '#bbf7d0',  // green-100 hover
-  },
-  warning: {
-    bg: '#fef3c7',    // amber-100
-    border: '#fde68a',  // amber-200
-    text: '#d97706',    // amber-600
-    hover: '#fde68a',  // amber-100 hover
-  },
-  danger: {
-    bg: '#fee2e2',    // red-100
-    border: '#fecaca',  // red-200
-    text: '#dc2626',    // red-600
-    hover: '#fecaca',  // red-100 hover
-  },
-  neutral: {
-    50: '#f8fafc',   // slate-50
-    100: '#f1f5f9',  // slate-100
-    200: '#e2e8f0',  // slate-200
-    300: '#cbd5e1',  // slate-300
-    400: '#94a3b8',  // slate-400
-    500: '#64748b',  // slate-500
-    600: '#475569',  // slate-600
-    700: '#334155',  // slate-700
-    800: '#1e293b',  // slate-800
-    900: '#0f172a',  // slate-900
-  }
-}
-
-function BudgetsContent() {
+export default function BudgetsPage() {
   const [budgets, setBudgets] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [isSheetOpen, setIsSheetOpen] = useState(false)
-  const [showCategoryDialog, setShowCategoryDialog] = useState(false)
-  const [showPeriodDropdown, setShowPeriodDropdown] = useState(false)
-  const [selectedPeriod, setSelectedPeriod] = useState("Ce mois")
-  const [newCategoryName, setNewCategoryName] = useState("")
   const [budgetAmount, setBudgetAmount] = useState("")
   const [budgetCategory, setBudgetCategory] = useState("")
   const [budgetPeriod, setBudgetPeriod] = useState("monthly")
-  const [totalBudget, setTotalBudget] = useState(0)
-  const [totalSpent, setTotalSpent] = useState(0)
 
-  // Catégories de base avec palette cohérente
-  const [categories] = useState([
-    { id: 'food', label: 'Alimentation', icon: '🍔', color: COLORS.primary[100] },
-    { id: 'transport', label: 'Transport', icon: '🚗', color: COLORS.primary[100] },
-    { id: 'shopping', label: 'Shopping', icon: '🛍', color: COLORS.primary[100] },
-    { id: 'bills', label: 'Factures', icon: '📄', color: COLORS.primary[100] },
-    { id: 'entertainment', label: 'Loisirs', icon: '🎮', color: COLORS.primary[100] },
-    { id: 'health', label: 'Santé', icon: '🏥', color: COLORS.primary[100] },
-    { id: 'education', label: 'Éducation', icon: '📚', color: COLORS.primary[100] },
-    { id: 'other', label: 'Autres', icon: '📌', color: COLORS.primary[100] }
-  ])
+  // Catégories de base
+  const budgetCategories = [
+    { id: 'food', label: 'Alimentation', icon: '🍔' },
+    { id: 'transport', label: 'Transport', icon: '🚗' },
+    { id: 'shopping', label: 'Shopping', icon: '🛍' },
+    { id: 'bills', label: 'Factures', icon: '📄' },
+    { id: 'entertainment', label: 'Loisirs', icon: '🎮' },
+    { id: 'health', label: 'Santé', icon: '🏥' },
+    { id: 'education', label: 'Éducation', icon: '📚' },
+    { id: 'other', label: 'Autres', icon: '📌' }
+  ]
 
   // Synchronisation des données
   useEffect(() => {
-    // Charger les données initiales
     const loadInitialData = () => {
-      const savedBudgets = DataSync.getBudgets()
-      const savedCategories = localStorage.getItem('budgetCategories')
+      const allBudgets = DataSync.getBudgets()
+      const allTransactions = DataSync.getTransactions()
       
-      if (savedCategories) {
-        setCategories(JSON.parse(savedCategories))
-      }
+      // Calculer le montant dépensé pour chaque budget
+      const budgetsWithSpent = allBudgets.map(budget => {
+        const spent = allTransactions
+          .filter(t => t.type === 'depense' && t.category === budget.category)
+          .reduce((sum, t) => sum + t.amount, 0)
+        
+        return {
+          ...budget,
+          spent,
+          remaining: budget.limit - spent,
+          percentage: (spent / budget.limit) * 100
+        }
+      })
       
-      setBudgets(savedBudgets)
-      
-      // Calculer les totaux
-      const total = savedBudgets.reduce((sum, b) => sum + b.limit, 0)
-      const spent = savedBudgets.reduce((sum, b) => sum + (b.spent || 0), 0)
-      
-      setTotalBudget(total)
-      setTotalSpent(spent)
-      
-      console.log('📊 Budgets synchronisés:', savedBudgets.length)
+      setBudgets(budgetsWithSpent)
+      console.log('📊 Budgets synchronisés:', budgetsWithSpent.length)
     }
     
     loadInitialData()
     
-    // Écouter les événements de synchronisation
     const handleSync = (event: CustomEvent) => {
       console.log('🔄 Événement de synchronisation reçu:', event.detail)
-      if (event.detail.type === 'budget-added' || event.detail.type === 'budget-updated') {
+      if (event.detail.type === 'budget-added' || 
+          event.detail.type === 'budget-updated' || 
+          event.detail.type === 'budget-deleted' ||
+          event.detail.type === 'transaction-added') {
         loadInitialData()
       }
     }
     
     DataSync.onSync(handleSync)
     
-    // Nettoyer l'écouteur
     return () => {
       DataSync.cleanup(handleSync)
     }
@@ -149,43 +97,21 @@ function BudgetsContent() {
   const handleSaveBudget = () => {
     if (!budgetAmount || !budgetCategory) return
 
-    const newBudget = {
-      id: Date.now(),
+    const budget = {
       category: budgetCategory,
       limit: parseFloat(budgetAmount),
       spent: 0,
-      period: budgetPeriod as 'monthly' | 'weekly',
-      createdAt: new Date().toISOString()
+      period: budgetPeriod as 'monthly' | 'weekly'
     }
 
-    DataSync.addBudget(newBudget)
-    console.log("💰 Budget ajouté:", newBudget)
+    DataSync.addBudget(budget)
+    console.log("💰 Budget ajouté:", budget)
     
     // Réinitialiser le formulaire
     setBudgetAmount("")
     setBudgetCategory("")
     setBudgetPeriod("monthly")
     setIsSheetOpen(false)
-  }
-
-  const handleAddCategory = () => {
-    if (!newCategoryName.trim()) return
-
-    const newCategory = {
-      id: newCategoryName.toLowerCase().replace(/\s+/g, '_'),
-      label: newCategoryName,
-      color: COLORS.primary[100], // Utiliser la couleur verte cohérente
-      icon: "📁"
-    }
-
-    const updatedCategories = [...categories, newCategory]
-    setCategories(updatedCategories)
-    localStorage.setItem('budgetCategories', JSON.stringify(updatedCategories))
-    
-    setNewCategoryName("")
-    setShowCategoryDialog(false)
-    
-    console.log('📂 Nouvelle catégorie ajoutée:', newCategory)
   }
 
   const handleDeleteBudget = (budgetId: number) => {
@@ -196,18 +122,11 @@ function BudgetsContent() {
   }
 
   const filteredBudgets = budgets.filter(budget =>
-    categories.find(c => c.id === budget.category)?.label.toLowerCase().includes(searchTerm.toLowerCase())
+    budgetCategories.find(c => c.id === budget.category)?.label.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const getCategoryInfo = (categoryId: string) => {
-    return categories.find(c => c.id === categoryId) || categories[0]
-  }
-
-  const getBudgetProgress = (budget: any) => {
-    const percentage = (budget.spent || 0) / budget.limit * 100
-    if (percentage >= 100) return 'bg-red-500'
-    if (percentage >= 80) return 'bg-yellow-500'
-    return 'bg-green-500'
+    return budgetCategories.find(c => c.id === categoryId) || budgetCategories[0]
   }
 
   const formatAmount = (amount: number) => {
@@ -215,31 +134,20 @@ function BudgetsContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-12 py-12 space-y-12">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-black text-foreground">Budgets</h1>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-1">
+            <h1 className="text-2xl font-black text-gray-900">Budgets</h1>
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mt-1">
               Gestion de vos budgets
             </p>
           </div>
           <div className="flex gap-3">
             <Button
-              onClick={() => setShowCategoryDialog(true)}
-              variant="outline"
-              className="rounded-full border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700"
-            >
-              <Settings className="w-4 h-4" />
-              Catégories
-            </Button>
-            <Button
               onClick={() => setIsSheetOpen(true)}
-              variant="outline"
-              className="rounded-full border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700"
+              className="rounded-full bg-emerald-600 hover:bg-emerald-700 text-white"
             >
               <Plus className="w-4 h-4" />
               Nouveau Budget
@@ -247,15 +155,17 @@ function BudgetsContent() {
           </div>
         </div>
 
-        {/* Key Metrics - Style Statistiques */}
+        {/* Key Metrics */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="rounded-2xl shadow-sm border border-border/60 card-hover">
+          <Card className="rounded-2xl shadow-sm border border-gray-200">
             <CardContent className="p-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total Budget</p>
-                  <p className="text-2xl font-black text-emerald-600 mt-1">{formatAmount(totalBudget)}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Total Budget</p>
+                  <p className="text-2xl font-black text-emerald-600 mt-1">
+                    {formatAmount(budgets.reduce((sum, b) => sum + b.limit, 0))}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
                     {budgets.length} budget{budgets.length > 1 ? 's' : ''}
                   </p>
                 </div>
@@ -266,31 +176,35 @@ function BudgetsContent() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl shadow-sm border border-border/60 card-hover">
+          <Card className="rounded-2xl shadow-sm border border-gray-200">
             <CardContent className="p-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Dépensé</p>
-                  <p className="text-2xl font-black text-destructive mt-1">{formatAmount(totalSpent)}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {Math.round((totalSpent / totalBudget) * 100) || 0}% utilisé
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Dépensé</p>
+                  <p className="text-2xl font-black text-red-600 mt-1">
+                    {formatAmount(budgets.reduce((sum, b) => sum + (b.spent || 0), 0))}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {Math.round((budgets.reduce((sum, b) => sum + (b.spent || 0), 0) / budgets.reduce((sum, b) => sum + b.limit, 0)) * 100) || 0}% utilisé
                   </p>
                 </div>
-                <div className="w-14 h-14 rounded-2xl bg-destructive/10 flex items-center justify-center ring-2 ring-offset-2 ring-destructive/20">
-                  <TrendingUp className="w-7 h-7 text-destructive" />
+                <div className="w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center ring-2 ring-offset-2 ring-red-200">
+                  <TrendingUp className="w-7 h-7 text-red-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl shadow-sm border border-border/60 card-hover">
+          <Card className="rounded-2xl shadow-sm border border-gray-200">
             <CardContent className="p-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Disponible</p>
-                  <p className="text-2xl font-black text-green-600 mt-1">{formatAmount(totalBudget - totalSpent)}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {Math.round(((totalBudget - totalSpent) / totalBudget) * 100) || 0}% restant
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Disponible</p>
+                  <p className="text-2xl font-black text-green-600 mt-1">
+                    {formatAmount(budgets.reduce((sum, b) => sum + b.limit - (b.spent || 0), 0))}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {Math.round(((budgets.reduce((sum, b) => sum + b.limit - (b.spent || 0), 0)) / budgets.reduce((sum, b) => sum + b.limit, 0)) * 100) || 0}% restant
                   </p>
                 </div>
                 <div className="w-14 h-14 rounded-2xl bg-green-100 flex items-center justify-center ring-2 ring-offset-2 ring-green-200">
@@ -309,14 +223,14 @@ function BudgetsContent() {
             placeholder="Rechercher un budget..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-12 h-12 rounded-xl border-border/60 bg-background"
+            className="pl-12 h-12 rounded-xl border-gray-300 bg-white"
           />
         </div>
 
-        {/* Budgets Grid - Style Statistiques */}
+        {/* Budgets Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Budget List */}
-          <Card className="rounded-2xl shadow-sm border border-border/60 card-hover">
+          <Card className="rounded-2xl shadow-sm border border-gray-200">
             <CardContent className="p-8">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold">Liste des Budgets</h3>
@@ -337,182 +251,111 @@ function BudgetsContent() {
                     const percentage = (budget.spent || 0) / budget.limit * 100
                     
                     return (
-                      <div key={budget.id} className="flex items-center justify-between p-4 border border-border/30 rounded-xl hover:bg-muted/30 transition-colors">
+                      <div key={budget.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
                         <div className="flex items-center gap-3">
-                          <div 
-                            className="w-10 h-10 rounded-xl flex items-center justify-center text-lg"
-                            style={{ backgroundColor: COLORS.primary[100] }}
-                          >
+                          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg bg-emerald-100">
                             {category.icon}
                           </div>
                           <div>
-                            <p className="font-semibold text-foreground">{category.label}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {budget.period === 'monthly' ? 'Mensuel' : 'Hebdomadaire'}
+                            <p className="font-semibold text-gray-900">{category.label}</p>
+                            <p className="text-sm text-gray-500">
+                              Limite: {formatAmount(budget.limit)}
                             </p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold text-foreground">{formatAmount(budget.limit)}</p>
-                          <p className="text-sm text-destructive">{formatAmount(budget.spent || 0)}</p>
+                          <p className="font-bold text-gray-900">{formatAmount(budget.spent || 0)}</p>
+                          <p className="text-xs text-gray-500">
+                            {Math.round(percentage)}% utilisé
+                          </p>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteBudget(budget.id)}
-                          className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
                       </div>
                     )
                   })}
                 </div>
               ) : (
-                <div className="h-[300px] flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Target className="w-8 h-8 text-gray-400" />
-                    </div>
-                    <p className="text-gray-500">Aucun budget créé</p>
-                  </div>
+                <div className="text-center py-8">
+                  <p className="text-gray-500">Aucun budget trouvé</p>
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Budget Progress */}
-          <Card className="rounded-2xl shadow-sm border border-border/60 card-hover">
+          {/* Quick Stats */}
+          <Card className="rounded-2xl shadow-sm border border-gray-200">
             <CardContent className="p-8">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold">Progression des Budgets</h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowCategoryDialog(true)}
-                  className="h-8 w-8 p-0"
-                >
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
+              <h3 className="text-lg font-semibold mb-6">Statistiques Rapides</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 border border-gray-200 rounded-xl">
+                  <span className="text-sm text-gray-500">Total des budgets</span>
+                  <span className="font-bold text-gray-900">
+                    {formatAmount(budgets.reduce((sum, b) => sum + b.limit, 0))}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between p-3 border border-gray-200 rounded-xl">
+                  <span className="text-sm text-gray-500">Total dépensé</span>
+                  <span className="font-bold text-red-600">
+                    {formatAmount(budgets.reduce((sum, b) => sum + (b.spent || 0), 0))}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between p-3 border border-gray-200 rounded-xl">
+                  <span className="text-sm text-gray-500">Total disponible</span>
+                  <span className="font-bold text-green-600">
+                    {formatAmount(budgets.reduce((sum, b) => sum + b.limit - (b.spent || 0), 0))}
+                  </span>
+                </div>
               </div>
-              
-              {filteredBudgets.length > 0 ? (
-                <div className="space-y-6">
-                  {filteredBudgets.map((budget) => {
-                    const category = getCategoryInfo(budget.category)
-                    const percentage = (budget.spent || 0) / budget.limit * 100
-                    
-                    return (
-                      <div key={budget.id} className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="text-lg">{category.icon}</span>
-                            <span className="font-medium">{category.label}</span>
-                          </div>
-                          <span className={`text-sm font-medium ${
-                            percentage >= 100 ? 'text-red-600' : 
-                            percentage >= 80 ? 'text-yellow-600' : 'text-emerald-600'
-                          }`}>
-                            {Math.round(percentage)}%
-                          </span>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <div className="w-full bg-gray-200 rounded-full h-3">
-                            <div 
-                              className={`h-3 rounded-full transition-all ${getBudgetProgress(budget)}`}
-                              style={{ width: `${Math.min(percentage, 100)}%` }}
-                            />
-                          </div>
-                          <div className="flex justify-between text-xs text-muted-foreground">
-                            <span>{formatAmount(budget.spent || 0)}</span>
-                            <span>{formatAmount(budget.limit)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              ) : (
-                <div className="h-[300px] flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <PieChart className="w-8 h-8 text-gray-400" />
-                    </div>
-                    <p className="text-gray-500">Créez des budgets pour voir la progression</p>
-                  </div>
-                </div>
-              )}
             </CardContent>
           </Card>
         </div>
-
-        {/* Empty State */}
-        {filteredBudgets.length === 0 && (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Target className="w-8 h-8 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              {searchTerm ? "Aucun budget trouvé" : "Aucun budget créé"}
-            </h3>
-            <p className="text-gray-500">
-              {searchTerm 
-                ? "Essayez une autre recherche" 
-                : "Utilisez les boutons en haut pour créer vos premiers budgets"
-              }
-            </p>
-          </div>
-        )}
 
         {/* Add Budget Sheet */}
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetContent className="w-full sm:max-w-md overflow-y-auto px-8">
             <SheetHeader className="px-8 pt-8">
-              <SheetTitle>Créer un budget</SheetTitle>
+              <SheetTitle>Ajouter un budget</SheetTitle>
               <SheetDescription>
-                Définissez une limite de dépense pour une catégorie
+                Définissez une limite de dépenses pour une catégorie
               </SheetDescription>
             </SheetHeader>
             
-            <div className="space-y-8 py-8">
-              <div className="space-y-3">
-                <Label htmlFor="category">Catégorie</Label>
+            <div className="px-8 py-6 space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="budget-amount">Montant</Label>
+                <Input
+                  id="budget-amount"
+                  type="number"
+                  placeholder="Entrez le montant"
+                  value={budgetAmount}
+                  onChange={(e) => setBudgetAmount(e.target.value)}
+                  className="h-12 rounded-xl border-gray-300 bg-white"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="budget-category">Catégorie</Label>
                 <Select value={budgetCategory} onValueChange={setBudgetCategory}>
-                  <SelectTrigger className="h-12">
-                    <SelectValue placeholder="Sélectionner une catégorie" />
+                  <SelectTrigger className="h-12 rounded-xl border-gray-300 bg-white">
+                    <SelectValue placeholder="Sélectionnez une catégorie" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((category) => (
+                    {budgetCategories.map((category) => (
                       <SelectItem key={category.id} value={category.id}>
                         <div className="flex items-center gap-2">
-                          <span>{category.icon}</span>
-                          {category.label}
+                          <span className="text-lg">{category.icon}</span>
+                          <span>{category.label}</span>
                         </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-
-              <div className="space-y-3">
-                <Label htmlFor="amount">Montant du budget (FCFA)</Label>
-                <Input
-                  id="amount"
-                  type="number"
-                  placeholder="Ex: 50000"
-                  value={budgetAmount}
-                  onChange={(e) => setBudgetAmount(e.target.value)}
-                  min="0"
-                  className="h-12"
-                />
-              </div>
-
-              <div className="space-y-3">
-                <Label htmlFor="period">Période</Label>
+              
+              <div className="space-y-2">
+                <Label htmlFor="budget-period">Période</Label>
                 <Select value={budgetPeriod} onValueChange={setBudgetPeriod}>
-                  <SelectTrigger className="h-12">
-                    <SelectValue placeholder="Sélectionner une période" />
+                  <SelectTrigger className="h-12 rounded-xl border-gray-300 bg-white">
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="monthly">Mensuel</SelectItem>
@@ -521,63 +364,18 @@ function BudgetsContent() {
                 </Select>
               </div>
             </div>
-
+            
             <SheetFooter className="px-8 pb-8">
-              <Button
-                variant="outline"
-                onClick={() => setIsSheetOpen(false)}
+              <Button 
+                onClick={handleSaveBudget}
+                className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white"
               >
-                Annuler
-              </Button>
-              <Button onClick={handleSaveBudget} className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
-                Créer le budget
+                Ajouter le budget
               </Button>
             </SheetFooter>
           </SheetContent>
         </Sheet>
-
-        {/* Add Category Dialog */}
-        <Dialog open={showCategoryDialog} onOpenChange={setShowCategoryDialog}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Ajouter une catégorie</DialogTitle>
-              <DialogDescription>
-                Créez une nouvelle catégorie pour vos budgets
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="categoryName">Nom de la catégorie</Label>
-                <Input
-                  id="categoryName"
-                  placeholder="Ex: Voyages, Cadeaux..."
-                  value={newCategoryName}
-                  onChange={(e) => setNewCategoryName(e.target.value)}
-                  className="h-12"
-                />
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setShowCategoryDialog(false)}
-              >
-                Annuler
-              </Button>
-              <Button onClick={handleAddCategory}>
-                Ajouter la catégorie
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   )
-}
-
-export default function BudgetsPage() {
-  // Plus besoin de AuthGuard - si on arrive ici, c'est qu'on est déjà connecté !
-  return <BudgetsContent />
 }
