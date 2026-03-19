@@ -199,14 +199,14 @@ function DashboardContent() {
             </CardContent>
           </Card>
 
-          <Card className="bg-blue-50 border-blue-200">
+          <Card className="bg-emerald-50 border-emerald-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-blue-600">Économies</p>
-                  <p className="text-2xl font-bold text-blue-700">{formatMoney(revenusActuels - depensesActuelles)}</p>
+                  <p className="text-sm font-medium text-emerald-600">Économies</p>
+                  <p className="text-2xl font-bold text-emerald-700">{formatMoney(revenusActuels - depensesActuelles)}</p>
                 </div>
-                <Wallet className="w-8 h-8 text-blue-600" />
+                <Wallet className="w-8 h-8 text-emerald-600" />
               </div>
             </CardContent>
           </Card>
