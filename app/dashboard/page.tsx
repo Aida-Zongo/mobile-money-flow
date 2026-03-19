@@ -275,7 +275,7 @@ function DashboardContent() {
                           <span>•</span>
                           <span>{transaction.date}</span>
                           {transaction.isToday && (
-                            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
+                            <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full font-medium">
                               Aujourd'hui
                             </span>
                           )}
@@ -492,7 +492,7 @@ function AllTransactionsModal({ isOpen, onClose, transactions }: { isOpen: boole
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[85vh] overflow-hidden transform transition-all duration-300">
         {/* Header avec dégradé */}
-        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4 rounded-t-2xl">
+        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 rounded-t-2xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
@@ -500,7 +500,7 @@ function AllTransactionsModal({ isOpen, onClose, transactions }: { isOpen: boole
               </div>
               <div>
                 <h3 className="text-xl font-bold text-white">Historique Complet</h3>
-                <p className="text-indigo-100 text-sm">Toutes vos transactions</p>
+                <p className="text-emerald-100 text-sm">Toutes vos transactions</p>
               </div>
             </div>
             <button 
