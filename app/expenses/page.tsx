@@ -71,6 +71,11 @@ const COLORS = {
   }
 }
 
+export default function ExpensesPage() {
+  // Plus besoin de AuthRequired/AuthGuard - si on est sur ces pages, on est déjà connecté
+  return <ExpensesContent />
+}
+
 function ExpensesContent() {
   const [expenses, setExpenses] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState("")
@@ -107,7 +112,8 @@ function ExpensesContent() {
   useEffect(() => {
     // Charger les données initiales
     const loadInitialData = () => {
-      const expenses = DataSync.getExpenses()
+      const allTransactions = DataSync.getTransactions()
+      const expenses = allTransactions.filter(t => t.type === 'depense')
       setExpenses(expenses)
       setTotalDepenses(expenses.reduce((sum, e) => sum + e.amount, 0))
       console.log('💸 Dépenses synchronisées:', expenses.length)

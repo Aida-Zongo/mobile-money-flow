@@ -108,7 +108,8 @@ function RevenuesContent() {
   useEffect(() => {
     // Charger les données initiales
     const loadInitialData = () => {
-      const revenues = DataSync.getRevenues()
+      const allTransactions = DataSync.getTransactions()
+      const revenues = allTransactions.filter(t => t.type === 'revenu')
       setRevenues(revenues)
       setTotalRevenus(revenues.reduce((sum, r) => sum + r.amount, 0))
       console.log('💰 Revenus synchronisés:', revenues.length)
