@@ -1,0 +1,584 @@
+'use client';
+import { useState, useEffect, useCallback }
+  from 'react';
+import api from '@/lib/api';
+import {
+  Plus, X, Trash2, Edit2, Target,
+  Bell, AlertTriangle, ShoppingBag,
+  Car, Heart, ShoppingCart, Home,
+  Smartphone, BookOpen, Package, Check
+} from 'lucide-react';
+
+const CATS = [
+  { id:'alimentation', label:'Alimentation',
+    Icon:ShoppingBag, color:'#D97706',
+    bg:'#FEF3E2' },
+  { id:'transport', label:'Transport',
+    Icon:Car, color:'#0A7B5E', bg:'#E8F5F1' },
+  { id:'sante', label:'Santé',
+    Icon:Heart, color:'#16A34A', bg:'#F0FDF4' },
+  { id:'shopping', label:'Shopping',
+    Icon:ShoppingCart, color:'#DB2777',
+    bg:'#FDF2F8' },
+  { id:'logement', label:'Logement',
+    Icon:Home, color:'#2563EB', bg:'#EFF6FF' },
+  { id:'telecom', label:'Télécom',
+    Icon:Smartphone, color:'#0369A1',
+    bg:'#F0F9FF' },
+  { id:'education', label:'Éducation',
+    Icon:BookOpen, color:'#CA8A04',
+    bg:'#FEFCE8' },
+  { id:'autre', label:'Autre',
+    Icon:Package, color:'#6B7280',
+    bg:'#F5F7F5' },
+];
+
+const MONTHS = ['Janvier','Février','Mars',
+  'Avril','Mai','Juin','Juillet','Août',
+  'Septembre','Octobre','Novembre','Décembre'];
+
+const fmt = (n:number) =>
+  new Intl.NumberFormat('fr-FR').format(n||0)
+  +' FCFA';
+
+export default function BudgetsPage() {
+  const [budgets, setBudgets] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [modal, setModal] = useState(false);
+  const [editing, setEditing] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<any>(null);
+  const [form, setForm] = useState({
+    category:'alimentation', limitAmount:'',
+    month: new Date().getMonth()+1,
+    year: new Date().getFullYear()
+  });
+
+  const showToast = (msg:string, err=false) => {
+    setToast({msg,err});
+    setTimeout(()=>setToast(null), 3000);
+  };
+
+  const load = useCallback(async()=>{
+    setLoading(true);
+    try {
+      const r = await api.get('/budgets/status');
+      setBudgets(r.data.budgets || []);
+    } catch(e) { console.error(e); }
+    setLoading(false);
+  }, []);
+
+  useEffect(()=>{ load(); }, [load]);
+
+  const openAdd = () => {
+    setEditing(null);
+    setForm({
+      category:'alimentation', limitAmount:'',
+      month: new Date().getMonth()+1,
+      year: new Date().getFullYear()
+    });
+    setModal(true);
+  };
+
+  const save = async() => {
+    if (!form.limitAmount) {
+      showToast('Montant requis', true); return;
+    }
+    setSaving(true);
+    try {
+      const body = {
+        ...form,
+        limitAmount: Number(form.limitAmount)
+      };
+      const id = editing?.id || editing?._id;
+      if (editing) {
+        await api.put('/budgets/'+id, body);
+        showToast('Budget modifié');
+      } else {
+        await api.post('/budgets', body);
+        showToast('Budget créé');
+      }
+      setModal(false);
+      load();
+    } catch(e:any) {
+      showToast('Erreur: '+e.message, true);
+    }
+    setSaving(false);
+  };
+
+  const del = async(id:string) => {
+    try {
+      await api.delete('/budgets/'+id);
+      showToast('Budget supprimé');
+      load();
+    } catch(e) {
+      showToast('Erreur', true);
+    }
+  };
+
+  const inp = {
+    width:'100%', padding:'10px 14px',
+    border:'1.5px solid #E2EAE7', borderRadius:10,
+    fontSize:14, outline:'none',
+    backgroundColor:'#FAFBFC', color:'#1A1D23',
+    fontFamily:'DM Sans, sans-serif',
+    boxSizing:'border-box' as const,
+  };
+
+  return (
+    <div style={{
+      padding:24, backgroundColor:'#F5F7F5',
+      minHeight:'100vh',
+      fontFamily:'DM Sans, sans-serif'
+    }}>
+      {toast && (
+        <div style={{
+          position:'fixed', top:16, right:16,
+          zIndex:9999, padding:'12px 20px',
+          borderRadius:16, fontSize:14,
+          fontWeight:500, color:'white',
+          backgroundColor:toast.err
+            ?'#F04438':'#00C48C',
+          boxShadow:'0 4px 20px rgba(0,0,0,0.15)'
+        }}>
+          {toast.msg}
+        </div>
+      )}
+
+      <div style={{
+        display:'flex',
+        justifyContent:'space-between',
+        alignItems:'center', marginBottom:24
+      }}>
+        <div>
+          <h1 style={{
+            fontSize:24, fontWeight:800,
+            color:'#1A1D23', margin:0
+          }}>Mes Budgets</h1>
+          <p style={{
+            color:'#8A94A6', fontSize:14,
+            marginTop:4
+          }}>
+            Gérez vos limites par catégorie
+          </p>
+        </div>
+        <button onClick={openAdd} style={{
+          display:'flex', alignItems:'center',
+          gap:6, backgroundColor:'#0A7B5E',
+          color:'white', border:'none',
+          borderRadius:50, padding:'10px 20px',
+          fontSize:14, fontWeight:600,
+          cursor:'pointer',
+          fontFamily:'DM Sans, sans-serif',
+          boxShadow:'0 4px 14px rgba(10,123,94,0.35)'
+        }}>
+          <Plus size={16} />
+          Créer un budget
+        </button>
+      </div>
+
+      {loading ? (
+        <div style={{
+          textAlign:'center', padding:40,
+          color:'#8A94A6'
+        }}>Chargement...</div>
+      ) : budgets.length===0 ? (
+        <div style={{
+          backgroundColor:'white', borderRadius:16,
+          padding:60, textAlign:'center',
+          boxShadow:'0 1px 8px rgba(0,0,0,0.05)'
+        }}>
+          <div style={{
+            width:64, height:64,
+            borderRadius:'50%',
+            backgroundColor:'#E8F5F1',
+            display:'flex', alignItems:'center',
+            justifyContent:'center',
+            margin:'0 auto 16px'
+          }}>
+            <Target size={28} color="#0A7B5E" />
+          </div>
+          <h3 style={{
+            color:'#1A1D23', fontWeight:700,
+            marginBottom:8
+          }}>Aucun budget</h3>
+          <p style={{
+            color:'#8A94A6', fontSize:14,
+            marginBottom:20
+          }}>
+            Créez des budgets pour maîtriser
+            vos dépenses
+          </p>
+          <button onClick={openAdd} style={{
+            backgroundColor:'#0A7B5E',
+            color:'white', border:'none',
+            borderRadius:50, padding:'10px 20px',
+            cursor:'pointer', fontSize:14,
+            fontWeight:600,
+            fontFamily:'DM Sans, sans-serif'
+          }}>
+            Créer un budget
+          </button>
+        </div>
+      ) : (
+        <div style={{
+          display:'grid',
+          gridTemplateColumns:
+            'repeat(auto-fill,minmax(300px,1fr))',
+          gap:16
+        }}>
+          {budgets.map((b:any)=>{
+            const cat = CATS.find(
+              c=>c.id===b.category) || CATS[7];
+            const CatIcon = cat.Icon;
+            const pct = Math.min(b.percent||0, 100);
+            const barColor = pct>=100 ? '#F04438'
+              : pct>=80 ? '#F5A623' : '#00C48C';
+            const id = b.id || b._id;
+            return (
+              <div key={id} style={{
+                backgroundColor:'white',
+                borderRadius:20, padding:20,
+                boxShadow:
+                  '0 1px 8px rgba(0,0,0,0.05)'
+              }}>
+                <div style={{
+                  display:'flex',
+                  alignItems:'center', gap:12,
+                  marginBottom:16
+                }}>
+                  <div style={{
+                    width:44, height:44,
+                    borderRadius:14,
+                    backgroundColor:cat.bg,
+                    display:'flex', alignItems:'center',
+                    justifyContent:'center'
+                  }}>
+                    <CatIcon size={22}
+                      color={cat.color} />
+                  </div>
+                  <div style={{flex:1}}>
+                    <p style={{
+                      fontWeight:700,
+                      color:'#1A1D23',
+                      margin:0, fontSize:15
+                    }}>{cat.label}</p>
+                    <p style={{
+                      color:'#8A94A6',
+                      fontSize:12,
+                      margin:'2px 0 0'
+                    }}>
+                      {MONTHS[(b.month||1)-1]}
+                      {' '}{b.year}
+                    </p>
+                  </div>
+                  {pct>=100 && (
+                    <span style={{
+                      display:'flex',
+                      alignItems:'center', gap:4,
+                      backgroundColor:'#FEF2F2',
+                      color:'#F04438',
+                      padding:'4px 10px',
+                      borderRadius:50, fontSize:11,
+                      fontWeight:600
+                    }}>
+                      <AlertTriangle size={11} />
+                      Dépassé
+                    </span>
+                  )}
+                  {pct>=80 && pct<100 && (
+                    <span style={{
+                      display:'flex',
+                      alignItems:'center', gap:4,
+                      backgroundColor:'#FFFBEB',
+                      color:'#F59E0B',
+                      padding:'4px 10px',
+                      borderRadius:50, fontSize:11,
+                      fontWeight:600
+                    }}>
+                      <Bell size={11} />
+                      Attention
+                    </span>
+                  )}
+                </div>
+
+                <div style={{
+                  width:'100%', height:8,
+                  backgroundColor:'#F0F2F8',
+                  borderRadius:50, marginBottom:14
+                }}>
+                  <div style={{
+                    width:pct+'%', height:8,
+                    backgroundColor:barColor,
+                    borderRadius:50,
+                    transition:'width 0.3s'
+                  }}/>
+                </div>
+
+                <div style={{
+                  display:'flex',
+                  justifyContent:'space-between',
+                  marginBottom:14
+                }}>
+                  <div>
+                    <p style={{
+                      color:'#8A94A6', fontSize:11,
+                      margin:0
+                    }}>Dépensé</p>
+                    <p style={{
+                      fontWeight:700,
+                      color:'#F04438', fontSize:13,
+                      margin:'2px 0 0'
+                    }}>
+                      {fmt(b.spent||0)}
+                    </p>
+                  </div>
+                  <div style={{textAlign:'center'}}>
+                    <p style={{
+                      color:'#8A94A6', fontSize:11,
+                      margin:0
+                    }}>Utilisé</p>
+                    <p style={{
+                      fontWeight:700,
+                      color:barColor, fontSize:13,
+                      margin:'2px 0 0'
+                    }}>
+                      {b.percent||0}%
+                    </p>
+                  </div>
+                  <div style={{textAlign:'right'}}>
+                    <p style={{
+                      color:'#8A94A6', fontSize:11,
+                      margin:0
+                    }}>Limite</p>
+                    <p style={{
+                      fontWeight:700,
+                      color:'#1A1D23', fontSize:13,
+                      margin:'2px 0 0'
+                    }}>
+                      {fmt(b.limitAmount)}
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{
+                  display:'flex', gap:8
+                }}>
+                  <button onClick={()=>{
+                    setEditing(b);
+                    setForm({
+                      category:b.category,
+                      limitAmount:String(b.limitAmount),
+                      month:b.month,
+                      year:b.year
+                    });
+                    setModal(true);
+                  }} style={{
+                    flex:1, padding:'8px',
+                    borderRadius:10, border:'none',
+                    backgroundColor:'#E8F5F1',
+                    color:'#0A7B5E', cursor:'pointer',
+                    fontSize:13, fontWeight:500,
+                    display:'flex',
+                    alignItems:'center',
+                    justifyContent:'center', gap:6,
+                    fontFamily:'DM Sans, sans-serif'
+                  }}>
+                    <Edit2 size={13} />
+                    Modifier
+                  </button>
+                  <button onClick={()=>del(id)}
+                    style={{
+                      flex:1, padding:'8px',
+                      borderRadius:10, border:'none',
+                      backgroundColor:'#FEF2F2',
+                      color:'#F04438', cursor:'pointer',
+                      fontSize:13, fontWeight:500,
+                      display:'flex',
+                      alignItems:'center',
+                      justifyContent:'center', gap:6,
+                      fontFamily:'DM Sans, sans-serif'
+                  }}>
+                    <Trash2 size={13} />
+                    Supprimer
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Modal */}
+      {modal && <>
+        <div onClick={()=>setModal(false)} style={{
+          position:'fixed', inset:0, zIndex:40,
+          backgroundColor:'rgba(0,0,0,0.4)'
+        }}/>
+        <div style={{
+          position:'fixed', inset:0, zIndex:50,
+          display:'flex', alignItems:'center',
+          justifyContent:'center', padding:16
+        }}>
+          <div style={{
+            backgroundColor:'white',
+            borderRadius:24, padding:28,
+            maxWidth:440, width:'100%'
+          }}>
+            <div style={{
+              display:'flex',
+              justifyContent:'space-between',
+              alignItems:'center', marginBottom:20
+            }}>
+              <h2 style={{
+                fontSize:18, fontWeight:800,
+                color:'#1A1D23', margin:0
+              }}>
+                {editing
+                  ?'Modifier le budget'
+                  :'Nouveau budget'}
+              </h2>
+              <button onClick={()=>setModal(false)} style={{
+                width:34, height:34,
+                borderRadius:10, border:'none',
+                backgroundColor:'#F5F7F5',
+                cursor:'pointer',
+                display:'flex', alignItems:'center',
+                justifyContent:'center'
+              }}>
+                <X size={16} color="#8A94A6" />
+              </button>
+            </div>
+
+            <div style={{marginBottom:16}}>
+              <label style={{
+                display:'block', fontSize:13,
+                color:'#8A94A6', marginBottom:10
+              }}>Catégorie</label>
+              <div style={{
+                display:'grid',
+                gridTemplateColumns:'repeat(4,1fr)',
+                gap:8
+              }}>
+                {CATS.map(cat=>{
+                  const CatIcon = cat.Icon;
+                  const sel =
+                    form.category===cat.id;
+                  return (
+                    <button key={cat.id}
+                      type='button'
+                      onClick={()=>setForm({
+                        ...form,
+                        category:cat.id})}
+                      style={{
+                        padding:'10px 6px',
+                        borderRadius:12,
+                        cursor:'pointer',
+                        textAlign:'center',
+                        border: sel
+                          ?'2px solid #0A7B5E'
+                          :'2px solid transparent',
+                        backgroundColor: sel
+                          ?'#E8F5F1':'#F5F7F5'
+                      }}>
+                      <div style={{
+                        display:'flex',
+                        justifyContent:'center',
+                        marginBottom:4
+                      }}>
+                        <CatIcon size={20}
+                          color={sel
+                            ?'#0A7B5E':cat.color}
+                        />
+                      </div>
+                      <div style={{
+                        fontSize:10, fontWeight:500,
+                        color:sel
+                          ?'#0A7B5E':cat.color
+                      }}>
+                        {cat.label.split(' ')[0]}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div style={{marginBottom:14}}>
+              <label style={{
+                display:'block', fontSize:13,
+                color:'#8A94A6', marginBottom:6
+              }}>Montant limite (FCFA)</label>
+              <input type='number'
+                value={form.limitAmount}
+                onChange={e=>setForm({
+                  ...form,
+                  limitAmount:e.target.value})}
+                placeholder='50 000'
+                style={inp}/>
+            </div>
+
+            <div style={{
+              display:'grid',
+              gridTemplateColumns:'1fr 1fr',
+              gap:12, marginBottom:20
+            }}>
+              <div>
+                <label style={{
+                  display:'block', fontSize:13,
+                  color:'#8A94A6', marginBottom:6
+                }}>Mois</label>
+                <select value={form.month}
+                  onChange={e=>setForm({
+                    ...form,
+                    month:Number(e.target.value)})}
+                  style={{...inp, cursor:'pointer'}}>
+                  {MONTHS.map((m,i)=>(
+                    <option key={i} value={i+1}>
+                      {m}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label style={{
+                  display:'block', fontSize:13,
+                  color:'#8A94A6', marginBottom:6
+                }}>Année</label>
+                <input type='number'
+                  value={form.year}
+                  onChange={e=>setForm({
+                    ...form,
+                    year:Number(e.target.value)})}
+                  style={inp}/>
+              </div>
+            </div>
+
+            <button onClick={save}
+              disabled={saving} style={{
+                width:'100%', padding:'13px',
+                backgroundColor:saving
+                  ?'#7BBDAD':'#0A7B5E',
+                color:'white', border:'none',
+                borderRadius:50, fontSize:15,
+                fontWeight:600,
+                cursor:saving
+                  ?'not-allowed':'pointer',
+                fontFamily:'DM Sans, sans-serif',
+                display:'flex',
+                alignItems:'center',
+                justifyContent:'center', gap:8
+              }}>
+              {saving ? 'Enregistrement...' : <>
+                <Check size={16} />
+                {editing
+                  ?'Modifier'
+                  :'Créer le budget'}
+              </>}
+            </button>
+          </div>
+        </div>
+      </>}
+    </div>
+  );
+}
