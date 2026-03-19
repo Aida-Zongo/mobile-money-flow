@@ -1,80 +1,197 @@
 "use client"
 
+import { useState } from "react"
+import { ArrowLeft, Eye, EyeOff, Mail, Lock, User, ArrowRight } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { DataSync } from "@/lib/data-sync"
+
 export default function AuthPage() {
+  const [isLogin, setIsLogin] = useState(true)
+  const [showPassword, setShowPassword] = useState(false)
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: ""
+  })
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+
+    try {
+      if (isLogin) {
+        // Connexion
+        const result = DataSync.login(formData.email, formData.password)
+        if (result.success) {
+          window.location.href = "/dashboard"
+        } else {
+          alert("Email ou mot de passe incorrect")
+        }
+      } else {
+        // Création de compte
+        if (formData.password !== formData.confirmPassword) {
+          alert("Les mots de passe ne correspondent pas")
+          setIsLoading(false)
+          return
+        }
+
+        const result = DataSync.createAccount({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password
+        })
+        
+        if (result.success) {
+          window.location.href = "/dashboard"
+        } else {
+          alert("Erreur lors de la création du compte")
+        }
+      }
+    } catch (error) {
+      alert("Une erreur est survenue")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #d1fae5, #a7f3d0, #99f6e4)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-      <div style={{ background: 'white', borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '400px', boxShadow: '0 20px 25px rgba(0, 0, 0, 0.1)' }}>
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{ width: '60px', height: '60px', background: 'linear-gradient(to bottom right, #10b981, #14b8a6)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)' }}>
-            <span style={{ fontSize: '20px', fontWeight: 'bold', color: 'white' }}>MF</span>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <span className="text-2xl font-bold text-white">MF</span>
           </div>
-          <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1f2937', margin: '0' }}>MoneyFlow</h2>
-          <p style={{ color: '#6b7280', margin: '0.5rem 0 0' }}>
-            Connectez-vous à votre compte
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">MoneyFlow</h1>
+          <p className="text-gray-600">
+            {isLogin ? "Connectez-vous à votre compte" : "Créez votre compte"}
           </p>
         </div>
-        
-        <form style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>Email</label>
-            <input 
-              type="email" 
-              placeholder="Entrez votre email"
-              style={{ 
-                width: '100%', 
-                padding: '12px 16px', 
-                border: '1px solid #d1d5db', 
-                borderRadius: '8px', 
-                fontSize: '16px',
-                outline: 'none',
-                transition: 'border-color 0.2s'
-              }}
-            />
-          </div>
-          
-          <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>Mot de passe</label>
-            <input 
-              type="password" 
-              placeholder="Entrez votre mot de passe"
-              style={{ 
-                width: '100%', 
-                padding: '12px 16px', 
-                border: '1px solid #d1d5db', 
-                borderRadius: '8px', 
-                fontSize: '16px',
-                outline: 'none',
-                transition: 'border-color 0.2s'
-              }}
-            />
-          </div>
-          
-          <button 
-            type="submit"
-            style={{ 
-              width: '100%', 
-              padding: '12px 24px', 
-              background: '#10b981', 
-              color: 'white', 
-              fontWeight: '600', 
-              borderRadius: '8px', 
-              fontSize: '16px',
-              border: 'none',
-              cursor: 'pointer',
-              transition: 'background-color 0.2s',
-              boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
-            }}
-          >
-            Se connecter
-          </button>
-          
-          <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-            <p style={{ color: '#6b7280', fontSize: '14px' }}>
-              Pas encore de compte ? 
-              <a href="/auth" style={{ color: '#10b981', textDecoration: 'none', fontWeight: '500' }}> Créer un compte</a>
-            </p>
-          </div>
-        </form>
+
+        <Card className="shadow-xl border-0">
+          <CardContent className="p-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {!isLogin && (
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-sm font-medium text-gray-700">
+                    Nom complet
+                  </Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="Entrez votre nom"
+                      value={formData.name}
+                      onChange={(e) => handleInputChange("name", e.target.value)}
+                      className="pl-10 h-12 border-gray-300 rounded-xl focus:border-emerald-500 focus:ring-emerald-500"
+                      required={!isLogin}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                  Email
+                </Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Entrez votre email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    className="pl-10 h-12 border-gray-300 rounded-xl focus:border-emerald-500 focus:ring-emerald-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                  Mot de passe
+                </Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Entrez votre mot de passe"
+                    value={formData.password}
+                    onChange={(e) => handleInputChange("password", e.target.value)}
+                    className="pl-10 pr-10 h-12 border-gray-300 rounded-xl focus:border-emerald-500 focus:ring-emerald-500"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {!isLogin && (
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
+                    Confirmer le mot de passe
+                  </Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Input
+                      id="confirmPassword"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Confirmez votre mot de passe"
+                      value={formData.confirmPassword}
+                      onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                      className="pl-10 h-12 border-gray-300 rounded-xl focus:border-emerald-500 focus:ring-emerald-500"
+                      required={!isLogin}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium shadow-lg transition-all duration-200 hover:shadow-xl disabled:opacity-50"
+              >
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <div className="flex items-center justify-center gap-2">
+                    <span>{isLogin ? "Se connecter" : "Créer un compte"}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
+                )}
+              </Button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600">
+                {isLogin ? "Pas encore de compte ?" : "Déjà un compte ?"}
+                <button
+                  type="button"
+                  onClick={() => setIsLogin(!isLogin)}
+                  className="ml-1 text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
+                >
+                  {isLogin ? "Créer un compte" : "Se connecter"}
+                </button>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
