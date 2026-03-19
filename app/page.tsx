@@ -1,3 +1,5 @@
+"use client"
+
 export default function HomePage() {
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #d1fae5, #a7f3d0, #99f6e4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -24,11 +26,9 @@ export default function HomePage() {
               fontWeight: '600', 
               borderRadius: '12px', 
               textDecoration: 'none',
-              transition: 'background-color 0.2s',
-              boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
+              boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+              transition: 'all 0.2s ease'
             }}
-            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#059669'}
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#10b981'}
           >
             Commencer
           </a>

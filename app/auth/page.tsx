@@ -1,3 +1,5 @@
+"use client"
+
 export default function AuthPage() {
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #d1fae5, #a7f3d0, #99f6e4)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
@@ -27,8 +29,6 @@ export default function AuthPage() {
                 outline: 'none',
                 transition: 'border-color 0.2s'
               }}
-              onFocus={(e) => e.currentTarget.style.borderColor = '#10b981'}
-              onBlur={(e) => e.currentTarget.style.borderColor = '#d1d5db'}
             />
           </div>
           
@@ -46,8 +46,6 @@ export default function AuthPage() {
                 outline: 'none',
                 transition: 'border-color 0.2s'
               }}
-              onFocus={(e) => e.currentTarget.style.borderColor = '#10b981'}
-              onBlur={(e) => e.currentTarget.style.borderColor = '#d1d5db'}
             />
           </div>
           
@@ -66,8 +64,6 @@ export default function AuthPage() {
               transition: 'background-color 0.2s',
               boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
             }}
-            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#059669'}
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#10b981'}
           >
             Se connecter
           </button>
