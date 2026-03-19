@@ -95,14 +95,14 @@ function BudgetsContent() {
 
   // Catégories de base avec palette cohérente
   const [categories] = useState([
-    { id: 'food', name: 'Alimentation', icon: '🍔', color: COLORS.primary[100] },
-    { id: 'transport', name: 'Transport', icon: '🚗', color: COLORS.primary[100] },
-    { id: 'shopping', name: 'Shopping', icon: '🛍', color: COLORS.primary[100] },
-    { id: 'bills', name: 'Factures', icon: '📄', color: COLORS.primary[100] },
-    { id: 'entertainment', name: 'Loisirs', icon: '🎮', color: COLORS.primary[100] },
-    { id: 'health', name: 'Santé', icon: '🏥', color: COLORS.primary[100] },
-    { id: 'education', name: 'Éducation', icon: '📚', color: COLORS.primary[100] },
-    { id: 'other', name: 'Autres', icon: '📌', color: COLORS.primary[100] }
+    { id: 'food', label: 'Alimentation', icon: '🍔', color: COLORS.primary[100] },
+    { id: 'transport', label: 'Transport', icon: '🚗', color: COLORS.primary[100] },
+    { id: 'shopping', label: 'Shopping', icon: '🛍', color: COLORS.primary[100] },
+    { id: 'bills', label: 'Factures', icon: '📄', color: COLORS.primary[100] },
+    { id: 'entertainment', label: 'Loisirs', icon: '🎮', color: COLORS.primary[100] },
+    { id: 'health', label: 'Santé', icon: '🏥', color: COLORS.primary[100] },
+    { id: 'education', label: 'Éducation', icon: '📚', color: COLORS.primary[100] },
+    { id: 'other', label: 'Autres', icon: '📌', color: COLORS.primary[100] }
   ])
 
   // Synchronisation des données
