@@ -1,0 +1,71 @@
+﻿node : C:\Users\Aida Z0
+NGO\Downloads\Mobile-mo
+ney-flow\backend\node_m
+odules\express\lib\rout
+er\route.js:216
+At line:1 char:1
++ node src/app.js 2>&1 
+| Out-File -Encoding 
+utf8 out.txt
++ ~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (C:\Users\Aida   
+  Z...er\route.js:2    
+16:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+        throw new 
+Error(msg);
+        ^
+
+Error: Route.put() 
+requires a callback 
+function but got a 
+[object Undefined]
+    at 
+Route.<computed> [as 
+put] (C:\Users\Aida Z0N
+GO\Downloads\Mobile-mon
+ey-flow\backend\node_mo
+dules\express\lib\route
+r\route.js:216:15)
+    at 
+proto.<computed> [as 
+put] (C:\Users\Aida Z0N
+GO\Downloads\Mobile-mon
+ey-flow\backend\node_mo
+dules\express\lib\route
+r\index.js:521:19)
+    at 
+Object.<anonymous> 
+(C:\Users\Aida Z0NGO\Do
+wnloads\Mobile-money-fl
+ow\backend\src\routes\a
+uth.routes.js:24:8)
+    at Module._compile 
+(node:internal/modules/
+cjs/loader:1688:14)
+    at Object..js (node
+:internal/modules/cjs/l
+oader:1820:10)
+    at Module.load (nod
+e:internal/modules/cjs/
+loader:1423:32)
+    at Function._load (
+node:internal/modules/c
+js/loader:1246:12)
+    at TracingChannel.t
+raceSync (node:diagnost
+ics_channel:322:14)
+    at wrapModuleLoad (
+node:internal/modules/c
+js/loader:235:24)
+    at Module.require (
+node:internal/modules/c
+js/loader:1445:12)
+
+Node.js v22.18.0

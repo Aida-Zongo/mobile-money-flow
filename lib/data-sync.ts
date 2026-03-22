@@ -89,12 +89,14 @@ export class DataSync {
 
   // Vérifier si l'utilisateur est connecté
   static isLoggedIn(): boolean {
+    if (typeof window === 'undefined') return false;
     const userData = localStorage.getItem(KEYS.USER)
     return userData !== null
   }
 
   // Obtenir l'utilisateur actuel
   static getCurrentUser(): UserData | null {
+    if (typeof window === 'undefined') return null;
     const userData = localStorage.getItem(KEYS.USER)
     return userData ? JSON.parse(userData) : null
   }
@@ -120,6 +122,7 @@ export class DataSync {
 
   // Obtenir toutes les transactions
   static getTransactions(): Transaction[] {
+    if (typeof window === 'undefined') return [];
     const transactions = localStorage.getItem(KEYS.TRANSACTIONS)
     return transactions ? JSON.parse(transactions) : []
   }
@@ -145,6 +148,7 @@ export class DataSync {
 
   // Obtenir tous les budgets
   static getBudgets(): Budget[] {
+    if (typeof window === 'undefined') return [];
     const budgets = localStorage.getItem(KEYS.BUDGETS)
     return budgets ? JSON.parse(budgets) : []
   }
@@ -186,6 +190,7 @@ export class DataSync {
 
   // Obtenir le solde initial
   static getInitialBalance(): number {
+    if (typeof window === 'undefined') return 0;
     return parseFloat(localStorage.getItem(KEYS.INITIAL_BALANCE) || '0')
   }
 

@@ -103,7 +103,7 @@ export default function LandingPage() {
     {
       icon: Lock,
       title: 'Sécurité maximale',
-      desc: 'Vos données sont chiffrées et protégées par Firebase Authentication.',
+      desc: "Vos données sont chiffrées de bout en bout et protégées selon les normes de l'industrie.",
       featured: false,
       color: '#16A34A',
       bg: '#F0FDF4',

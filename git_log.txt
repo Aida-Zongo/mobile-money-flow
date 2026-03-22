@@ -1,0 +1,19 @@
+commit 0eb39835489da2f84bf5e65d1044a70e8a503c99
+Author: isa444zng <belgehacking.444@gmail.com>
+Date:   Sun Mar 22 12:43:52 2026 +0000
+
+    feat: implement dynamic reviews on landing page
+
+diff --git a/app/settings/page.tsx b/app/settings/page.tsx
+index ee6aa93..d26fa78 100644
+--- a/app/settings/page.tsx
++++ b/app/settings/page.tsx
+@@ -269,7 +269,7 @@ const menuSections = [
+         {
+           icon: HelpCircle,
+           label: "Centre d'aide",
+-          action: () => alert("Centre d'aide bientôt disponible !"),
++          action: () => window.location.href = '/dashboard/aide',
+         },
+         {
+           icon: MessageCircle,

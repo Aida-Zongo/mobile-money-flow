@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { DataSync, formatMoney, formatDate } from "@/lib/data-sync"
-// Plus besoin de AuthRequired/AuthGuard - si on est sur ces pages, on est déjà connecté
+import AuthRequired from "@/components/auth-required"
 import {
   Sheet,
   SheetContent,
@@ -423,7 +423,3 @@ function ExpensesContent() {
   )
 }
 
-export default function ExpensesPage() {
-  // Plus besoin de AuthGuard - si on arrive ici, c'est qu'on est déjà connecté !
-  return <ExpensesContent />
-}

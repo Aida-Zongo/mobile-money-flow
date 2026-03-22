@@ -1,0 +1,28 @@
+
+> my-project@0.1.0 build
+> next build
+
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Users\Aida Z0NGO\pnpm-lock.yaml as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * C:\Users\Aida Z0NGO\Downloads\Mobile-money-flow\pnpm-lock.yaml
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local, .env
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 6.4s
+  Skipping validation of types
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/24) ...
+  Generating static pages using 7 workers (6/24) 
+Error occurred prerendering page "/expenses". Read more: https://nextjs.org/docs/messages/prerender-error
+ReferenceError: isRegistering is not defined
+    at A (C:\Users\Aida Z0NGO\Downloads\Mobile-money-flow\.next\server\chunks\ssr\Downloads_Mobile-money-flow_app_expenses_page_tsx_6d1fbbc5._.js:1:2653) {
+  digest: '3291263192'
+}
+Export encountered an error on /expenses/page: /expenses, exiting the build.
+⨯ Next.js build worker exited with code: 1 and signal: null

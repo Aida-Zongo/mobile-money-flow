@@ -21,26 +21,22 @@ export default function AuthRequired({ children, action = "add", message }: Auth
     return <>{children}</>
   }
 
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const [isRegistering, setIsRegistering] = useState(false)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [name, setName] = useState("")
+
   const handleLogin = () => {
     if (email && password) {
-      const userData = {
-        email,
-        name: email.split('@')[0],
-        isLoggedIn: true
-      }
-      DataSync.setCurrentUser(userData)
+      DataSync.login(email, password)
       window.location.reload()
     }
   }
 
   const handleRegister = () => {
     if (email && password && name) {
-      const userData = {
-        email,
-        name,
-        isLoggedIn: true
-      }
-      DataSync.setCurrentUser(userData)
+      DataSync.createAccount({ name, email, password })
       window.location.reload()
     }
   }
