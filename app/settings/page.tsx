@@ -269,7 +269,7 @@ const menuSections = [
         {
           icon: HelpCircle,
           label: "Centre d'aide",
-          action: () => alert("Centre d'aide bientôt disponible !"),
+          action: () => window.location.href = '/dashboard/aide',
         },
         {
           icon: MessageCircle,

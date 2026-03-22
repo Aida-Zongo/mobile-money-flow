@@ -6,15 +6,14 @@ import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
+  // const { login } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async (
-    e: React.FormEvent
-  ) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     if (!email || !password) {
       setError('Remplissez tous les champs');
@@ -23,23 +22,22 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
     try {
-      await loginUser(email.trim(), password);
-      router.push('/dashboard');
+      const result = await loginUser(email.trim(), password);
+      
+      console.log('=== LOGIN DEBUG ===');
+      console.log('result:', result);
+      console.log('token:', result?.token);
+      console.log('user:', result?.user);
+      console.log('localStorage token:',
+        localStorage.getItem('token'));
+      console.log('===================');
+
+      window.location.href = '/dashboard';
     } catch (err: any) {
-      const code = err?.code || '';
-      if (
-        code === 'auth/invalid-credential' ||
-        code === 'auth/wrong-password' ||
-        code === 'auth/user-not-found'
-      ) {
-        setError('Email ou mot de passe incorrect');
-      } else if (code === 'auth/too-many-requests') {
-        setError('Trop de tentatives. Réessayez plus tard.');
-      } else {
-        setError('Erreur de connexion. Réessayez.');
-      }
-    } finally {
       setLoading(false);
+      setError(
+        err.message || 'Email ou mot de passe incorrect'
+      );
     }
   };
 
@@ -72,7 +70,7 @@ export default function LoginPage() {
         flexDirection: 'column',
         justifyContent: 'space-between',
       }}
-      className="hidden lg:flex">
+        className="hidden lg:flex">
         <div style={{
           display: 'flex',
           alignItems: 'center', gap: 12,
@@ -111,15 +109,15 @@ export default function LoginPage() {
             display: 'flex', gap: 10,
             marginTop: 24, flexWrap: 'wrap',
           }}>
-            {['Orange Money','Wave','Moov Money']
+            {['Orange Money', 'Wave', 'Moov Money']
               .map(op => (
-              <span key={op} style={{
-                backgroundColor: 'rgba(255,255,255,0.15)',
-                color: 'rgba(255,255,255,0.9)',
-                padding: '6px 14px', borderRadius: 50,
-                fontSize: 13,
-              }}>{op}</span>
-            ))}
+                <span key={op} style={{
+                  backgroundColor: 'rgba(255,255,255,0.15)',
+                  color: 'rgba(255,255,255,0.9)',
+                  padding: '6px 14px', borderRadius: 50,
+                  fontSize: 13,
+                }}>{op}</span>
+              ))}
           </div>
         </div>
         <p style={{
@@ -222,10 +220,12 @@ export default function LoginPage() {
               <div style={{
                 textAlign: 'right', marginBottom: 20,
               }}>
-                <span style={{
-                  color: '#0A7B5E', fontSize: 13,
-                  fontWeight: 500, cursor: 'pointer',
-                }}>
+                <span
+                  onClick={() => router.push('/forgot-password')}
+                  style={{
+                    color: '#0A7B5E', fontSize: 13,
+                    fontWeight: 500, cursor: 'pointer',
+                  }}>
                   Mot de passe oublié ?
                 </span>
               </div>

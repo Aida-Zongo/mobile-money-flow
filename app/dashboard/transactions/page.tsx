@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback }
   from 'react';
 import api from '@/lib/api';
+import { useLanguage } from '@/lib/LanguageContext';
 import {
   Plus, Edit2, Trash2, X, ShoppingBag,
   Car, Heart, ShoppingCart, Home,
@@ -30,7 +31,7 @@ const CATS = [
     bg:'#FEFCE8' },
   { id:'autre', label:'Autre',
     Icon:Package, color:'#6B7280',
-    bg:'#F5F7F5' },
+    bg:'var(--bg)' },
 ];
 
 const OPS = [
@@ -41,7 +42,7 @@ const OPS = [
   { id:'moov_money', label:'Moov Money',
     color:'#00AA44' },
   { id:'especes', label:'Espèces',
-    color:'#8A94A6' },
+    color:'var(--text-muted)' },
 ];
 
 const MONTHS = ['Janvier','Février','Mars',
@@ -56,6 +57,7 @@ const getCat = (id:string) =>
   CATS.find(c=>c.id===id) || CATS[7];
 
 export default function TransactionsPage() {
+  const { t } = useLanguage();
   const [expenses, setExpenses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [drawer, setDrawer] = useState(false);
@@ -154,14 +156,14 @@ export default function TransactionsPage() {
     width:'100%', padding:'10px 14px',
     border:'1.5px solid #E2EAE7',
     borderRadius:10, fontSize:14, outline:'none',
-    backgroundColor:'#FAFBFC', color:'#1A1D23',
+    backgroundColor:'var(--bg-input)', color:'var(--text-main)',
     fontFamily:'DM Sans, sans-serif',
     boxSizing:'border-box' as const,
   };
 
   return (
     <div style={{
-      padding:24, backgroundColor:'#F5F7F5',
+      padding:24, backgroundColor:'var(--bg)',
       minHeight:'100vh',
       fontFamily:'DM Sans, sans-serif'
     }}>
@@ -171,7 +173,7 @@ export default function TransactionsPage() {
           position:'fixed', top:16, right:16,
           zIndex:9999, padding:'12px 20px',
           borderRadius:16, fontSize:14,
-          fontWeight:500, color:'white',
+          fontWeight:500, color:'var(--bg-card)',
           backgroundColor:toast.err
             ?'#F04438':'#00C48C',
           boxShadow:'0 4px 20px rgba(0,0,0,0.15)'
@@ -188,12 +190,12 @@ export default function TransactionsPage() {
         <div>
           <h1 style={{
             fontSize:24, fontWeight:800,
-            color:'#1A1D23', margin:0
+            color:'var(--text-main)', margin:0
           }}>
             Mes Dépenses
           </h1>
           <p style={{
-            color:'#8A94A6', fontSize:14, marginTop:4
+            color:'var(--text-muted)', fontSize:14, marginTop:4
           }}>
             {expenses.length} transaction
             {expenses.length!==1?'s':''}
@@ -201,7 +203,7 @@ export default function TransactionsPage() {
         </div>
         <button onClick={openAdd} style={{
           display:'flex', alignItems:'center', gap:6,
-          backgroundColor:'#0A7B5E', color:'white',
+          backgroundColor:'#0A7B5E', color:'var(--bg-card)',
           border:'none', borderRadius:50,
           padding:'10px 20px', fontSize:14,
           fontWeight:600, cursor:'pointer',
@@ -209,13 +211,13 @@ export default function TransactionsPage() {
           fontFamily:'DM Sans, sans-serif'
         }}>
           <Plus size={16} />
-          Nouvelle dépense
+          {t('tx.new')}
         </button>
       </div>
 
       {/* Filters */}
       <div style={{
-        backgroundColor:'white', borderRadius:16,
+        backgroundColor:'var(--bg-card)', borderRadius:16,
         padding:14, marginBottom:16,
         display:'flex', gap:12, flexWrap:'wrap',
         boxShadow:'0 1px 8px rgba(0,0,0,0.05)'
@@ -243,14 +245,14 @@ export default function TransactionsPage() {
 
       {/* List */}
       <div style={{
-        backgroundColor:'white', borderRadius:16,
+        backgroundColor:'var(--bg-card)', borderRadius:16,
         overflow:'hidden',
         boxShadow:'0 1px 8px rgba(0,0,0,0.05)'
       }}>
         {loading ? (
           <div style={{
             padding:40, textAlign:'center',
-            color:'#8A94A6'
+            color:'var(--text-muted)'
           }}>
             Chargement...
           </div>
@@ -270,20 +272,20 @@ export default function TransactionsPage() {
                 color="#0A7B5E" />
             </div>
             <h3 style={{
-              color:'#1A1D23', fontWeight:700,
+              color:'var(--text-main)', fontWeight:700,
               marginBottom:8
             }}>
-              Aucune dépense
+              {t('tx.none')}
             </h3>
             <p style={{
-              color:'#8A94A6', fontSize:14,
+              color:'var(--text-muted)', fontSize:14,
               marginBottom:20
             }}>
               Ajoutez votre première dépense
             </p>
             <button onClick={openAdd} style={{
               backgroundColor:'#0A7B5E',
-              color:'white', border:'none',
+              color:'var(--bg-card)', border:'none',
               borderRadius:50, padding:'10px 20px',
               cursor:'pointer', fontSize:14,
               fontWeight:600,
@@ -301,15 +303,15 @@ export default function TransactionsPage() {
               display:'flex', alignItems:'center',
               gap:14, padding:'14px 20px',
               borderBottom: i<expenses.length-1
-                ?'1px solid #F0F2F8':'none',
+                ?'1px solid var(--border)':'none',
               transition:'background 0.15s'
             }}
             onMouseEnter={e=>
               (e.currentTarget.style.backgroundColor
-                ='#F5F7F5')}
+                ='var(--bg)')}
             onMouseLeave={e=>
               (e.currentTarget.style.backgroundColor
-                ='white')}>
+                ='var(--bg-card)')}>
               <div style={{
                 width:42, height:42,
                 borderRadius:12,
@@ -324,12 +326,12 @@ export default function TransactionsPage() {
               <div style={{flex:1}}>
                 <p style={{
                   fontWeight:600, fontSize:14,
-                  color:'#1A1D23', margin:0
+                  color:'var(--text-main)', margin:0
                 }}>
                   {exp.description || cat.label}
                 </p>
                 <p style={{
-                  color:'#8A94A6', fontSize:12,
+                  color:'var(--text-muted)', fontSize:12,
                   margin:'2px 0 0'
                 }}>
                   {new Date(exp.date)
@@ -388,7 +390,7 @@ export default function TransactionsPage() {
         <div style={{
           position:'fixed', right:0, top:0,
           height:'100%', width:'100%', maxWidth:420,
-          backgroundColor:'white', zIndex:50,
+          backgroundColor:'var(--bg-card)', zIndex:50,
           overflowY:'auto', padding:24,
           borderRadius:'20px 0 0 20px',
           boxShadow:'-4px 0 30px rgba(0,0,0,0.15)'
@@ -400,16 +402,16 @@ export default function TransactionsPage() {
           }}>
             <h2 style={{
               fontSize:20, fontWeight:800,
-              color:'#1A1D23', margin:0
+              color:'var(--text-main)', margin:0
             }}>
               {editing
                 ?'Modifier la dépense'
-                :'Nouvelle dépense'}
+                : t('tx.new')}
             </h2>
             <button onClick={()=>setDrawer(false)} style={{
               width:36, height:36,
               borderRadius:10, border:'none',
-              backgroundColor:'#F5F7F5',
+              backgroundColor:'var(--bg)',
               cursor:'pointer',
               display:'flex', alignItems:'center',
               justifyContent:'center'
@@ -422,8 +424,8 @@ export default function TransactionsPage() {
           <div style={{marginBottom:20}}>
             <label style={{
               display:'block', fontSize:13,
-              color:'#8A94A6', marginBottom:8
-            }}>Montant</label>
+              color:'var(--text-muted)', marginBottom:8
+            }}>{t('tx.amount')}</label>
             <div style={{position:'relative'}}>
               <input type='number' value={form.amount}
                 onChange={e=>setForm({
@@ -438,7 +440,7 @@ export default function TransactionsPage() {
                 }}/>
               <span style={{
                 position:'absolute', right:14,
-                bottom:14, color:'#8A94A6',
+                bottom:14, color:'var(--text-muted)',
                 fontSize:12
               }}>FCFA</span>
             </div>
@@ -448,8 +450,8 @@ export default function TransactionsPage() {
           <div style={{marginBottom:20}}>
             <label style={{
               display:'block', fontSize:13,
-              color:'#8A94A6', marginBottom:10
-            }}>Catégorie</label>
+              color:'var(--text-muted)', marginBottom:10
+            }}>{t('tx.category')}</label>
             <div style={{
               display:'grid',
               gridTemplateColumns:'repeat(4,1fr)',
@@ -502,7 +504,7 @@ export default function TransactionsPage() {
           <div style={{marginBottom:14}}>
             <label style={{
               display:'block', fontSize:13,
-              color:'#8A94A6', marginBottom:6
+              color:'var(--text-muted)', marginBottom:6
             }}>Description (optionnel)</label>
             <input type='text'
               value={form.description}
@@ -517,8 +519,8 @@ export default function TransactionsPage() {
           <div style={{marginBottom:14}}>
             <label style={{
               display:'block', fontSize:13,
-              color:'#8A94A6', marginBottom:6
-            }}>Date</label>
+              color:'var(--text-muted)', marginBottom:6
+            }}>{t('tx.date')}</label>
             <input type='date' value={form.date}
               onChange={e=>setForm({
                 ...form, date:e.target.value})}
@@ -529,8 +531,8 @@ export default function TransactionsPage() {
           <div style={{marginBottom:24}}>
             <label style={{
               display:'block', fontSize:13,
-              color:'#8A94A6', marginBottom:10
-            }}>Opérateur</label>
+              color:'var(--text-muted)', marginBottom:10
+            }}>{t('tx.operator')}</label>
             <div style={{
               display:'grid',
               gridTemplateColumns:'repeat(4,1fr)',
@@ -551,7 +553,7 @@ export default function TransactionsPage() {
                         ?'2px solid #0A7B5E'
                         :'1.5px solid #E2EAE7',
                       backgroundColor: sel
-                        ?'#E8F5F1':'#FAFBFC'
+                        ?'#E8F5F1':'var(--bg-input)'
                     }}>
                     <div style={{
                       width:12, height:12,
@@ -562,7 +564,7 @@ export default function TransactionsPage() {
                     <div style={{
                       fontSize:10, fontWeight:500,
                       color:sel
-                        ?'#0A7B5E':'#8A94A6'
+                        ?'#0A7B5E':'var(--text-muted)'
                     }}>
                       {op.label.split(' ')[0]}
                     </div>
@@ -577,7 +579,7 @@ export default function TransactionsPage() {
               width:'100%', padding:'14px',
               backgroundColor:saving
                 ?'#7BBDAD':'#0A7B5E',
-              color:'white', border:'none',
+              color:'var(--bg-card)', border:'none',
               borderRadius:50, fontSize:15,
               fontWeight:600,
               cursor:saving?'not-allowed':'pointer',
@@ -609,7 +611,7 @@ export default function TransactionsPage() {
           justifyContent:'center', padding:16
         }}>
           <div style={{
-            backgroundColor:'white',
+            backgroundColor:'var(--bg-card)',
             borderRadius:24, padding:32,
             maxWidth:340, width:'100%',
             textAlign:'center'
@@ -625,13 +627,13 @@ export default function TransactionsPage() {
               <Trash2 size={24} color="#F04438" />
             </div>
             <h3 style={{
-              fontWeight:700, color:'#1A1D23',
+              fontWeight:700, color:'var(--text-main)',
               marginBottom:8
             }}>
               Supprimer ?
             </h3>
             <p style={{
-              color:'#8A94A6', fontSize:14,
+              color:'var(--text-muted)', fontSize:14,
               marginBottom:24
             }}>
               Cette action est irréversible.
@@ -641,8 +643,8 @@ export default function TransactionsPage() {
                 onClick={()=>setDelId(null)}
                 style={{
                   flex:1, padding:'12px',
-                  backgroundColor:'#F5F7F5',
-                  color:'#8A94A6', border:'none',
+                  backgroundColor:'var(--bg)',
+                  color:'var(--text-muted)', border:'none',
                   borderRadius:50, cursor:'pointer',
                   fontWeight:600,
                   fontFamily:'DM Sans, sans-serif'
@@ -652,7 +654,7 @@ export default function TransactionsPage() {
               <button onClick={del} style={{
                 flex:1, padding:'12px',
                 backgroundColor:'#F04438',
-                color:'white', border:'none',
+                color:'var(--bg-card)', border:'none',
                 borderRadius:50, cursor:'pointer',
                 fontWeight:600,
                 fontFamily:'DM Sans, sans-serif'

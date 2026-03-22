@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback }
   from 'react';
 import api from '@/lib/api';
+import { useLanguage } from '@/lib/LanguageContext';
 import {
   Plus, X, Trash2, DollarSign,
   Briefcase, Laptop, ShoppingCart,
@@ -22,8 +23,8 @@ const SOURCES = [
     Icon:Users, color:'#8B5CF6',
     bg:'#F3F0FF' },
   { id:'autre', label:'Autre',
-    Icon:DollarSign, color:'#8A94A6',
-    bg:'#F5F7F5' },
+    Icon:DollarSign, color:'var(--text-muted)',
+    bg:'var(--bg)' },
 ];
 
 const MONTHS = ['Janvier','Février','Mars',
@@ -35,6 +36,7 @@ const fmt = (n:number) =>
   +' FCFA';
 
 export default function RevenusPage() {
+  const { t } = useLanguage();
   const [incomes, setIncomes] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -106,14 +108,14 @@ export default function RevenusPage() {
     width:'100%', padding:'10px 14px',
     border:'1.5px solid #E2EAE7', borderRadius:10,
     fontSize:14, outline:'none',
-    backgroundColor:'#FAFBFC', color:'#1A1D23',
+    backgroundColor:'var(--bg-input)', color:'var(--text-main)',
     fontFamily:'DM Sans, sans-serif',
     boxSizing:'border-box' as const,
   };
 
   return (
     <div style={{
-      padding:24, backgroundColor:'#F5F7F5',
+      padding:24, backgroundColor:'var(--bg)',
       minHeight:'100vh',
       fontFamily:'DM Sans, sans-serif'
     }}>
@@ -122,7 +124,7 @@ export default function RevenusPage() {
           position:'fixed', top:16, right:16,
           zIndex:9999, padding:'12px 20px',
           borderRadius:16, fontSize:14,
-          fontWeight:500, color:'white',
+          fontWeight:500, color:'var(--bg-card)',
           backgroundColor:toast.err
             ?'#F04438':'#00C48C',
           boxShadow:'0 4px 20px rgba(0,0,0,0.15)'
@@ -139,10 +141,10 @@ export default function RevenusPage() {
         <div>
           <h1 style={{
             fontSize:24, fontWeight:800,
-            color:'#1A1D23', margin:0
-          }}>Mes Revenus</h1>
+            color:'var(--text-main)', margin:0
+          }}>{t('page.incomes')}</h1>
           <p style={{
-            color:'#8A94A6', fontSize:14,
+            color:'var(--text-muted)', fontSize:14,
             marginTop:4
           }}>
             {incomes.length} source
@@ -153,7 +155,7 @@ export default function RevenusPage() {
           style={{
             display:'flex', alignItems:'center',
             gap:6, backgroundColor:'#16A34A',
-            color:'white', border:'none',
+            color:'var(--bg-card)', border:'none',
             borderRadius:50, padding:'10px 20px',
             fontSize:14, fontWeight:600,
             cursor:'pointer',
@@ -161,7 +163,7 @@ export default function RevenusPage() {
             boxShadow:'0 4px 14px rgba(22,163,74,0.35)'
           }}>
           <Plus size={16} />
-          Ajouter un revenu
+          {t('income.new')}
         </button>
       </div>
 
@@ -170,13 +172,13 @@ export default function RevenusPage() {
         background:
           'linear-gradient(135deg,#16A34A,#22C55E)',
         borderRadius:20, padding:24,
-        marginBottom:20, color:'white'
+        marginBottom:20, color:'var(--bg-card)'
       }}>
         <p style={{
           color:'rgba(255,255,255,0.7)',
           fontSize:13, margin:'0 0 6px'
         }}>
-          Total revenus — {MONTHS[month-1]}
+          {t('income.total')} — {MONTHS[month-1]}
         </p>
         <p style={{
           fontSize:36, fontWeight:900,
@@ -188,7 +190,7 @@ export default function RevenusPage() {
 
       {/* Filter */}
       <div style={{
-        backgroundColor:'white', borderRadius:14,
+        backgroundColor:'var(--bg-card)', borderRadius:14,
         padding:14, marginBottom:16,
         boxShadow:'0 1px 8px rgba(0,0,0,0.05)'
       }}>
@@ -204,14 +206,14 @@ export default function RevenusPage() {
 
       {/* List */}
       <div style={{
-        backgroundColor:'white', borderRadius:16,
+        backgroundColor:'var(--bg-card)', borderRadius:16,
         overflow:'hidden',
         boxShadow:'0 1px 8px rgba(0,0,0,0.05)'
       }}>
         {loading ? (
           <div style={{
             padding:40, textAlign:'center',
-            color:'#8A94A6'
+            color:'var(--text-muted)'
           }}>Chargement...</div>
         ) : incomes.length===0 ? (
           <div style={{
@@ -229,13 +231,13 @@ export default function RevenusPage() {
                 color="#16A34A" />
             </div>
             <h3 style={{
-              color:'#1A1D23', fontWeight:700,
+              color:'var(--text-main)', fontWeight:700,
               marginBottom:8
             }}>
-              Aucun revenu ce mois
+              {t('income.none')}
             </h3>
             <p style={{
-              color:'#8A94A6', fontSize:14,
+              color:'var(--text-muted)', fontSize:14,
               marginBottom:20
             }}>
               Ajoutez votre salaire ou vos revenus
@@ -244,7 +246,7 @@ export default function RevenusPage() {
               onClick={()=>setModal(true)}
               style={{
                 backgroundColor:'#16A34A',
-                color:'white', border:'none',
+                color:'var(--bg-card)', border:'none',
                 borderRadius:50, padding:'10px 20px',
                 cursor:'pointer', fontSize:14,
                 fontWeight:600,
@@ -262,7 +264,7 @@ export default function RevenusPage() {
               display:'flex', alignItems:'center',
               gap:14, padding:'14px 20px',
               borderBottom: i<incomes.length-1
-                ?'1px solid #F0F2F8':'none'
+                ?'1px solid var(--border)':'none'
             }}>
               <div style={{
                 width:42, height:42,
@@ -278,12 +280,12 @@ export default function RevenusPage() {
               <div style={{flex:1}}>
                 <p style={{
                   fontWeight:600, fontSize:14,
-                  color:'#1A1D23', margin:0
+                  color:'var(--text-main)', margin:0
                 }}>
                   {src.label}
                   {inc.note && (
                     <span style={{
-                      color:'#8A94A6',
+                      color:'var(--text-muted)',
                       fontWeight:400
                     }}>
                       {' '}— {inc.note}
@@ -291,7 +293,7 @@ export default function RevenusPage() {
                   )}
                 </p>
                 <p style={{
-                  color:'#8A94A6', fontSize:12,
+                  color:'var(--text-muted)', fontSize:12,
                   margin:'2px 0 0'
                 }}>
                   {MONTHS[inc.month-1]} {inc.year}
@@ -331,7 +333,7 @@ export default function RevenusPage() {
           justifyContent:'center', padding:16
         }}>
           <div style={{
-            backgroundColor:'white',
+            backgroundColor:'var(--bg-card)',
             borderRadius:24, padding:28,
             maxWidth:440, width:'100%'
           }}>
@@ -342,12 +344,12 @@ export default function RevenusPage() {
             }}>
               <h2 style={{
                 fontSize:18, fontWeight:800,
-                color:'#1A1D23', margin:0
+                color:'var(--text-main)', margin:0
               }}>Nouveau revenu</h2>
               <button onClick={()=>setModal(false)} style={{
                 width:34, height:34,
                 borderRadius:10, border:'none',
-                backgroundColor:'#F5F7F5',
+                backgroundColor:'var(--bg)',
                 cursor:'pointer',
                 display:'flex', alignItems:'center',
                 justifyContent:'center'
@@ -359,8 +361,8 @@ export default function RevenusPage() {
             <div style={{marginBottom:16}}>
               <label style={{
                 display:'block', fontSize:13,
-                color:'#8A94A6', marginBottom:8
-              }}>Montant</label>
+                color:'var(--text-muted)', marginBottom:8
+              }}>{t('tx.amount')}</label>
               <div style={{position:'relative'}}>
                 <input type='number'
                   value={form.amount}
@@ -377,7 +379,7 @@ export default function RevenusPage() {
                   }}/>
                 <span style={{
                   position:'absolute', right:14,
-                  bottom:14, color:'#8A94A6',
+                  bottom:14, color:'var(--text-muted)',
                   fontSize:12
                 }}>FCFA</span>
               </div>
@@ -386,8 +388,8 @@ export default function RevenusPage() {
             <div style={{marginBottom:16}}>
               <label style={{
                 display:'block', fontSize:13,
-                color:'#8A94A6', marginBottom:10
-              }}>Source</label>
+                color:'var(--text-muted)', marginBottom:10
+              }}>{t('income.source')}</label>
               <div style={{
                 display:'grid',
                 gridTemplateColumns:'repeat(5,1fr)',
@@ -411,7 +413,7 @@ export default function RevenusPage() {
                           ?'2px solid #16A34A'
                           :'2px solid transparent',
                         backgroundColor: sel
-                          ?'#F0FDF4':'#F5F7F5'
+                          ?'#F0FDF4':'var(--bg)'
                       }}>
                       <div style={{
                         display:'flex',
@@ -439,7 +441,7 @@ export default function RevenusPage() {
             <div style={{marginBottom:14}}>
               <label style={{
                 display:'block', fontSize:13,
-                color:'#8A94A6', marginBottom:6
+                color:'var(--text-muted)', marginBottom:6
               }}>Note (optionnel)</label>
               <input type='text' value={form.note}
                 onChange={e=>setForm({
@@ -457,7 +459,7 @@ export default function RevenusPage() {
               <div>
                 <label style={{
                   display:'block', fontSize:13,
-                  color:'#8A94A6', marginBottom:6
+                  color:'var(--text-muted)', marginBottom:6
                 }}>Mois</label>
                 <select value={form.month}
                   onChange={e=>setForm({
@@ -474,7 +476,7 @@ export default function RevenusPage() {
               <div>
                 <label style={{
                   display:'block', fontSize:13,
-                  color:'#8A94A6', marginBottom:6
+                  color:'var(--text-muted)', marginBottom:6
                 }}>Année</label>
                 <input type='number'
                   value={form.year}
@@ -490,7 +492,7 @@ export default function RevenusPage() {
                 width:'100%', padding:'13px',
                 backgroundColor:saving
                   ?'#86EFAC':'#16A34A',
-                color:'white', border:'none',
+                color:'var(--bg-card)', border:'none',
                 borderRadius:50, fontSize:15,
                 fontWeight:600,
                 cursor:saving

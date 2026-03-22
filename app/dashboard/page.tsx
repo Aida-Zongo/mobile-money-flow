@@ -1,438 +1,404 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { logoutUser } from '@/lib/auth';
-import { ArrowUp, ArrowDown, TrendingUp, CreditCard, ArrowRight, LogOut, User, Home, PieChart, Target, Wallet } from 'lucide-react';
+import api from '@/lib/api';
+import { t } from '@/lib/i18n';
+import {
+  TrendingDown, CreditCard, Target,
+  Calendar, ShoppingBag, Car, Heart,
+  ShoppingCart, Home, Smartphone,
+  BookOpen, Package
+} from 'lucide-react';
+
+const fmt = (n: number) =>
+  new Intl.NumberFormat('fr-FR').format(n || 0)
+  + ' FCFA';
+
+const getCategoryIcon = (category: string) => {
+  const icons: Record<string, any> = {
+    alimentation: {
+      icon: ShoppingBag,
+      color: '#D97706', bg: '#FEF3E2'
+    },
+    transport: {
+      icon: Car,
+      color: '#0A7B5E', bg: '#E8F5F1'
+    },
+    sante: {
+      icon: Heart,
+      color: '#16A34A', bg: '#F0FDF4'
+    },
+    shopping: {
+      icon: ShoppingCart,
+      color: '#DB2777', bg: '#FDF2F8'
+    },
+    logement: {
+      icon: Home,
+      color: '#2563EB', bg: '#EFF6FF'
+    },
+    telecom: {
+      icon: Smartphone,
+      color: '#0369A1', bg: '#F0F9FF'
+    },
+    education: {
+      icon: BookOpen,
+      color: '#CA8A04', bg: '#FEFCE8'
+    },
+    autre: {
+      icon: Package,
+      color: '#6B7280', bg: 'var(--bg-hover)'
+    },
+  };
+  return icons[category] || icons.autre;
+};
 
 export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
-  const [transactions, setTransactions] = useState<any[]>([]);
+  const [summary, setSummary] =
+    useState<any>(null);
+  const [expenses, setExpenses] =
+    useState<any[]>([]);
+  const [incomes, setIncomes] =
+    useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const year = now.getFullYear();
+  const monthName = now.toLocaleDateString(
+    'fr-FR', { month: 'long', year: 'numeric' }
+  );
+
   useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      setUser(JSON.parse(userData));
-    } else {
-      router.push('/login');
-      return;
+    const raw = localStorage.getItem('user');
+    if (raw) {
+      try { setUser(JSON.parse(raw)); }
+      catch(e) {}
     }
+    loadData();
+  }, []);
 
-    // Simuler des transactions
-    const mockTransactions = [
-      { id: 1, type: 'expense', label: 'Orange Money', amount: 5000, date: '2024-03-19', category: 'Mobile Money' },
-      { id: 2, type: 'income', label: 'Salaire', amount: 150000, date: '2024-03-18', category: 'Revenu' },
-      { id: 3, type: 'expense', label: 'Wave', amount: 12000, date: '2024-03-18', category: 'Mobile Money' },
-      { id: 4, type: 'expense', label: 'Moov Money', amount: 8000, date: '2024-03-17', category: 'Mobile Money' },
-      { id: 5, type: 'income', label: 'Transfert reçu', amount: 25000, date: '2024-03-17', category: 'Transfert' },
-    ];
-    setTransactions(mockTransactions);
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [s, e, inc] = await Promise.all([
+        api.get(
+          `/stats/summary?month=${month}&year=${year}`
+        ),
+        api.get(
+          `/expenses?month=${month}&year=${year}&limit=5`
+        ),
+        api.get(
+          `/incomes?month=${month}&year=${year}`
+        ),
+      ]);
+      setSummary(s.data);
+      setExpenses(e.data.expenses || []);
+      setIncomes(inc.data.incomes || []);
+    } catch(err) {
+      console.error('Dashboard error:', err);
+    }
     setLoading(false);
-  }, [router]);
-
-  const handleLogout = async () => {
-    await logoutUser();
   };
 
-  const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-  const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
-  const balance = totalIncome - totalExpense;
-
-  const navItemStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 12,
-    padding: '12px 16px',
-    borderRadius: 12,
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    color: '#8A94A6',
-    textDecoration: 'none',
-  };
-
-  const navItemActiveStyle = {
-    ...navItemStyle,
-    backgroundColor: '#E8F5F1',
-    color: '#0A7B5E',
-  };
-
-  if (loading) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'DM Sans, sans-serif',
-        backgroundColor: '#F5F7F5',
-      }}>
-        <div style={{
-          width: 40,
-          height: 40,
-          border: '4px solid #E2EAE7',
-          borderTop: '4px solid #0A7B5E',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite',
-        }}></div>
-      </div>
-    );
-  }
+  const totalIncomes = incomes.reduce((sum, i) => sum + i.amount, 0);
+  const totalExpenses = summary?.totalMonth || 0;
+  const solde = totalIncomes - totalExpenses;
 
   return (
     <div style={{
-      minHeight: '100vh',
-      display: 'flex',
       fontFamily: 'DM Sans, sans-serif',
-      backgroundColor: '#F5F7F5',
     }}>
-      {/* SIDEBAR */}
+      {/* Greeting */}
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{
+          fontSize: 26, fontWeight: 800,
+          color: 'var(--text-main)', margin: 0,
+        }}>
+          {t('dashboard.greeting')}, {user?.name?.split(' ')[0]
+            || 'Utilisateur'}
+        </h1>
+        <p style={{
+          color: 'var(--text-muted)', fontSize: 14,
+          marginTop: 4,
+        }}>
+          {t('dashboard.subtitle')} — {monthName}
+        </p>
+      </div>
+
+      {/* Hero Card */}
       <div style={{
-        width: 280,
-        backgroundColor: 'white',
-        padding: 24,
-        borderRight: '1px solid #E2EAE7',
-        display: 'flex',
-        flexDirection: 'column',
+        background:
+          'linear-gradient(135deg, #0A7B5E, #0D9B76)',
+        borderRadius: 24, padding: 28,
+        marginBottom: 20, position: 'relative',
+        overflow: 'hidden',
       }}>
         <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          marginBottom: 32,
+          position: 'absolute', top: -40,
+          right: -40, width: 200, height: 200,
+          borderRadius: '50%',
+          backgroundColor: 'rgba(255,255,255,0.06)',
+        }} />
+        <p style={{
+          color: 'rgba(255,255,255,0.7)',
+          fontSize: 13, margin: '0 0 6px',
         }}>
-          <div style={{
-            width: 40, height: 40,
-            borderRadius: 12,
-            backgroundColor: '#0A7B5E',
-            display: 'flex', alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 800, color: 'white',
-            fontSize: 15,
-          }}>MF</div>
-          <span style={{
-            color: '#1A1D23', fontWeight: 700,
-            fontSize: 20,
-          }}>MoneyFlow</span>
-        </div>
-
-        <nav style={{ flex: 1 }}>
-          <div style={navItemActiveStyle}>
-            <Home size={20} />
-            <span>Tableau de bord</span>
-          </div>
-          <a href="/dashboard/transactions" style={navItemStyle}>
-            <CreditCard size={20} />
-            <span>Transactions</span>
-          </a>
-          <a href="/dashboard/budgets" style={navItemStyle}>
-            <Target size={20} />
-            <span>Budgets</span>
-          </a>
-          <a href="/dashboard/revenus" style={navItemStyle}>
-            <TrendingUp size={20} />
-            <span>Revenus</span>
-          </a>
-          <a href="/dashboard/stats" style={navItemStyle}>
-            <PieChart size={20} />
-            <span>Statistiques</span>
-          </a>
-        </nav>
-
-        <div style={{ borderTop: '1px solid #E2EAE7', paddingTop: 16 }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            marginBottom: 16,
-          }}>
-            <div style={{
-              width: 36, height: 36,
-              borderRadius: '50%',
-              backgroundColor: '#E8F5F1',
-              display: 'flex', alignItems: 'center',
-              justifyContent: 'center',
+          Solde actuel
+        </p>
+        <p style={{
+          fontSize: 42, fontWeight: 900,
+          color: 'white', margin: '0 0 20px',
+        }}>
+          {loading ? '...'
+            : fmt(solde)}
+        </p>
+        <div style={{
+          display: 'flex', gap: 24,
+        }}>
+          {[
+            { label: 'Revenus',
+              val: fmt(totalIncomes) },
+            { label: 'Dépenses',
+              val: fmt(totalExpenses) },
+            { label: 'Transactions',
+              val: summary?.totalCount || 0 },
+          ].map((s, i) => (
+            <div key={i} style={{
+              paddingRight: 16,
+              borderRight: i < 2
+                ? '1px solid rgba(255,255,255,0.2)'
+                : 'none',
             }}>
-              <User size={18} color="#0A7B5E" />
+              <p style={{
+                color: 'rgba(255,255,255,0.6)',
+                fontSize: 11, margin: '0 0 2px',
+              }}>
+                {s.label}
+              </p>
+              <p style={{
+                color: 'white', fontWeight: 700,
+                fontSize: 15, margin: 0,
+              }}>
+                {loading ? '...' : String(s.val)}
+              </p>
             </div>
-            <div>
-              <div style={{
-                fontSize: 14, fontWeight: 600,
-                color: '#1A1D23',
-              }}>{user?.name || 'Utilisateur'}</div>
-              <div style={{
-                fontSize: 12, color: '#8A94A6',
-              }}>{user?.email}</div>
-            </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              padding: '12px 16px',
-              borderRadius: 12,
-              border: 'none',
-              backgroundColor: 'transparent',
-              color: '#F04438',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              width: '100%',
-              fontFamily: 'DM Sans, sans-serif',
-            }}
-          >
-            <LogOut size={20} />
-            <span>Déconnexion</span>
-          </button>
+          ))}
         </div>
       </div>
 
-      {/* MAIN CONTENT */}
-      <div style={{ flex: 1, padding: 32 }}>
-        <div style={{ marginBottom: 32 }}>
-          <h1 style={{
-            fontSize: 32, fontWeight: 800,
-            color: '#1A1D23', marginBottom: 8,
-          }}>
-            Bonjour, {user?.name || 'Utilisateur'}
-          </h1>
-          <p style={{
-            fontSize: 16, color: '#8A94A6',
-          }}>
-            Voici un aperçu de vos finances
-          </p>
-        </div>
-
-        {/* HERO CARD */}
-        <div style={{
-          background: 'linear-gradient(135deg, #0A7B5E 0%, #16A34A 100%)',
-          borderRadius: 24,
-          padding: 32,
-          marginBottom: 32,
-          color: 'white',
-          position: 'relative',
-          overflow: 'hidden',
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: -50, right: -50,
-            width: 200, height: 200,
-            borderRadius: '50%',
-            backgroundColor: 'rgba(255,255,255,0.1)',
-          }}></div>
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <p style={{
-              fontSize: 14, opacity: 0.8,
-              marginBottom: 8,
-            }}>Total dépensé ce mois</p>
-            <h2 style={{
-              fontSize: 48, fontWeight: 800,
-              marginBottom: 16,
-            }}>{totalExpense.toLocaleString()} FCFA</h2>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-            }}>
-              <ArrowUp size={20} />
-              <span style={{ fontSize: 14 }}>
-                +12% par rapport au mois dernier
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* STATS CARDS */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-          gap: 24,
-          marginBottom: 32,
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: 16,
-            padding: 24,
-            border: '1px solid #E2EAE7',
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: 16,
+      {/* Stat Cards */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3,1fr)',
+        gap: 16, marginBottom: 20,
+      }}>
+        {[
+          {
+            icon: CreditCard, label: 'Transactions',
+            val: loading ? '...'
+              : String(summary?.totalCount || 0),
+            border: '#0A7B5E', bg: '#E8F5F1',
+            color: '#0A7B5E',
+          },
+          {
+            icon: Target, label: 'Budget utilisé',
+            val: loading ? '...'
+              : (summary?.budgetUsedPercent || 0)
+                + '%',
+            border: '#F5A623', bg: '#FEF3DC',
+            color: '#F5A623',
+          },
+          {
+            icon: Calendar, label: 'Moy. par jour',
+            val: loading ? '...'
+              : fmt(Math.round(
+                  (summary?.totalMonth || 0) /
+                  now.getDate()
+                )),
+            border: '#16A34A', bg: '#F0FDF4',
+            color: '#16A34A',
+          },
+        ].map((s, i) => {
+          const Icon = s.icon;
+          return (
+            <div key={i} style={{
+              backgroundColor: 'var(--bg-card)',
+              borderRadius: 16, padding: 20,
+              borderLeft: `4px solid ${s.border}`,
+              boxShadow:
+                '0 1px 8px rgba(0,0,0,0.05)',
             }}>
               <div style={{
-                width: 48, height: 48,
-                borderRadius: 12,
-                backgroundColor: '#E8F5F1',
-                display: 'flex', alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                <TrendingUp size={24} color="#0A7B5E" />
-              </div>
-              <span style={{
-                fontSize: 12, color: '#16A34A',
-                fontWeight: 600,
-              }}>+8.2%</span>
-            </div>
-            <h3 style={{
-              fontSize: 24, fontWeight: 800,
-              color: '#1A1D23', marginBottom: 4,
-            }}>{totalIncome.toLocaleString()}</h3>
-            <p style={{ fontSize: 14, color: '#8A94A6' }}>
-              Revenus totaux
-            </p>
-          </div>
-
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: 16,
-            padding: 24,
-            border: '1px solid #E2EAE7',
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: 16,
-            }}>
-              <div style={{
-                width: 48, height: 48,
-                borderRadius: 12,
-                backgroundColor: '#FEF2F2',
-                display: 'flex', alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                <ArrowDown size={24} color="#F04438" />
-              </div>
-              <span style={{
-                fontSize: 12, color: '#F04438',
-                fontWeight: 600,
-              }}>+12.5%</span>
-            </div>
-            <h3 style={{
-              fontSize: 24, fontWeight: 800,
-              color: '#1A1D23', marginBottom: 4,
-            }}>{totalExpense.toLocaleString()}</h3>
-            <p style={{ fontSize: 14, color: '#8A94A6' }}>
-              Dépenses totales
-            </p>
-          </div>
-
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: 16,
-            padding: 24,
-            border: '1px solid #E2EAE7',
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: 16,
-            }}>
-              <div style={{
-                width: 48, height: 48,
-                borderRadius: 12,
-                backgroundColor: '#F0F9FF',
-                display: 'flex', alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                <Wallet size={24} color="#0A7B5E" />
-              </div>
-              <span style={{
-                fontSize: 12, color: '#16A34A',
-                fontWeight: 600,
-              }}>Solde</span>
-            </div>
-            <h3 style={{
-              fontSize: 24, fontWeight: 800,
-              color: '#1A1D23', marginBottom: 4,
-            }}>{balance.toLocaleString()}</h3>
-            <p style={{ fontSize: 14, color: '#8A94A6' }}>
-              Solde actuel
-            </p>
-          </div>
-        </div>
-
-        {/* RECENT TRANSACTIONS */}
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: 16,
-          padding: 24,
-          border: '1px solid #E2EAE7',
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: 24,
-          }}>
-            <h3 style={{
-              fontSize: 18, fontWeight: 700,
-              color: '#1A1D23',
-            }}>Transactions récentes</h3>
-            <a href="/dashboard/transactions" style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              color: '#0A7B5E',
-              textDecoration: 'none',
-              fontSize: 14,
-              fontWeight: 500,
-            }}>
-              Voir tout
-              <ArrowRight size={16} />
-            </a>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {transactions.slice(0, 5).map(transaction => (
-              <div key={transaction.id} style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '16px 0',
-                borderBottom: '1px solid #F5F7F5',
+                gap: 10, marginBottom: 12,
               }}>
                 <div style={{
+                  width: 36, height: 36,
+                  borderRadius: 10,
+                  backgroundColor: s.bg,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 16,
+                  justifyContent: 'center',
                 }}>
-                  <div style={{
-                    width: 40, height: 40,
-                    borderRadius: 12,
-                    backgroundColor: transaction.type === 'income' ? '#E8F5F1' : '#FEF2F2',
-                    display: 'flex', alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                    {transaction.type === 'income' ? 
-                      <ArrowDown size={20} color="#16A34A" /> :
-                      <ArrowUp size={20} color="#F04438" />
-                    }
-                  </div>
-                  <div>
-                    <div style={{
-                      fontSize: 14, fontWeight: 600,
-                      color: '#1A1D23', marginBottom: 2,
-                    }}>{transaction.label}</div>
-                    <div style={{
-                      fontSize: 12, color: '#8A94A6',
-                    }}>{transaction.category} • {transaction.date}</div>
-                  </div>
+                  <Icon size={18}
+                    color={s.color} />
                 </div>
-                <div style={{
-                  fontSize: 16, fontWeight: 700,
-                  color: transaction.type === 'income' ? '#16A34A' : '#F04438',
+                <span style={{
+                  fontSize: 13, color: 'var(--text-muted)',
+                  fontWeight: 500,
                 }}>
-                  {transaction.type === 'income' ? '+' : '-'}{transaction.amount.toLocaleString()} FCFA
-                </div>
+                  {s.label}
+                </span>
               </div>
-            ))}
-          </div>
+              <p style={{
+                fontSize: 26, fontWeight: 800,
+                color: 'var(--text-main)', margin: 0,
+              }}>
+                {s.val}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Transactions récentes */}
+      <div style={{
+        backgroundColor: 'var(--bg-card)',
+        borderRadius: 16, overflow: 'hidden',
+        boxShadow: '0 1px 8px rgba(0,0,0,0.05)',
+      }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '16px 20px',
+          borderBottom: '1px solid var(--border)',
+        }}>
+          <h3 style={{
+            fontSize: 16, fontWeight: 700,
+            color: 'var(--text-main)', margin: 0,
+          }}>
+            {t('dashboard.recent')}
+          </h3>
+          <button
+            onClick={() => router.push(
+              '/dashboard/transactions')}
+            style={{
+              background: 'none', border: 'none',
+              color: '#0A7B5E', fontSize: 13,
+              fontWeight: 600, cursor: 'pointer',
+              fontFamily: 'DM Sans, sans-serif',
+            }}>
+            {t('dashboard.viewAll')} →
+          </button>
         </div>
+
+        {loading ? (
+          <div style={{
+            padding: 40, textAlign: 'center',
+            color: 'var(--text-muted)',
+          }}>
+            Chargement...
+          </div>
+        ) : expenses.length === 0 ? (
+          <div style={{
+            padding: 48, textAlign: 'center',
+          }}>
+            <div style={{
+              width: 56, height: 56,
+              borderRadius: '50%',
+              backgroundColor: '#E8F5F1',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 14px',
+            }}>
+              <TrendingDown size={24}
+                color="#0A7B5E" />
+            </div>
+            <p style={{
+              color: 'var(--text-muted)', fontSize: 14,
+              marginBottom: 14,
+            }}>
+              {t('dashboard.noExpense')}
+            </p>
+            <button
+              onClick={() => router.push(
+                '/dashboard/transactions')}
+              style={{
+                backgroundColor: '#0A7B5E',
+                color: 'white', border: 'none',
+                borderRadius: 50,
+                padding: '10px 20px', fontSize: 13,
+                fontWeight: 600, cursor: 'pointer',
+                fontFamily: 'DM Sans, sans-serif',
+              }}>
+              Ajouter une dépense
+            </button>
+          </div>
+        ) : (
+          expenses.map((exp, i) => {
+            const catInfo = getCategoryIcon(
+              exp.category
+            );
+            const CatIcon = catInfo.icon;
+            return (
+              <div key={exp.id || exp._id || i}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center', gap: 14,
+                  padding: '14px 20px',
+                  borderBottom:
+                    i < expenses.length - 1
+                      ? '1px solid var(--border)'
+                      : 'none',
+                }}>
+                <div style={{
+                  width: 42, height: 42,
+                  borderRadius: 12,
+                  backgroundColor: catInfo.bg,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  <CatIcon size={18}
+                    color={catInfo.color} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p style={{
+                    fontWeight: 600, fontSize: 14,
+                    color: 'var(--text-main)', margin: 0,
+                  }}>
+                    {exp.description
+                      || exp.category}
+                  </p>
+                  <p style={{
+                    color: 'var(--text-muted)', fontSize: 12,
+                    margin: '2px 0 0',
+                  }}>
+                    {new Date(exp.date)
+                      .toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                  </p>
+                </div>
+                <p style={{
+                  fontWeight: 700,
+                  color: '#F04438', fontSize: 14,
+                  margin: 0,
+                }}>
+                  -{fmt(exp.amount)}
+                </p>
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );

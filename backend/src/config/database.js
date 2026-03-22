@@ -2,16 +2,29 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/moneyflow';
-    
-    const conn = await mongoose.connect(mongoURI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    console.log('Connexion à MongoDB...');
+    console.log('URI:', process.env.MONGODB_URI
+      ?.substring(0, 50) + '...');
 
-    console.log(`✅ MongoDB connecté: ${conn.connection.host}`);
+    const conn = await mongoose.connect(
+      process.env.MONGODB_URI,
+      {
+        serverSelectionTimeoutMS: 10000,
+        socketTimeoutMS: 45000,
+      }
+    );
+
+    console.log(
+      '✅ MongoDB Atlas connecté:',
+      conn.connection.host
+    );
   } catch (error) {
-    console.error('❌ Erreur de connexion MongoDB:', error.message);
+    console.error(
+      '❌ MongoDB erreur:', error.message
+    );
+    console.error(
+      'Vérifiez votre MONGODB_URI dans .env'
+    );
     process.exit(1);
   }
 };

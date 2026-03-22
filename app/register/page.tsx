@@ -6,6 +6,7 @@ import { Eye, EyeOff } from 'lucide-react';
 
 export default function RegisterPage() {
   const router = useRouter();
+  // const { register } = useUser();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -16,32 +17,31 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
-    if (!name || !phone || !email || !password || !confirmPassword) {
+    if (!name || !email || !password) {
       setError('Remplissez tous les champs');
       return;
     }
     if (password !== confirmPassword) {
-      setError('Les mots de passe ne correspondent pas');
+      setError('Mots de passe différents');
+      return;
+    }
+    if (password.length < 6) {
+      setError('Mot de passe trop court');
       return;
     }
     setLoading(true);
     setError('');
     try {
-      await registerUser(name.trim(), email.trim(), password, phone.trim(), operator);
-      router.push('/dashboard');
+      await registerUser(
+        name.trim(), email.trim(), password,
+        phone?.trim(), operator
+      );
+      window.location.href = '/onboarding';
     } catch (err: any) {
-      const code = err?.code || '';
-      if (code === 'auth/email-already-in-use') {
-        setError('Cet email est déjà utilisé');
-      } else if (code === 'auth/weak-password') {
-        setError('Le mot de passe est trop faible');
-      } else {
-        setError('Erreur lors de la création du compte');
-      }
-    } finally {
       setLoading(false);
+      setError(err.message || 'Erreur inscription');
     }
   };
 
@@ -81,7 +81,7 @@ export default function RegisterPage() {
         flexDirection: 'column',
         justifyContent: 'space-between',
       }}
-      className="hidden lg:flex">
+        className="hidden lg:flex">
         <div style={{
           display: 'flex',
           alignItems: 'center', gap: 12,
@@ -120,15 +120,15 @@ export default function RegisterPage() {
             display: 'flex', gap: 10,
             marginTop: 24, flexWrap: 'wrap',
           }}>
-            {['Orange Money','Wave','Moov Money']
+            {['Orange Money', 'Wave', 'Moov Money']
               .map(op => (
-              <span key={op} style={{
-                backgroundColor: 'rgba(255,255,255,0.15)',
-                color: 'rgba(255,255,255,0.9)',
-                padding: '6px 14px', borderRadius: 50,
-                fontSize: 13,
-              }}>{op}</span>
-            ))}
+                <span key={op} style={{
+                  backgroundColor: 'rgba(255,255,255,0.15)',
+                  color: 'rgba(255,255,255,0.9)',
+                  padding: '6px 14px', borderRadius: 50,
+                  fontSize: 13,
+                }}>{op}</span>
+              ))}
           </div>
         </div>
         <p style={{

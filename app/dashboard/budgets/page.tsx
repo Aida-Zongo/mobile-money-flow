@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback }
   from 'react';
 import api from '@/lib/api';
+import { useLanguage } from '@/lib/LanguageContext';
 import {
   Plus, X, Trash2, Edit2, Target,
   Bell, AlertTriangle, ShoppingBag,
@@ -30,7 +31,7 @@ const CATS = [
     bg:'#FEFCE8' },
   { id:'autre', label:'Autre',
     Icon:Package, color:'#6B7280',
-    bg:'#F5F7F5' },
+    bg:'var(--bg)' },
 ];
 
 const MONTHS = ['Janvier','Février','Mars',
@@ -42,6 +43,7 @@ const fmt = (n:number) =>
   +' FCFA';
 
 export default function BudgetsPage() {
+  const { t } = useLanguage();
   const [budgets, setBudgets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(false);
@@ -120,14 +122,14 @@ export default function BudgetsPage() {
     width:'100%', padding:'10px 14px',
     border:'1.5px solid #E2EAE7', borderRadius:10,
     fontSize:14, outline:'none',
-    backgroundColor:'#FAFBFC', color:'#1A1D23',
+    backgroundColor:'var(--bg-input)', color:'var(--text-main)',
     fontFamily:'DM Sans, sans-serif',
     boxSizing:'border-box' as const,
   };
 
   return (
     <div style={{
-      padding:24, backgroundColor:'#F5F7F5',
+      padding:24, backgroundColor:'var(--bg)',
       minHeight:'100vh',
       fontFamily:'DM Sans, sans-serif'
     }}>
@@ -136,7 +138,7 @@ export default function BudgetsPage() {
           position:'fixed', top:16, right:16,
           zIndex:9999, padding:'12px 20px',
           borderRadius:16, fontSize:14,
-          fontWeight:500, color:'white',
+          fontWeight:500, color:'var(--bg-card)',
           backgroundColor:toast.err
             ?'#F04438':'#00C48C',
           boxShadow:'0 4px 20px rgba(0,0,0,0.15)'
@@ -153,10 +155,10 @@ export default function BudgetsPage() {
         <div>
           <h1 style={{
             fontSize:24, fontWeight:800,
-            color:'#1A1D23', margin:0
-          }}>Mes Budgets</h1>
+            color:'var(--text-main)', margin:0
+          }}>{t('page.budgets')}</h1>
           <p style={{
-            color:'#8A94A6', fontSize:14,
+            color:'var(--text-muted)', fontSize:14,
             marginTop:4
           }}>
             Gérez vos limites par catégorie
@@ -165,7 +167,7 @@ export default function BudgetsPage() {
         <button onClick={openAdd} style={{
           display:'flex', alignItems:'center',
           gap:6, backgroundColor:'#0A7B5E',
-          color:'white', border:'none',
+          color:'var(--bg-card)', border:'none',
           borderRadius:50, padding:'10px 20px',
           fontSize:14, fontWeight:600,
           cursor:'pointer',
@@ -180,11 +182,11 @@ export default function BudgetsPage() {
       {loading ? (
         <div style={{
           textAlign:'center', padding:40,
-          color:'#8A94A6'
+          color:'var(--text-muted)'
         }}>Chargement...</div>
       ) : budgets.length===0 ? (
         <div style={{
-          backgroundColor:'white', borderRadius:16,
+          backgroundColor:'var(--bg-card)', borderRadius:16,
           padding:60, textAlign:'center',
           boxShadow:'0 1px 8px rgba(0,0,0,0.05)'
         }}>
@@ -199,11 +201,11 @@ export default function BudgetsPage() {
             <Target size={28} color="#0A7B5E" />
           </div>
           <h3 style={{
-            color:'#1A1D23', fontWeight:700,
+            color:'var(--text-main)', fontWeight:700,
             marginBottom:8
-          }}>Aucun budget</h3>
+          }}>{t('budget.none')}</h3>
           <p style={{
-            color:'#8A94A6', fontSize:14,
+            color:'var(--text-muted)', fontSize:14,
             marginBottom:20
           }}>
             Créez des budgets pour maîtriser
@@ -211,7 +213,7 @@ export default function BudgetsPage() {
           </p>
           <button onClick={openAdd} style={{
             backgroundColor:'#0A7B5E',
-            color:'white', border:'none',
+            color:'var(--bg-card)', border:'none',
             borderRadius:50, padding:'10px 20px',
             cursor:'pointer', fontSize:14,
             fontWeight:600,
@@ -237,7 +239,7 @@ export default function BudgetsPage() {
             const id = b.id || b._id;
             return (
               <div key={id} style={{
-                backgroundColor:'white',
+                backgroundColor:'var(--bg-card)',
                 borderRadius:20, padding:20,
                 boxShadow:
                   '0 1px 8px rgba(0,0,0,0.05)'
@@ -260,11 +262,11 @@ export default function BudgetsPage() {
                   <div style={{flex:1}}>
                     <p style={{
                       fontWeight:700,
-                      color:'#1A1D23',
+                      color:'var(--text-main)',
                       margin:0, fontSize:15
                     }}>{cat.label}</p>
                     <p style={{
-                      color:'#8A94A6',
+                      color:'var(--text-muted)',
                       fontSize:12,
                       margin:'2px 0 0'
                     }}>
@@ -304,7 +306,7 @@ export default function BudgetsPage() {
 
                 <div style={{
                   width:'100%', height:8,
-                  backgroundColor:'#F0F2F8',
+                  backgroundColor:'var(--bg-sub)',
                   borderRadius:50, marginBottom:14
                 }}>
                   <div style={{
@@ -322,9 +324,9 @@ export default function BudgetsPage() {
                 }}>
                   <div>
                     <p style={{
-                      color:'#8A94A6', fontSize:11,
+                      color:'var(--text-muted)', fontSize:11,
                       margin:0
-                    }}>Dépensé</p>
+                    }}>{t('budget.spent')}</p>
                     <p style={{
                       fontWeight:700,
                       color:'#F04438', fontSize:13,
@@ -335,9 +337,9 @@ export default function BudgetsPage() {
                   </div>
                   <div style={{textAlign:'center'}}>
                     <p style={{
-                      color:'#8A94A6', fontSize:11,
+                      color:'var(--text-muted)', fontSize:11,
                       margin:0
-                    }}>Utilisé</p>
+                    }}>{t('budget.used')}</p>
                     <p style={{
                       fontWeight:700,
                       color:barColor, fontSize:13,
@@ -348,12 +350,12 @@ export default function BudgetsPage() {
                   </div>
                   <div style={{textAlign:'right'}}>
                     <p style={{
-                      color:'#8A94A6', fontSize:11,
+                      color:'var(--text-muted)', fontSize:11,
                       margin:0
-                    }}>Limite</p>
+                    }}>{t('budget.limit')}</p>
                     <p style={{
                       fontWeight:700,
-                      color:'#1A1D23', fontSize:13,
+                      color:'var(--text-main)', fontSize:13,
                       margin:'2px 0 0'
                     }}>
                       {fmt(b.limitAmount)}
@@ -421,7 +423,7 @@ export default function BudgetsPage() {
           justifyContent:'center', padding:16
         }}>
           <div style={{
-            backgroundColor:'white',
+            backgroundColor:'var(--bg-card)',
             borderRadius:24, padding:28,
             maxWidth:440, width:'100%'
           }}>
@@ -432,7 +434,7 @@ export default function BudgetsPage() {
             }}>
               <h2 style={{
                 fontSize:18, fontWeight:800,
-                color:'#1A1D23', margin:0
+                color:'var(--text-main)', margin:0
               }}>
                 {editing
                   ?'Modifier le budget'
@@ -441,7 +443,7 @@ export default function BudgetsPage() {
               <button onClick={()=>setModal(false)} style={{
                 width:34, height:34,
                 borderRadius:10, border:'none',
-                backgroundColor:'#F5F7F5',
+                backgroundColor:'var(--bg)',
                 cursor:'pointer',
                 display:'flex', alignItems:'center',
                 justifyContent:'center'
@@ -453,8 +455,8 @@ export default function BudgetsPage() {
             <div style={{marginBottom:16}}>
               <label style={{
                 display:'block', fontSize:13,
-                color:'#8A94A6', marginBottom:10
-              }}>Catégorie</label>
+                color:'var(--text-muted)', marginBottom:10
+              }}>{t('tx.category')}</label>
               <div style={{
                 display:'grid',
                 gridTemplateColumns:'repeat(4,1fr)',
@@ -479,7 +481,7 @@ export default function BudgetsPage() {
                           ?'2px solid #0A7B5E'
                           :'2px solid transparent',
                         backgroundColor: sel
-                          ?'#E8F5F1':'#F5F7F5'
+                          ?'#E8F5F1':'var(--bg)'
                       }}>
                       <div style={{
                         display:'flex',
@@ -507,7 +509,7 @@ export default function BudgetsPage() {
             <div style={{marginBottom:14}}>
               <label style={{
                 display:'block', fontSize:13,
-                color:'#8A94A6', marginBottom:6
+                color:'var(--text-muted)', marginBottom:6
               }}>Montant limite (FCFA)</label>
               <input type='number'
                 value={form.limitAmount}
@@ -526,7 +528,7 @@ export default function BudgetsPage() {
               <div>
                 <label style={{
                   display:'block', fontSize:13,
-                  color:'#8A94A6', marginBottom:6
+                  color:'var(--text-muted)', marginBottom:6
                 }}>Mois</label>
                 <select value={form.month}
                   onChange={e=>setForm({
@@ -543,7 +545,7 @@ export default function BudgetsPage() {
               <div>
                 <label style={{
                   display:'block', fontSize:13,
-                  color:'#8A94A6', marginBottom:6
+                  color:'var(--text-muted)', marginBottom:6
                 }}>Année</label>
                 <input type='number'
                   value={form.year}
@@ -559,7 +561,7 @@ export default function BudgetsPage() {
                 width:'100%', padding:'13px',
                 backgroundColor:saving
                   ?'#7BBDAD':'#0A7B5E',
-                color:'white', border:'none',
+                color:'var(--bg-card)', border:'none',
                 borderRadius:50, fontSize:15,
                 fontWeight:600,
                 cursor:saving

@@ -1,493 +1,361 @@
-const { auth, db } = require('../config/firebase');
-const { validationResult } = require('express-validator');
+const User = require('../models/User');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
-/**
- * @swagger
- * components:
- *   schemas:
- *     User:
- *       type: object
- *       properties:
- *         uid:
- *           type: string
- *         name:
- *           type: string
- *         email:
- *           type: string
- *         role:
- *           type: string
- *           enum: [user, admin]
- *         operator:
- *           type: string
- *           enum: [orange_money, moov_money, wave, other]
- */
+const JWT_SECRET = process.env.JWT_SECRET ||
+  'moneyflow_2026';
 
-/**
- * @swagger
- * /auth/register:
- *   post:
- *     tags: [Auth]
- *     summary: Inscrire un nouvel utilisateur
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - name
- *               - email
- *               - password
- *             properties:
- *               name:
- *                 type: string
- *               email:
- *                 type: string
- *                 format: email
- *               password:
- *                 type: string
- *                 minLength: 6
- *               phone:
- *                 type: string
- *               operator:
- *                 type: string
- *                 enum: [orange_money, moov_money, wave, other]
- *     responses:
- *       201:
- *         description: Utilisateur créé avec succès
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 uid:
- *                   type: string
- *                 user:
- *                   $ref: '#/components/schemas/User'
- *       400:
- *         description: Erreur de validation ou email déjà existant
- *       500:
- *         description: Erreur serveur
- */
-const register = async (req, res, next) => {
+const register = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
+    console.log('=== REGISTER ===');
+    console.log('Body:', req.body);
+
+    const { name, email, password,
+      phone, operator } = req.body;
+
+    if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Erreur de validation',
-        errors: errors.array(),
+        message: 'Nom, email, mot de passe requis'
       });
     }
 
-    const { uid, name, email, phone, operator } = req.body;
+    // Vérifie si email existe
+    const existing =
+      await User.findOne({ email });
+    console.log('Existing user:', existing);
 
-    // L'utilisateur est déjà créé dans Firebase Auth côté client
-    // On crée juste le document dans Firestore
-    const userDoc = {
-      uid,
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email déjà utilisé'
+      });
+    }
+
+    // Hash password
+    const hashed =
+      await bcrypt.hash(password, 12);
+
+    // Crée user
+    const user = await User.create({
       name,
       email,
+      password: hashed,
       phone: phone || '',
-      operator: operator || 'orange_money',
-      location: 'Non spécifiée',
-      role: 'user', // Rôle par défaut
-      isActive: true,
-      createdAt: new Date(),
-      lastLogin: null
-    };
+      operator: operator || 'other',
+      role: 'user',
+    });
 
-    await db.collection('users').doc(uid).set(userDoc);
+    console.log('User créé:', user._id);
 
-    // Générer un token Firebase custom avec rôle
-    const customToken = await auth.createCustomToken(uid, { role: 'user' });
+    const token = jwt.sign(
+      {
+        uid: user._id.toString(),
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
-      message: 'Utilisateur créé avec succès',
-      token: customToken,
+      token,
       user: {
-        uid,
-        name: userDoc.name,
-        email: userDoc.email,
-        phone: userDoc.phone,
-        location: userDoc.location,
-        role: userDoc.role,
-        isActive: userDoc.isActive
+        id: user._id.toString(),
+        uid: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        operator: user.operator,
+        role: user.role,
       }
     });
-  } catch (error) {
-    console.error('Erreur register:', error);
-    
-    if (error.code === 'auth/email-already-exists') {
-      return res.status(400).json({
-        success: false,
-        message: 'Cet email est déjà utilisé'
-      });
-    }
 
-    res.status(500).json({
+  } catch (error) {
+    console.error('Register error:', error);
+    return res.status(500).json({
       success: false,
-      message: 'Erreur serveur lors de l\'inscription'
+      message: error.message
     });
   }
 };
 
-/**
- * @swagger
- * /auth/login:
- *   post:
- *     tags: [Auth]
- *     summary: Vérifier l'utilisateur après auth Firebase
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - uid
- *             properties:
- *               uid:
- *                 type: string
- *     responses:
- *       200:
- *         description: Utilisateur trouvé
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 user:
- *                   $ref: '#/components/schemas/User'
- *       404:
- *         description: Utilisateur non trouvé
- *       500:
- *         description: Erreur serveur
- */
-const login = async (req, res, next) => {
+const login = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
+    console.log('=== LOGIN ===');
+    console.log('Body:', req.body);
+
+    const { email, password } = req.body;
+
+    if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Erreur de validation',
-        errors: errors.array(),
+        message: 'Email et mot de passe requis'
       });
     }
 
-    const { uid } = req.body;
+    const user = await User.findOne({ email })
+      .select('+password');
 
-    // Validation
-    if (!uid) {
-      return res.status(400).json({
-        success: false,
-        message: 'UID requis'
-      });
-    }
+    console.log('User found:', user?._id);
 
-    // L'utilisateur est déjà authentifié côté client avec Firebase
-    // On vérifie juste qu'il existe dans Firestore
-    const userDoc = await db.collection('users').doc(uid).get();
-    
-    if (!userDoc.exists) {
+    if (!user) {
       return res.status(401).json({
+        success: false,
+        message: 'Email ou mot de passe incorrect'
+      });
+    }
+
+    const isValid = await bcrypt.compare(
+      password, user.password
+    );
+
+    console.log('Password valid:', isValid);
+
+    if (!isValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Email ou mot de passe incorrect'
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        uid: user._id.toString(),
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    return res.json({
+      success: true,
+      token,
+      user: {
+        id: user._id.toString(),
+        uid: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        phone: user.phone || '',
+        operator: user.operator || '',
+        role: user.role,
+      }
+    });
+
+  } catch (error) {
+    console.error('Login error:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(
+      req.user.uid
+    );
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Utilisateur non trouvé'
+      });
+    }
+    return res.json({
+      success: true,
+      user: {
+        id: user._id.toString(),
+        uid: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        phone: user.phone || '',
+        operator: user.operator || '',
+        role: user.role,
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+const getNotifications = async (req, res) => {
+  try {
+    const Notification =
+      require('../models/Notification');
+    const notifications = await Notification
+      .find({ userId: req.user.uid })
+      .sort({ createdAt: -1 })
+      .limit(20);
+    return res.json({
+      success: true,
+      notifications
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+const markNotificationsRead =
+  async (req, res) => {
+  try {
+    const Notification =
+      require('../models/Notification');
+    await Notification.updateMany(
+      { userId: req.user.uid, isRead: false },
+      { isRead: true }
+    );
+    return res.json({
+      success: true,
+      message: 'Notifications lues'
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+const updateProfile = async (req, res) => {
+  try {
+    const { name, phone, operator } = req.body;
+    const user = await User.findById(req.user.uid);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Utilisateur non trouvé' });
+    }
+    if (name) user.name = name;
+    if (phone !== undefined) user.phone = phone;
+    if (operator) user.operator = operator;
+    await user.save();
+    return res.json({ success: true, message: 'Profil mis à jour' });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const changePassword = async (req, res) => {
+  try {
+    console.log('=== CHANGE PASSWORD ===');
+    console.log('user uid:', req.user?.uid);
+    console.log('body:', {
+      hasCurrentPwd: !!req.body.currentPassword,
+      hasNewPwd: !!req.body.newPassword,
+    });
+
+    const { currentPassword, newPassword } =
+      req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Mot de passe actuel et nouveau requis'
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Nouveau mot de passe min 6 caractères'
+      });
+    }
+
+    // Récupère user avec mot de passe
+    let user = await User.findById(
+      req.user.uid
+    ).select('+password');
+
+    // Si pas trouvé par _id, cherche par email
+    if (!user && req.user.email) {
+      user = await User.findOne(
+        { email: req.user.email }
+      ).select('+password');
+    }
+
+    console.log('User found:', !!user);
+    console.log('User id:', user?._id);
+
+    if (!user) {
+      return res.status(404).json({
         success: false,
         message: 'Utilisateur non trouvé'
       });
     }
 
-    const userData = userDoc.data();
-
-    if (!userData.isActive) {
-      return res.status(401).json({
-        success: false,
-        message: 'Compte désactivé'
-      });
-    }
-
-    // Générer un token Firebase custom
-    const customToken = await auth.createCustomToken(uid, { 
-      role: userData.role || 'user' 
-    });
-
-    // Mettre à jour la dernière connexion
-    await db.collection('users').doc(uid).update({
-      lastLogin: new Date()
-    });
-
-    res.json({
-      success: true,
-      message: 'Connexion réussie',
-      token: customToken,
-      user: {
-        uid: userData.uid,
-        name: userData.name,
-        email: userData.email,
-        phone: userData.phone,
-        location: userData.location,
-        role: userData.role,
-        isActive: userData.isActive
-      }
-    });
-  } catch (error) {
-    console.error('Erreur login:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Erreur serveur lors de la connexion'
-    });
-  }
-};
-
-/**
- * @swagger
- * /auth/me:
- *   get:
- *     tags: [Auth]
- *     summary: Obtenir les informations de l'utilisateur connecté
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Informations utilisateur
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 user:
- *                   $ref: '#/components/schemas/User'
- *       401:
- *         description: Non authentifié
- *       500:
- *         description: Erreur serveur
- */
-const getMe = async (req, res, next) => {
-  try {
-    // L'utilisateur est déjà disponible via le middleware verifyToken
-    const userDoc = await db.collection('users').doc(req.user.uid).get();
-    
-    if (!userDoc.exists) {
-      return res.status(404).json({
-        success: false,
-        message: 'Utilisateur non trouvé',
-      });
-    }
-
-    const userData = userDoc.data();
-
-    res.json({
-      success: true,
-      user: {
-        uid: userData.uid,
-        name: userData.name,
-        email: userData.email,
-        phone: userData.phone,
-        location: userData.location,
-        role: userData.role,
-        isActive: userData.isActive,
-        createdAt: userData.createdAt,
-        lastLogin: userData.lastLogin
-      }
-    });
-  } catch (error) {
-    console.error('Erreur getMe:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Erreur serveur'
-    });
-  }
-};
-
-/**
- * @swagger
- * /auth/me:
- *   put:
- *     tags: [Auth]
- *     summary: Mettre à jour les informations de l'utilisateur connecté
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               phone:
- *                 type: string
- *               operator:
- *                 type: string
- *                 enum: [orange_money, moov_money, wave, other]
- *     responses:
- *       200:
- *         description: Utilisateur mis à jour
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 user:
- *                   $ref: '#/components/schemas/User'
- *       401:
- *         description: Non authentifié
- *       500:
- *         description: Erreur serveur
- */
-const updateMe = async (req, res, next) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
+    if (!user.password) {
       return res.status(400).json({
         success: false,
-        message: 'Erreur de validation',
-        errors: errors.array(),
+        message: 'Aucun mot de passe défini'
       });
     }
 
-    const { name, phone, operator } = req.body;
-    
-    const updateData = {};
-    if (name) updateData.name = name;
-    if (phone !== undefined) updateData.phone = phone;
-    if (operator) updateData.operator = operator;
+    // Vérifie mot de passe actuel
+    const isValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
 
-    await db.collection('users').doc(req.user.uid).update(updateData);
+    console.log('Password valid:', isValid);
 
-    const updatedUserDoc = await db.collection('users').doc(req.user.uid).get();
-
-    res.json({
-      success: true,
-      user: updatedUserDoc.data(),
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * @swagger
- * /auth/notifications:
- *   get:
- *     tags: [Auth]
- *     summary: Obtenir les notifications de l'utilisateur
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Liste des notifications
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 notifications:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: string
- *                       message:
- *                         type: string
- *                       type:
- *                         type: string
- *                         enum: [warning, danger, info]
- *                       isRead:
- *                         type: boolean
- *                       createdAt:
- *                         type: string
- *                 unreadCount:
- *                   type: number
- *       401:
- *         description: Non authentifié
- *       500:
- *         description: Erreur serveur
- */
-const getNotifications = async (req, res, next) => {
-  try {
-    const notificationsSnapshot = await db.collection('notifications')
-      .where('userId', '==', req.user.uid)
-      .orderBy('createdAt', 'desc')
-      .get();
-
-    const notifications = [];
-    notificationsSnapshot.forEach(doc => {
-      notifications.push({
-        id: doc.id,
-        ...doc.data(),
+    if (!isValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Mot de passe actuel incorrect'
       });
-    });
+    }
 
-    const unreadCount = notifications.filter(n => !n.isRead).length;
+    // Hash et sauvegarde le nouveau
+    const hashed = await bcrypt.hash(
+      newPassword, 12
+    );
+    user.password = hashed;
+    await user.save();
 
-    res.json({
+    console.log('Password updated successfully');
+
+    return res.json({
       success: true,
-      notifications,
-      unreadCount,
+      message: 'Mot de passe modifié avec succès'
     });
+
   } catch (error) {
-    next(error);
+    console.error('changePassword error:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
 };
 
-/**
- * @swagger
- * /auth/notifications/read:
- *   put:
- *     tags: [Auth]
- *     summary: Marquer toutes les notifications comme lues
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Notifications marquées comme lues
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *       401:
- *         description: Non authentifié
- *       500:
- *         description: Erreur serveur
- */
-const markNotificationsRead = async (req, res, next) => {
+const deleteAccount = async (req, res) => {
   try {
-    const notificationsSnapshot = await db.collection('notifications')
-      .where('userId', '==', req.user.uid)
-      .where('isRead', '==', false)
-      .get();
+    const uid = req.user.uid;
+    const Expense = require('../models/Expense');
+    const Budget = require('../models/Budget');
+    const Income = require('../models/Income');
+    const Notification = require('../models/Notification');
 
-    const batch = db.batch();
-    notificationsSnapshot.forEach(doc => {
-      batch.update(doc.ref, { isRead: true });
-    });
+    await Promise.all([
+      Expense.deleteMany({ userId: uid }),
+      Budget.deleteMany({ userId: uid }),
+      Income.deleteMany({ userId: uid }),
+      Notification.deleteMany({ userId: uid }),
+      User.findByIdAndDelete(uid),
+    ]);
 
-    await batch.commit();
-
-    res.json({
-      success: true,
-      message: 'Toutes les notifications ont été marquées comme lues',
-    });
+    return res.json({ success: true, message: 'Compte supprimé' });
   } catch (error) {
-    next(error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -495,7 +363,9 @@ module.exports = {
   register,
   login,
   getMe,
-  updateMe,
   getNotifications,
   markNotificationsRead,
+  changePassword,
+  deleteAccount,
+  updateProfile,
 };

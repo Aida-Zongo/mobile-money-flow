@@ -1,464 +1,151 @@
-const { auth, db } = require('../config/firebase');
-const { validationResult } = require('express-validator');
+const Budget = require('../models/Budget');
+const Expense = require('../models/Expense');
 
-/**
- * @swagger
- * components:
- *   schemas:
- *     Budget:
- *       type: object
- *       properties:
- *         id:
- *           type: string
- *         userId:
- *           type: string
- *         category:
- *           type: string
- *           enum: [alimentation, transport, sante, shopping, logement, telecom, education, autre]
- *         limitAmount:
- *           type: number
- *         month:
- *           type: integer
- *           minimum: 1
- *           maximum: 12
- *         year:
- *           type: integer
- *         createdAt:
- *           type: string
- *           format: date-time
- */
-
-/**
- * @swagger
- * /budgets:
- *   get:
- *     tags: [Budgets]
- *     summary: Obtenir tous les budgets de l'utilisateur
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: month
- *         schema:
- *           type: integer
- *         description: Mois (1-12)
- *       - in: query
- *         name: year
- *         schema:
- *           type: integer
- *         description: Année
- *     responses:
- *       200:
- *         description: Liste des budgets
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 budgets:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Budget'
- *       401:
- *         description: Non authentifié
- *       500:
- *         description: Erreur serveur
- */
-const getAllBudgets = async (req, res, next) => {
+const getBudgetsWithStatus = async (req, res) => {
   try {
-    const { month, year } = req.query;
-    let query = db.collection('budgets').where('userId', '==', req.user.uid);
+    const { uid } = req.user;
+    const budgets = await Budget.find(
+      { userId: uid }
+    );
 
-    if (month) query = query.where('month', '==', parseInt(month));
-    if (year) query = query.where('year', '==', parseInt(year));
+    const result = await Promise.all(
+      budgets.map(async (b) => {
+        const agg = await Expense.aggregate([
+          {
+            $match: {
+              userId: uid,
+              category: b.category,
+              date: {
+                $gte: new Date(
+                  b.year, b.month - 1, 1),
+                $lte: new Date(
+                  b.year, b.month, 0, 23, 59, 59)
+              }
+            }
+          },
+          {
+            $group: {
+              _id: null,
+              total: { $sum: '$amount' }
+            }
+          }
+        ]);
 
-    const budgetsSnapshot = await query.orderBy('year', 'desc').orderBy('month', 'desc').orderBy('category', 'asc').get();
-    const budgets = [];
-
-    budgetsSnapshot.forEach(doc => {
-      budgets.push({
-        id: doc.id,
-        ...doc.data(),
-      });
-    });
-
-    res.json({
-      success: true,
-      budgets,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * @swagger
- * /budgets/status:
- *   get:
- *     tags: [Budgets]
- *     summary: Obtenir le statut des budgets avec montant dépensé
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Statut des budgets
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 budgets:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: string
- *                       category:
- *                         type: string
- *                       limitAmount:
- *                         type: number
- *                       month:
- *                         type: integer
- *                       year:
- *                         type: integer
- *                       spent:
- *                         type: number
- *                       percent:
- *                         type: number
- *       401:
- *         description: Non authentifié
- *       500:
- *         description: Erreur serveur
- */
-const getBudgetsWithStatus = async (req, res, next) => {
-  try {
-    const budgetsSnapshot = await db.collection('budgets')
-      .where('userId', '==', req.user.uid)
-      .get();
-
-    const budgetsWithStatus = await Promise.all(
-      budgetsSnapshot.docs.map(async (budgetDoc) => {
-        const budget = {
-          id: budgetDoc.id,
-          ...budgetDoc.data(),
-        };
-
-        const startDate = new Date(budget.year, budget.month - 1, 1);
-        const endDate = new Date(budget.year, budget.month, 0, 23, 59, 59);
-
-        const expensesSnapshot = await db.collection('expenses')
-          .where('userId', '==', req.user.uid)
-          .where('category', '==', budget.category)
-          .where('date', '>=', startDate)
-          .where('date', '<=', endDate)
-          .get();
-
-        let spent = 0;
-        expensesSnapshot.forEach(doc => {
-          spent += doc.data().amount;
-        });
-
-        const percent = budget.limitAmount > 0 ? (spent / budget.limitAmount) * 100 : 0;
+        const spent = agg[0]?.total || 0;
+        const percent = Math.round(
+          (spent / b.limitAmount) * 100
+        );
 
         return {
-          ...budget,
+          id: b._id.toString(),
+          category: b.category,
+          limitAmount: b.limitAmount,
+          month: b.month,
+          year: b.year,
           spent,
-          percent: Math.round(percent * 100) / 100,
+          percent
         };
       })
     );
 
-    res.json({
-      success: true,
-      budgets: budgetsWithStatus,
+    return res.json({
+      success: true, budgets: result
     });
   } catch (error) {
-    next(error);
+    return res.status(500).json({
+      success: false, message: error.message
+    });
   }
 };
 
-/**
- * @swagger
- * /budgets:
- *   post:
- *     tags: [Budgets]
- *     summary: Créer un nouveau budget
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - category
- *               - limitAmount
- *               - month
- *               - year
- *             properties:
- *               category:
- *                 type: string
- *                 enum: [alimentation, transport, sante, shopping, logement, telecom, education, autre]
- *               limitAmount:
- *                 type: number
- *                 minimum: 1
- *               month:
- *                 type: integer
- *                 minimum: 1
- *                 maximum: 12
- *               year:
- *                 type: integer
- *     responses:
- *       201:
- *         description: Budget créé
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 budget:
- *                   $ref: '#/components/schemas/Budget'
- *       400:
- *         description: Erreur de validation ou budget déjà existant
- *       401:
- *         description: Non authentifié
- *       500:
- *         description: Erreur serveur
- */
-const createBudget = async (req, res, next) => {
+const createBudget = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Erreur de validation',
-        errors: errors.array(),
-      });
-    }
+    const { uid } = req.user;
+    const { category, limitAmount, month, year }
+      = req.body;
 
-    const { category, limitAmount, month, year } = req.body;
-
-    // Vérifier si un budget existe déjà pour cette catégorie et période
-    const existingBudgetSnapshot = await db.collection('budgets')
-      .where('userId', '==', req.user.uid)
-      .where('category', '==', category)
-      .where('month', '==', parseInt(month))
-      .where('year', '==', parseInt(year))
-      .get();
-
-    if (!existingBudgetSnapshot.empty) {
-      return res.status(400).json({
-        success: false,
-        message: 'Un budget existe déjà pour cette catégorie et cette période',
-      });
-    }
-
-    const budgetData = {
-      userId: req.user.uid,
+    const existing = await Budget.findOne({
+      userId: uid,
       category,
-      limitAmount: parseFloat(limitAmount),
-      month: parseInt(month),
-      year: parseInt(year),
-      createdAt: new Date(),
-    };
-
-    const budgetRef = await db.collection('budgets').add(budgetData);
-    const budget = {
-      id: budgetRef.id,
-      ...budgetData,
-    };
-
-    res.status(201).json({
-      success: true,
-      budget,
+      month: Number(month),
+      year: Number(year)
     });
-  } catch (error) {
-    next(error);
-  }
-};
 
-/**
- * @swagger
- * /budgets/{id}:
- *   put:
- *     tags: [Budgets]
- *     summary: Mettre à jour un budget
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               limitAmount:
- *                 type: number
- *                 minimum: 1
- *               month:
- *                 type: integer
- *                 minimum: 1
- *                 maximum: 12
- *               year:
- *                 type: integer
- *     responses:
- *       200:
- *         description: Budget mis à jour
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 budget:
- *                   $ref: '#/components/schemas/Budget'
- *       401:
- *         description: Non authentifié
- *       403:
- *         description: Accès refusé
- *       404:
- *         description: Budget non trouvé
- *       500:
- *         description: Erreur serveur
- */
-const updateBudget = async (req, res, next) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
+    if (existing) {
       return res.status(400).json({
         success: false,
-        message: 'Erreur de validation',
-        errors: errors.array(),
+        message:
+          'Budget déjà existant pour ' +
+          'cette catégorie ce mois'
       });
     }
 
-    const budgetDoc = await db.collection('budgets').doc(req.params.id).get();
+    const budget = await Budget.create({
+      userId: uid,
+      category,
+      limitAmount: Number(limitAmount),
+      month: Number(month),
+      year: Number(year)
+    });
 
-    if (!budgetDoc.exists) {
-      return res.status(404).json({
-        success: false,
-        message: 'Budget non trouvé',
-      });
-    }
-
-    const budget = budgetDoc.data();
-
-    if (budget.userId !== req.user.uid) {
-      return res.status(403).json({
-        success: false,
-        message: 'Accès refusé',
-      });
-    }
-
-    const { limitAmount, month, year } = req.body;
-    const updateData = {};
-
-    if (limitAmount !== undefined) updateData.limitAmount = parseFloat(limitAmount);
-    if (month !== undefined) updateData.month = parseInt(month);
-    if (year !== undefined) updateData.year = parseInt(year);
-
-    await db.collection('budgets').doc(req.params.id).update(updateData);
-
-    const updatedBudgetDoc = await db.collection('budgets').doc(req.params.id).get();
-    const updatedBudget = {
-      id: updatedBudgetDoc.id,
-      ...updatedBudgetDoc.data(),
-    };
-
-    res.json({
+    return res.status(201).json({
       success: true,
-      budget: updatedBudget,
+      budget: {
+        id: budget._id.toString(),
+        ...budget.toObject()
+      }
     });
   } catch (error) {
-    next(error);
+    return res.status(500).json({
+      success: false, message: error.message
+    });
   }
 };
 
-/**
- * @swagger
- * /budgets/{id}:
- *   delete:
- *     tags: [Budgets]
- *     summary: Supprimer un budget
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Budget supprimé
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *       401:
- *         description: Non authentifié
- *       403:
- *         description: Accès refusé
- *       404:
- *         description: Budget non trouvé
- *       500:
- *         description: Erreur serveur
- */
-const deleteBudget = async (req, res, next) => {
+const updateBudget = async (req, res) => {
   try {
-    const budgetDoc = await db.collection('budgets').doc(req.params.id).get();
-
-    if (!budgetDoc.exists) {
-      return res.status(404).json({
-        success: false,
-        message: 'Budget non trouvé',
-      });
-    }
-
-    const budget = budgetDoc.data();
-
-    if (budget.userId !== req.user.uid) {
-      return res.status(403).json({
-        success: false,
-        message: 'Accès refusé',
-      });
-    }
-
-    await db.collection('budgets').doc(req.params.id).delete();
-
-    res.json({
+    const { uid } = req.user;
+    const budget = await Budget.findOneAndUpdate(
+      { _id: req.params.id, userId: uid },
+      {
+        limitAmount: req.body.limitAmount,
+        month: req.body.month,
+        year: req.body.year
+      },
+      { new: true }
+    );
+    return res.json({
       success: true,
-      message: 'Budget supprimé avec succès',
+      budget: {
+        id: budget._id.toString(),
+        ...budget.toObject()
+      }
     });
   } catch (error) {
-    next(error);
+    return res.status(500).json({
+      success: false, message: error.message
+    });
+  }
+};
+
+const deleteBudget = async (req, res) => {
+  try {
+    const { uid } = req.user;
+    await Budget.findOneAndDelete(
+      { _id: req.params.id, userId: uid }
+    );
+    return res.json({
+      success: true,
+      message: 'Budget supprimé'
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false, message: error.message
+    });
   }
 };
 
 module.exports = {
-  getAllBudgets,
-  getBudgetsWithStatus,
-  createBudget,
-  updateBudget,
-  deleteBudget,
+  getBudgetsWithStatus, createBudget,
+  updateBudget, deleteBudget
 };

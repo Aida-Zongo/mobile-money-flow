@@ -1,386 +1,410 @@
 'use client';
-import { useState, useEffect, useCallback }
-  from 'react';
-import api from '@/lib/api';
+import { useState, useEffect } from 'react';
 import {
-  BarChart3, PieChart, TrendingUp,
-  Calendar, DollarSign, ArrowUp,
-  ArrowDown, Wallet, Target
+  PieChart, Pie, Cell, Tooltip,
+  BarChart, Bar, XAxis, YAxis,
+  ResponsiveContainer
+} from 'recharts';
+import api from '@/lib/api';
+import { useLanguage } from '@/lib/LanguageContext';
+import {
+  TrendingDown, BarChart3, Tag,
+  ChevronLeft, ChevronRight, TrendingUp
 } from 'lucide-react';
 
-const MONTHS = ['Janvier','Février','Mars',
-  'Avril','Mai','Juin','Juillet','Août',
-  'Septembre','Octobre','Novembre','Décembre'];
+const COLORS = [
+  '#F59E0B','#0A7B5E','#00C48C',
+  '#DB2777','#2563EB','#0369A1',
+  '#CA8A04','#6B7280'
+];
 
-const fmt = (n:number) =>
-  new Intl.NumberFormat('fr-FR').format(n||0)
-  +' FCFA';
+const MONTHS = [
+  'Janvier','Février','Mars','Avril','Mai',
+  'Juin','Juillet','Août','Septembre',
+  'Octobre','Novembre','Décembre'
+];
+
+const fmt = (n: number) =>
+  new Intl.NumberFormat('fr-FR').format(n || 0)
+  + ' FCFA';
 
 export default function StatsPage() {
-  const [stats, setStats] = useState<any>({});
-  const [categoryStats, setCategoryStats] = useState<any[]>([]);
-  const [dailyStats, setDailyStats] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { t } = useLanguage();
   const [month, setMonth] =
-    useState(new Date().getMonth()+1);
+    useState(new Date().getMonth());
   const [year, setYear] =
     useState(new Date().getFullYear());
+  const [summary, setSummary] =
+    useState<any>(null);
+  const [cats, setCats] =
+    useState<any[]>([]);
+  const [daily, setDaily] =
+    useState<any[]>([]);
+  const [loading, setLoading] =
+    useState(true);
 
-  const load = useCallback(async()=>{
+  const load = async () => {
     setLoading(true);
     try {
-      // Stats globales
-      const statsRes = await api.get('/stats/summary');
-      setStats(statsRes.data || {});
-      
-      // Stats par catégorie
-      const catRes = await api.get('/stats/categories');
-      setCategoryStats(catRes.data || []);
-      
-      // Stats quotidiennes
-      const dailyRes = await api.get('/stats/daily');
-      setDailyStats(dailyRes.data || []);
-    } catch(e) { console.error(e); }
+      const p = `month=${month+1}&year=${year}`;
+      const [s, c, d] = await Promise.all([
+        api.get('/stats/summary?' + p),
+        api.get('/stats/categories?' + p),
+        api.get('/stats/daily?' + p),
+      ]);
+      setSummary(s.data);
+      setCats(c.data.data || []);
+      setDaily(d.data.data || []);
+    } catch(e) {
+      console.error(e);
+    }
     setLoading(false);
-  }, [month, year]);
+  };
 
-  useEffect(()=>{ load(); }, [load]);
+  useEffect(() => { load(); }, [month, year]);
+
+  const prev = () => {
+    if (month === 0) {
+      setMonth(11);
+      setYear(y => y - 1);
+    } else {
+      setMonth(m => m - 1);
+    }
+  };
+
+  const next = () => {
+    if (month === 11) {
+      setMonth(0);
+      setYear(y => y + 1);
+    } else {
+      setMonth(m => m + 1);
+    }
+  };
+
+  const pieData = cats.map((c, i) => ({
+    name: c._id,
+    value: c.total,
+    color: COLORS[i % COLORS.length],
+  }));
 
   return (
     <div style={{
-      padding:24, backgroundColor:'#F5F7F5',
-      minHeight:'100vh',
-      fontFamily:'DM Sans, sans-serif'
+      padding: 24,
+      backgroundColor: 'var(--bg)',
+      minHeight: '100vh',
+      fontFamily: 'DM Sans, sans-serif',
     }}>
+
+      {/* Header */}
       <div style={{
-        display:'flex',
-        justifyContent:'space-between',
-        alignItems:'center', marginBottom:24
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 24,
       }}>
         <div>
           <h1 style={{
-            fontSize:24, fontWeight:800,
-            color:'#1A1D23', margin:0
-          }}>Statistiques</h1>
-          <p style={{
-            color:'#8A94A6', fontSize:14,
-            marginTop:4
+            fontSize: 24, fontWeight: 800,
+            color: 'var(--text-main)', margin: 0,
           }}>
-            Vue d'ensemble de vos finances
+            Statistiques
+          </h1>
+          <p style={{
+            color: 'var(--text-muted)', fontSize: 14,
+            marginTop: 4,
+          }}>
+            Analysez vos habitudes financières
           </p>
         </div>
+
+        {/* Sélecteur mois */}
         <div style={{
-          display:'flex', gap:12
+          display: 'flex', alignItems: 'center',
+          gap: 10, backgroundColor: 'var(--bg-card)',
+          padding: '8px 16px', borderRadius: 16,
+          boxShadow: '0 1px 8px rgba(0,0,0,0.05)',
         }}>
-          <select value={month}
-            onChange={e=>setMonth(Number(e.target.value))}
-            style={{
-              padding:'8px 12px',
-              border:'1.5px solid #E2EAE7',
-              borderRadius:8, fontSize:14,
-              outline:'none',
-              backgroundColor:'white',
-              color:'#1A1D23',
-              fontFamily:'DM Sans, sans-serif',
-              cursor:'pointer'
-            }}>
-            {MONTHS.map((m,i)=>(
-              <option key={i} value={i+1}>{m}</option>
-            ))}
-          </select>
-          <input type='number'
-            value={year}
-            onChange={e=>setYear(Number(e.target.value))}
-            style={{
-              padding:'8px 12px',
-              border:'1.5px solid #E2EAE7',
-              borderRadius:8, fontSize:14,
-              outline:'none',
-              backgroundColor:'white',
-              color:'#1A1D23',
-              fontFamily:'DM Sans, sans-serif',
-              width:100
-            }}/>
+          <button onClick={prev} style={{
+            width: 32, height: 32,
+            borderRadius: 10, border: 'none',
+            backgroundColor: 'var(--bg)',
+            cursor: 'pointer',
+            display: 'flex', alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <ChevronLeft size={18}
+              color="#1A1D23" />
+          </button>
+          <span style={{
+            fontWeight: 600, fontSize: 14,
+            color: 'var(--text-main)', minWidth: 130,
+            textAlign: 'center',
+          }}>
+            {MONTHS[month]} {year}
+          </span>
+          <button onClick={next} style={{
+            width: 32, height: 32,
+            borderRadius: 10, border: 'none',
+            backgroundColor: 'var(--bg)',
+            cursor: 'pointer',
+            display: 'flex', alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <ChevronRight size={18}
+              color="#1A1D23" />
+          </button>
         </div>
       </div>
 
-      {loading ? (
+      {/* Summary Cards */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3,1fr)',
+        gap: 16, marginBottom: 24,
+      }}>
+        {[
+          {
+            icon: TrendingDown,
+            label: t('stats.total'),
+            val: loading ? '...'
+              : fmt(summary?.totalMonth || 0),
+            bg: '#FEF2F2',
+            color: '#F04438',
+          },
+          {
+            icon: BarChart3,
+            label: 'Transactions',
+            val: loading ? '...'
+              : String(summary?.totalCount || 0),
+            bg: '#E8F5F1',
+            color: '#0A7B5E',
+          },
+          {
+            icon: Tag,
+            label: 'Top catégorie',
+            val: loading ? '...'
+              : (summary?.topCategory || '—'),
+            bg: '#F0FDF4',
+            color: '#16A34A',
+          },
+        ].map((item, i) => {
+          const Icon = item.icon;
+          return (
+            <div key={i} style={{
+              backgroundColor: 'var(--bg-card)',
+              borderRadius: 16, padding: 20,
+              boxShadow:
+                '0 1px 8px rgba(0,0,0,0.05)',
+              display: 'flex',
+              alignItems: 'center', gap: 14,
+            }}>
+              <div style={{
+                width: 48, height: 48,
+                borderRadius: 14,
+                backgroundColor: item.bg,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}>
+                <Icon size={22}
+                  color={item.color} />
+              </div>
+              <div>
+                <p style={{
+                  color: 'var(--text-muted)',
+                  fontSize: 12, margin: 0,
+                }}>
+                  {item.label}
+                </p>
+                <p style={{
+                  fontWeight: 700, fontSize: 18,
+                  color: 'var(--text-main)',
+                  margin: '4px 0 0',
+                }}>
+                  {item.val}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Charts */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: 16, marginBottom: 24,
+      }}>
+
+        {/* Pie Chart */}
         <div style={{
-          backgroundColor:'white',
-          borderRadius:16, padding:60,
-          textAlign:'center',
-          boxShadow:'0 1px 8px rgba(0,0,0,0.05)'
+          backgroundColor: 'var(--bg-card)',
+          borderRadius: 16, padding: 20,
+          boxShadow: '0 1px 8px rgba(0,0,0,0.05)',
         }}>
-          <div style={{
-            width:64, height:64,
-            borderRadius:'50%',
-            backgroundColor:'#E8F5F1',
-            display:'flex', alignItems:'center',
-            justifyContent:'center',
-            margin:'0 auto 16px',
-            animation:'spin 1s linear infinite'
-          }}>
-            <BarChart3 size={28}
-              color="#0A7B5E" />
-          </div>
           <h3 style={{
-            color:'#1A1D23', fontWeight:700,
-            marginBottom:8
+            fontSize: 16, fontWeight: 700,
+            color: 'var(--text-main)', marginBottom: 16,
           }}>
-            Chargement des statistiques...
+            {t('stats.by_cat')}
           </h3>
+          {pieData.length === 0 ? (
+            <div style={{
+              textAlign: 'center', padding: 40,
+              color: 'var(--text-muted)',
+            }}>
+              Aucune donnée
+            </div>
+          ) : (
+            <>
+              <ResponsiveContainer
+                width="100%" height={200}>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%" cy="50%"
+                    innerRadius={55}
+                    outerRadius={85}
+                    paddingAngle={3}
+                    dataKey="value">
+                    {pieData.map((entry, i) => (
+                      <Cell
+                        key={i}
+                        fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(v: any) =>
+                      [fmt(v), 'Montant']} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div style={{
+                display: 'flex',
+                flexWrap: 'wrap', gap: 6,
+                marginTop: 12,
+              }}>
+                {pieData.map((d, i) => (
+                  <span key={i} style={{
+                    padding: '3px 10px',
+                    borderRadius: 50, fontSize: 11,
+                    fontWeight: 500,
+                    backgroundColor: d.color + '20',
+                    color: d.color,
+                  }}>
+                    {d.name}
+                  </span>
+                ))}
+              </div>
+            </>
+          )}
         </div>
-      ) : (
+
+        {/* Bar Chart */}
         <div style={{
-          display:'grid',
-          gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))',
-          gap:20
+          backgroundColor: 'var(--bg-card)',
+          borderRadius: 16, padding: 20,
+          boxShadow: '0 1px 8px rgba(0,0,0,0.05)',
         }}>
-          {/* Carte résumé */}
-          <div style={{
-            backgroundColor:'white',
-            borderRadius:16, padding:24,
-            boxShadow:'0 1px 8px rgba(0,0,0,0.05)',
-            gridColumn:'span 2'
+          <h3 style={{
+            fontSize: 16, fontWeight: 700,
+            color: 'var(--text-main)', marginBottom: 16,
           }}>
-            <h2 style={{
-              fontSize:18, fontWeight:700,
-              color:'#1A1D23', marginBottom:20,
-              display:'flex',
-              alignItems:'center', gap:8
-            }}>
-              <BarChart3 size={20} color="#0A7B5E" />
-              Résumé du mois
-            </h2>
-            
+            {t('stats.daily')}
+          </h3>
+          {daily.length === 0 ? (
             <div style={{
-              display:'grid',
-              gridTemplateColumns:'repeat(3, 1fr)',
-              gap:16
+              textAlign: 'center', padding: 40,
+              color: 'var(--text-muted)',
             }}>
-              <div style={{textAlign:'center'}}>
-                <p style={{
-                  color:'#8A94A6', fontSize:12,
-                  margin:'0 0 8px'
-                }}>Revenus</p>
-                <p style={{
-                  fontSize:24, fontWeight:800,
-                  color:'#16A34A', margin:0
-                }}>
-                  {fmt(stats.totalIncome || 0)}
-                </p>
-                <div style={{
-                  display:'flex', alignItems:'center', gap:4,
-                  justifyContent:'center', marginTop:4
-                }}>
-                  <ArrowUp size={12} color="#16A34A" />
-                  <span style={{
-                    fontSize:11, color:'#16A34A'
-                  }}>
-                    +{stats.incomeGrowth || 0}%
-                  </span>
-                </div>
-              </div>
-              
-              <div style={{textAlign:'center'}}>
-                <p style={{
-                  color:'#8A94A6', fontSize:12,
-                  margin:'0 0 8px'
-                }}>Dépenses</p>
-                <p style={{
-                  fontSize:24, fontWeight:800,
-                  color:'#F04438', margin:0
-                }}>
-                  {fmt(stats.totalExpense || 0)}
-                </p>
-                <div style={{
-                  display:'flex', alignItems:'center', gap:4,
-                  justifyContent:'center', marginTop:4
-                }}>
-                  <ArrowDown size={12} color="#F04438" />
-                  <span style={{
-                    fontSize:11, color:'#F04438'
-                  }}>
-                    +{stats.expenseGrowth || 0}%
-                  </span>
-                </div>
-              </div>
-              
-              <div style={{textAlign:'center'}}>
-                <p style={{
-                  color:'#8A94A6', fontSize:12,
-                  margin:'0 0 8px'
-                }}>Solde</p>
-                <p style={{
-                  fontSize:24, fontWeight:800,
-                  color: stats.balance >= 0 ? '#16A34A' : '#F04438',
-                  margin:0
-                }}>
-                  {fmt(stats.balance || 0)}
-                </p>
-                <div style={{
-                  display:'flex', alignItems:'center', gap:4,
-                  justifyContent:'center', marginTop:4
-                }}>
-                  <Wallet size={12} color={stats.balance >= 0 ? '#16A34A' : '#F04438'} />
-                  <span style={{
-                    fontSize:11,
-                    color: stats.balance >= 0 ? '#16A34A' : '#F04438'
-                  }}>
-                    {stats.balance >= 0 ? '+' : '-'}{Math.abs(stats.balanceGrowth || 0)}%
-                  </span>
-                </div>
-              </div>
+              Aucune donnée
             </div>
-          </div>
+          ) : (
+            <ResponsiveContainer
+              width="100%" height={220}>
+              <BarChart data={daily}>
+                <XAxis dataKey="day"
+                  tick={{
+                    fill: 'var(--text-muted)',
+                    fontSize: 11
+                  }}
+                  axisLine={false}
+                  tickLine={false} />
+                <YAxis
+                  tick={{
+                    fill: 'var(--text-muted)',
+                    fontSize: 11
+                  }}
+                  axisLine={false}
+                  tickLine={false} />
+                <Tooltip
+                  formatter={(v: any) =>
+                    [fmt(v), 'Dépenses']} />
+                <Bar dataKey="total"
+                  fill="#0A7B5E"
+                  radius={[6,6,0,0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>
 
-          {/* Graphique catégories */}
-          <div style={{
-            backgroundColor:'white',
-            borderRadius:16, padding:24,
-            boxShadow:'0 1px 8px rgba(0,0,0,0.05)'
-          }}>
-            <h3 style={{
-              fontSize:16, fontWeight:700,
-              color:'#1A1D23', marginBottom:16,
-              display:'flex',
-              alignItems:'center', gap:8
-            }}>
-              <PieChart size={18} color="#0A7B5E" />
-              Dépenses par catégorie
-            </h3>
-            <div style={{
-              display:'flex',
-              flexDirection:'column',
-              gap:12
-            }}>
-              {categoryStats.slice(0, 6).map((cat:any, i)=>(
-                <div key={i} style={{
-                  display:'flex',
-                  alignItems:'center',
-                  justifyContent:'space-between'
+      {/* Insights */}
+      {summary && (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3,1fr)',
+          gap: 16,
+        }}>
+          {[
+            {
+              icon: Tag,
+              bg: '#E8F5F1',
+              color: '#0A7B5E',
+              text: `Principale: ${summary.topCategory || '—'}`,
+            },
+            {
+              icon: BarChart3,
+              bg: '#F0FDF4',
+              color: '#16A34A',
+              text: `${summary.totalCount || 0} transactions`,
+            },
+            {
+              icon: TrendingUp,
+              bg: '#FFFBEB',
+              color: '#D97706',
+              text: `Moy/jour: ${fmt(
+                Math.round(
+                  (summary.totalMonth || 0) /
+                  new Date(year, month+1, 0)
+                    .getDate()
+                )
+              )}`,
+            },
+          ].map((ins, i) => {
+            const Icon = ins.icon;
+            return (
+              <div key={i} style={{
+                borderRadius: 16, padding: 18,
+                backgroundColor: ins.bg,
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 12,
+              }}>
+                <Icon size={22}
+                  color={ins.color} />
+                <p style={{
+                  fontSize: 13, fontWeight: 500,
+                  color: ins.color, margin: 0,
+                  lineHeight: 1.5,
                 }}>
-                  <div style={{
-                    display:'flex',
-                    alignItems:'center', gap:8
-                  }}>
-                    <div style={{
-                      width:12, height:12,
-                      borderRadius:'50%',
-                      backgroundColor:cat.color || '#8A94A6'
-                    }}/>
-                    <span style={{
-                      fontSize:13,
-                      color:'#1A1D23'
-                    }}>{cat.category}</span>
-                  </div>
-                  <div style={{
-                    display:'flex',
-                    flexDirection:'column',
-                    alignItems:'flex-end'
-                  }}>
-                    <span style={{
-                      fontSize:14, fontWeight:600,
-                      color:'#1A1D23'
-                    }}>{fmt(cat.amount || 0)}</span>
-                    <span style={{
-                      fontSize:11, color:'#8A94A6'
-                    }}>{cat.percentage || 0}%</span>
-                  </div>
-                </div>
-                <div style={{
-                  width:100, height:6,
-                  backgroundColor:'#F0F2F8',
-                  borderRadius:3,
-                  marginTop:4
-                }}>
-                  <div style={{
-                    width:cat.percentage || 0,
-                    height:6,
-                    backgroundColor:cat.color || '#8A94A6',
-                    borderRadius:3
-                  }}/>
-                </div>
+                  {ins.text}
+                </p>
               </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Tendances quotidiennes */}
-          <div style={{
-            backgroundColor:'white',
-            borderRadius:16, padding:24,
-            boxShadow:'0 1px 8px rgba(0,0,0,0.05)',
-            gridColumn:'span 2'
-          }}>
-            <h3 style={{
-              fontSize:16, fontWeight:700,
-              color:'#1A1D23', marginBottom:16,
-              display:'flex',
-              alignItems:'center', gap:8
-            }}>
-              <Calendar size={18} color="#0A7B5E" />
-              Évolution quotidienne
-            </h3>
-            <div style={{
-              height:200,
-              display:'flex',
-              alignItems:'flex-end',
-              gap:2,
-              padding:'0 8px'
-            }}>
-              {dailyStats.slice(-30).map((day:any, i)=>(
-                <div key={i} style={{
-                  flex:1,
-                  display:'flex',
-                  flexDirection:'column',
-                  alignItems:'center'
-                }}>
-                  <div style={{
-                    width:'100%',
-                    height:160,
-                    backgroundColor: day.expense > day.income ? '#FEE2E2' : '#F0FDF4',
-                    borderRadius:4,
-                    marginBottom:8,
-                    position:'relative',
-                    overflow:'hidden'
-                  }}>
-                    <div style={{
-                      position:'absolute',
-                      bottom:0,
-                      width:'100%',
-                      height: `${Math.min((day.expense + day.income) / Math.max(...dailyStats.map(d => d.expense + d.income)) * 160, 160)}px`,
-                      backgroundColor: day.expense > day.income ? '#F04438' : '#16A34A',
-                      borderRadius:'4px 4px 0 0'
-                    }}/>
-                  </div>
-                  <div style={{
-                    fontSize:10, color:'#8A94A6',
-                    textAlign:'center'
-                  }}>
-                    {new Date(day.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div style={{
-              display:'flex',
-              justifyContent:'space-between',
-              marginTop:8,
-              fontSize:11, color:'#8A94A6'
-            }}>
-              <span>Dépenses</span>
-              <span>Revenus</span>
-            </div>
-          </div>
+            );
+          })}
         </div>
       )}
-
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 }

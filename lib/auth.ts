@@ -1,33 +1,14 @@
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-} from 'firebase/auth';
-import { auth } from './firebase';
-
-const getApiUrl = () =>
+const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   'http://localhost:5001/api';
 
-const fetchWithTimeout = async (
-  url: string,
-  options: RequestInit,
-  timeout = 5000
-) => {
-  const controller = new AbortController();
-  const id = setTimeout(
-    () => controller.abort(), timeout);
-  try {
-    const res = await fetch(url, {
-      ...options,
-      signal: controller.signal,
-    });
-    clearTimeout(id);
-    return res;
-  } catch (err) {
-    clearTimeout(id);
-    throw err;
-  }
+const save = (token: string, user: any) => {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('token', token);
+  localStorage.setItem('user',
+    JSON.stringify(user));
+  document.cookie =
+    `token=${token}; path=/; max-age=86400`;
 };
 
 export const registerUser = async (
@@ -37,117 +18,65 @@ export const registerUser = async (
   phone?: string,
   operator?: string
 ) => {
-  const cred = await createUserWithEmailAndPassword(
-    auth, email, password);
-  const token = await cred.user.getIdToken();
-
-  const userData: any = {
-    uid: cred.user.uid,
-    name, email,
-    phone: phone || '',
-    operator: operator || 'other',
-    role: 'user',
-  };
-
-  try {
-    const res = await fetchWithTimeout(
-      `${getApiUrl()}/auth/register`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(userData),
-      }
-    );
-    if (res.ok) {
-      const data = await res.json();
-      if (data.user) Object.assign(userData, data.user);
+  const res = await fetch(
+    `${API_URL}/auth/register`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name, email, password,
+        phone: phone || '',
+        operator: operator || 'other',
+      }),
     }
-  } catch {
-    // Backend indisponible → continue quand même
+  );
+
+  const data = await res.json();
+
+  if (!res.ok || !data.success) {
+    throw new Error(
+      data.message || 'Erreur inscription'
+    );
   }
 
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('token', token);
-    localStorage.setItem('user',
-      JSON.stringify(userData));
-    document.cookie =
-      `token=${token}; path=/; max-age=3600`;
-  }
-
-  return { token, user: userData };
+  save(data.token, data.user);
+  return data;
 };
 
 export const loginUser = async (
   email: string,
   password: string
 ) => {
-  const cred = await signInWithEmailAndPassword(
-    auth, email, password);
-  const token = await cred.user.getIdToken();
+  const res = await fetch(
+    `${API_URL}/auth/login`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password }),
+    }
+  );
 
-  const userData: any = {
-    uid: cred.user.uid,
-    name: cred.user.displayName || email,
-    email,
-    role: 'user',
-  };
+  const data = await res.json();
 
-  try {
-    const res = await fetchWithTimeout(
-      `${getApiUrl()}/auth/login`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ uid: cred.user.uid }),
-      }
+  if (!res.ok || !data.success) {
+    throw new Error(
+      data.message || 'Erreur connexion'
     );
-    if (res.ok) {
-      const data = await res.json();
-      if (data.user) Object.assign(userData, data.user);
-    }
-  } catch {
-    // Backend indisponible → continue quand même
   }
 
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('token', token);
-    localStorage.setItem('user',
-      JSON.stringify(userData));
-    document.cookie =
-      `token=${token}; path=/; max-age=3600`;
-  }
-
-  return { token, user: userData };
+  save(data.token, data.user);
+  return data;
 };
 
-export const logoutUser = async () => {
-  try { await signOut(auth); } catch {}
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    document.cookie = 'token=; path=/; max-age=0';
-  }
+export const logoutUser = () => {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  document.cookie =
+    'token=; path=/; max-age=0';
   window.location.href = '/login';
-};
-
-export const getValidToken = async () => {
-  try {
-    const user = auth.currentUser;
-    if (user) {
-      const token = await user.getIdToken(true);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('token', token);
-        document.cookie =
-          `token=${token}; path=/; max-age=3600`;
-      }
-      return token;
-    }
-  } catch {}
-  return null;
 };

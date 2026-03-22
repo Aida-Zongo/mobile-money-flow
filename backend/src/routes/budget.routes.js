@@ -1,7 +1,6 @@
 const express = require('express');
 const { body } = require('express-validator');
 const {
-  getAllBudgets,
   getBudgetsWithStatus,
   createBudget,
   updateBudget,
@@ -56,7 +55,6 @@ const updateBudgetValidation = [
 // Routes (toutes protégées)
 router.use(verifyToken); // Middleware appliqué à toutes les routes
 
-router.get('/', getAllBudgets);
 router.get('/status', getBudgetsWithStatus);
 router.post('/', createBudgetValidation, createBudget);
 router.put('/:id', updateBudgetValidation, updateBudget);

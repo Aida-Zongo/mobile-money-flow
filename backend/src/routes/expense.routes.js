@@ -1,9 +1,8 @@
 const express = require('express');
 const { body } = require('express-validator');
 const {
-  getAllExpenses,
+  getExpenses,
   createExpense,
-  getExpenseById,
   updateExpense,
   deleteExpense,
 } = require('../controllers/expense.controller');
@@ -72,9 +71,8 @@ const updateExpenseValidation = [
 // Routes (toutes protégées)
 router.use(verifyToken); // Middleware appliqué à toutes les routes
 
-router.get('/', getAllExpenses);
+router.get('/', getExpenses);
 router.post('/', createExpenseValidation, createExpense);
-router.get('/:id', getExpenseById);
 router.put('/:id', updateExpenseValidation, updateExpense);
 router.delete('/:id', deleteExpense);
 

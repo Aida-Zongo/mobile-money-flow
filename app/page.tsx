@@ -19,6 +19,9 @@ export default function LandingPage() {
     useState(false);
   const [scrolled, setScrolled] = useState(false);
 
+  const [realReviews, setRealReviews] = useState<any[]>([]);
+  const [stats, setStats] = useState({ total: 248, avgRating: 4.9 });
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
@@ -27,6 +30,26 @@ export default function LandingPage() {
     const handleScroll = () =>
       setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
+    
+    // Fetch avis dynamiques
+    const fetchReviews = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/reviews`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.reviews) {
+            setRealReviews(data.reviews.filter((r: any) => r.rating >= 4).slice(0, 3));
+            if (data.total > 0) {
+              setStats({ total: data.total, avgRating: data.avgRating });
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Erreur fetch avis', err);
+      }
+    };
+    fetchReviews();
+
     return () =>
       window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -660,7 +683,7 @@ export default function LandingPage() {
             { num: '2 400+', label: 'Utilisateurs actifs' },
             { num: '12M+', label: 'FCFA suivis' },
             { num: '98%', label: 'Satisfaction' },
-            { num: '4.9', label: 'Note moyenne' },
+            { num: stats.avgRating.toString(), label: 'Note moyenne' },
           ].map((s, i) => (
             <div key={i}>
               <p style={{
@@ -891,7 +914,7 @@ export default function LandingPage() {
               <p style={{
                 fontSize: 52, fontWeight: 900,
                 color: '#0A7B5E', margin: 0,
-              }}>4.9</p>
+              }}>{stats.avgRating}</p>
               <div style={{
                 display: 'flex',
                 justifyContent: 'center', gap: 4,
@@ -899,14 +922,14 @@ export default function LandingPage() {
               }}>
                 {[1,2,3,4,5].map(i => (
                   <Star key={i} size={20}
-                    fill="#F5A623"
-                    color="#F5A623" />
+                    fill={i <= Math.round(stats.avgRating) ? "#F5A623" : "transparent"}
+                    color={i <= Math.round(stats.avgRating) ? "#F5A623" : "#E2EAE7"} />
                 ))}
               </div>
               <p style={{
                 color: '#8A94A6', fontSize: 14,
               }}>
-                Basé sur 248 avis
+                Basé sur {stats.total} avis
               </p>
             </div>
           </div>
@@ -916,19 +939,27 @@ export default function LandingPage() {
             gridTemplateColumns: 'repeat(3,1fr)',
             gap: 20,
           }}>
-            {testimonials.map((t, i) => (
+            {(realReviews.length > 0 ? realReviews : testimonials).map((t: any, i) => {
+              const isFeatured = t.featured !== undefined ? t.featured : i === 1;
+              const name = t.userName || t.name;
+              const initials = t.initials || name.substring(0, 2).toUpperCase();
+              const avatarBg = t.avatarBg || ['#0A7B5E','#F5A623','#16A34A'][i % 3];
+              const role = t.role || 'Utilisateur MoneyFlow';
+              const rRating = t.rating || 5;
+              const text = t.comment || t.text;
+              return (
               <div key={i}
                 style={{
                   padding: 24, borderRadius: 24,
-                  border: t.featured
+                  border: isFeatured
                     ? 'none' : '1px solid #E2EAE7',
-                  background: t.featured
+                  background: isFeatured
                     ? 'linear-gradient(135deg, #0A7B5E, #0D9B76)'
                     : 'white',
                   transition: 'all 0.2s',
                 }}
                 onMouseEnter={e => {
-                  if (!t.featured) {
+                  if (!isFeatured) {
                     e.currentTarget.style.transform
                       = 'translateY(-3px)';
                     e.currentTarget.style.boxShadow
@@ -947,19 +978,19 @@ export default function LandingPage() {
                 }}>
                   {[1,2,3,4,5].map(j => (
                     <Star key={j} size={15}
-                      fill="#F5A623"
-                      color="#F5A623" />
+                      fill={j <= rRating ? "#F5A623" : "transparent"}
+                      color={j <= rRating ? "#F5A623" : (isFeatured ? "rgba(255,255,255,0.3)" : "#E2EAE7")} />
                   ))}
                 </div>
                 <p style={{
                   fontSize: 14, lineHeight: 1.7,
                   fontStyle: 'italic',
-                  color: t.featured
+                  color: isFeatured
                     ? 'rgba(255,255,255,0.9)'
                     : '#1A1D23',
                   marginBottom: 20,
                 }}>
-                  "{t.text}"
+                  "{text}"
                 </p>
                 <div style={{
                   display: 'flex',
@@ -968,38 +999,38 @@ export default function LandingPage() {
                   <div style={{
                     width: 36, height: 36,
                     borderRadius: '50%',
-                    backgroundColor: t.featured
+                    backgroundColor: isFeatured
                       ? 'rgba(255,255,255,0.25)'
-                      : t.avatarBg,
+                      : avatarBg,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     color: 'white', fontSize: 12,
                     fontWeight: 700,
-                  }}>{t.initials}</div>
+                  }}>{initials}</div>
                   <div>
                     <p style={{
                       fontWeight: 700, fontSize: 13,
                       margin: 0,
-                      color: t.featured
+                      color: isFeatured
                         ? 'white' : '#1A1D23',
-                    }}>{t.name}</p>
+                    }}>{name}</p>
                     <p style={{
                       fontSize: 11, margin: 0,
-                      color: t.featured
+                      color: isFeatured
                         ? 'rgba(255,255,255,0.7)'
                         : '#8A94A6',
-                    }}>{t.role}</p>
+                    }}>{role}</p>
                   </div>
                   <div style={{ marginLeft: 'auto' }}>
                     <Award size={16}
-                      color={t.featured
+                      color={isFeatured
                         ? 'rgba(255,255,255,0.7)'
                         : '#0A7B5E'} />
                   </div>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
         </div>
       </section>
@@ -1057,7 +1088,7 @@ export default function LandingPage() {
                 color: '#8A94A6', fontSize: 14,
                 marginBottom: 20,
               }}>
-                Il sera publié après modération.
+                Votre avis est désormais en ligne !
               </p>
               <button
                 onClick={() => {
@@ -1209,7 +1240,7 @@ export default function LandingPage() {
               </div>
 
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (!rating) {
                     alert('Donnez une note svp');
                     return;
@@ -1218,6 +1249,33 @@ export default function LandingPage() {
                     alert('Entrez votre prénom svp');
                     return;
                   }
+                  
+                  try {
+                    const token = localStorage.getItem('token');
+                    await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/reviews`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                      },
+                      body: JSON.stringify({
+                        rating,
+                        comment: reviewText,
+                        userName: reviewName,
+                      })
+                    });
+                    
+                    // Rafraîchir
+                    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/reviews`);
+                    if (res.ok) {
+                      const data = await res.json();
+                      if (data.success && data.reviews) {
+                        setRealReviews(data.reviews.filter((r: any) => r.rating >= 4).slice(0, 3));
+                        setStats({ total: data.total, avgRating: data.avgRating || 4.9 });
+                      }
+                    }
+                  } catch(e) {}
+
                   setReviewSubmitted(true);
                 }}
                 style={{
@@ -1241,7 +1299,7 @@ export default function LandingPage() {
                 justifyContent: 'center', gap: 4,
               }}>
                 <Lock size={12} />
-                Publié après modération
+                Système d'avis sécurisé
               </p>
             </div>
           )}
@@ -1394,7 +1452,7 @@ export default function LandingPage() {
                 cursor: 'not-allowed',
                 fontFamily: 'DM Sans, sans-serif',
               }}>
-                Bientôt disponible
+                
               </button>
             </div>
           </div>

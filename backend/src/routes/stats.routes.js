@@ -2,7 +2,7 @@ const express = require('express');
 const {
   getSummary,
   getMonthly,
-  getByCategories,
+  getCategories,
   getDaily,
 } = require('../controllers/stats.controller');
 const { verifyToken } = require('../middleware/auth');
@@ -21,7 +21,7 @@ router.use(verifyToken); // Middleware appliqué à toutes les routes
 
 router.get('/summary', getSummary);
 router.get('/monthly', getMonthly);
-router.get('/categories', getByCategories);
+router.get('/categories', getCategories);
 router.get('/daily', getDaily);
 
 module.exports = router;
