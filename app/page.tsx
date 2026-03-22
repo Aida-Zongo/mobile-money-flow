@@ -34,11 +34,11 @@ export default function LandingPage() {
     // Fetch avis dynamiques
     const fetchReviews = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/reviews`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/reviews`);
         if (res.ok) {
           const data = await res.json();
           if (data.success && data.reviews) {
-            setRealReviews(data.reviews.filter((r: any) => r.rating >= 4).slice(0, 3));
+            setRealReviews(data.reviews.slice(0, 3));
             if (data.total > 0) {
               setStats({ total: data.total, avgRating: data.avgRating });
             }
@@ -1252,7 +1252,7 @@ export default function LandingPage() {
                   
                   try {
                     const token = localStorage.getItem('token');
-                    await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/reviews`, {
+                    await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/reviews`, {
                       method: 'POST',
                       headers: {
                         'Content-Type': 'application/json',
@@ -1266,11 +1266,11 @@ export default function LandingPage() {
                     });
                     
                     // Rafraîchir
-                    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/reviews`);
+                    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/reviews`);
                     if (res.ok) {
                       const data = await res.json();
                       if (data.success && data.reviews) {
-                        setRealReviews(data.reviews.filter((r: any) => r.rating >= 4).slice(0, 3));
+                        setRealReviews(data.reviews.slice(0, 3));
                         setStats({ total: data.total, avgRating: data.avgRating || 4.9 });
                       }
                     }
@@ -1607,7 +1607,7 @@ export default function LandingPage() {
             },
             {
               title: 'Contact',
-              links: ['contact@moneyflow.bf',
+              links: ['aida04zng@gmail.com',
                 'Ouagadougou, BF'],
             },
           ].map((col, i) => (
