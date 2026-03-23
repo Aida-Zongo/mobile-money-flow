@@ -231,7 +231,7 @@ export default function LandingPage() {
             }}>MoneyFlow</span>
           </div>
 
-          <div style={{ display: 'flex', gap: 4 }}>
+          <div className="nav-links">
             {[
               { label: 'Fonctionnalités',
                 id: 'fonctionnalites' },
@@ -343,13 +343,7 @@ export default function LandingPage() {
         paddingTop: 68,
         backgroundColor: '#F5F7F5',
       }}>
-        <div style={{
-          ...S.container,
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: 64, alignItems: 'center',
-          width: '100%', padding: '80px 32px',
-        }}>
+        <div style={S.container} className="hero-grid">
           {/* Left */}
           <div>
             <div style={{
@@ -478,7 +472,7 @@ export default function LandingPage() {
           </div>
 
           {/* Right — Dashboard mockup */}
-          <div style={{ position: 'relative' }}>
+          <div style={{ position: 'relative' }} className="hero-right">
             <div style={{
               background:
                 'radial-gradient(circle at center, #E8F5F1, #F5F7F5)',
@@ -673,12 +667,7 @@ export default function LandingPage() {
         backgroundColor: '#0A7B5E',
         padding: '48px 32px',
       }}>
-        <div style={{
-          ...S.container,
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4,1fr)',
-          gap: 24, textAlign: 'center',
-        }}>
+        <div style={S.container} className="stats-grid">
           {[
             { num: '2 400+', label: 'Utilisateurs actifs' },
             { num: '12M+', label: 'FCFA suivis' },
@@ -736,11 +725,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3,1fr)',
-            gap: 20,
-          }}>
+          <div className="features-grid">
             {features.map((f, i) => {
               const Icon = f.icon;
               return (
@@ -934,11 +919,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3,1fr)',
-            gap: 20,
-          }}>
+          <div className="testimonials-grid">
             {(realReviews.length > 0 ? realReviews : testimonials).map((t: any, i) => {
               const isFeatured = t.featured !== undefined ? t.featured : i === 1;
               const name = t.userName || t.name;
