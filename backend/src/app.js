@@ -122,6 +122,9 @@ const server = app.listen(PORT, () => {
   console.log(
     `✅ MoneyFlow API running on port ${PORT}`
   );
+  console.log(
+    `📖 Documentation Swagger: http://localhost:${PORT}/api/docs`
+  );
 });
 
 // Fermeture propre quand on fait Ctrl+C

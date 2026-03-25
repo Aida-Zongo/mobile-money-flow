@@ -2,7 +2,42 @@ const express = require('express');
 const router = express.Router();
 const Review = require('../models/Review');
 
-// Soumettre un avis (sans auth obligatoire)
+/**
+ * @swagger
+ * tags:
+ *   name: Reviews
+ *   description: Gestion des avis et témoignages
+ */
+
+/**
+ * @swagger
+ * /reviews:
+ *   post:
+ *     summary: Soumettre un avis
+ *     tags: [Reviews]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - rating
+ *             properties:
+ *               rating:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 5
+ *               comment:
+ *                 type: string
+ *               userName:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Avis enregistré
+ *       400:
+ *         description: Note invalide
+ */
 router.post('/', async (req, res) => {
   try {
     const { rating, comment, userName } =
@@ -41,7 +76,16 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Récupérer les avis (admin)
+/**
+ * @swagger
+ * /reviews:
+ *   get:
+ *     summary: Récupérer les 50 derniers avis
+ *     tags: [Reviews]
+ *     responses:
+ *       200:
+ *         description: Liste des avis récupérée avec moyenne des notes
+ */
 router.get('/', async (req, res) => {
   try {
     const reviews = await Review
