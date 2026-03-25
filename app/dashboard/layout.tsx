@@ -138,19 +138,19 @@ export default function DashboardLayout({
     }}>
 
       {/* ===== SIDEBAR FIXE ===== */}
-      <aside style={{
-        width: 260,
-        flexShrink: 0,
-        background:
-          'linear-gradient(180deg, #ffffff 0%, #fafcfb 100%)',
-        borderRight: '1px solid #E2EAE7',
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100vh',
-        position: 'sticky',
-        top: 0,
-        overflow: 'hidden',
-      }}>
+      <aside 
+        className="sidebar flex-col"
+        style={{
+          width: 260,
+          flexShrink: 0,
+          background:
+            'linear-gradient(180deg, #ffffff 0%, #fafcfb 100%)',
+          borderRight: '1px solid #E2EAE7',
+          height: '100vh',
+          position: 'sticky',
+          top: 0,
+          overflow: 'hidden',
+        }}>
 
         {/* Accent ligne verte en haut */}
         <div style={{
@@ -537,10 +537,48 @@ export default function DashboardLayout({
         height: '100vh', backgroundColor: 'var(--bg)',
       }}>
         <div style={{
-          maxWidth: 1100, margin: '0 auto', padding: '28px 28px',
+          maxWidth: 1100, margin: '0 auto', 
+          padding: '24px clamp(16px, 4vw, 28px)',
         }}>
           {children}
         </div>
+
+        {/* BOTTOM NAV (Mobile Only) */}
+        <nav 
+          className="lg:hidden"
+          style={{
+            position: 'fixed', bottom: 0, left: 0, right: 0,
+            height: 64, backgroundColor: 'white',
+            borderTop: '1px solid #E2EAE7',
+            display: 'flex', justifyContent: 'space-around',
+            alignItems: 'center', zIndex: 100,
+            padding: '0 10px',
+          }}>
+          {[
+            { icon: Home, path: '/dashboard' },
+            { icon: TrendingDown, path: '/dashboard/transactions' },
+            { icon: Target, path: '/dashboard/budgets' },
+            { icon: BarChart3, path: '/dashboard/stats' },
+            { icon: User, path: '/dashboard/profil' },
+          ].map(link => {
+            const Icon = link.icon;
+            const active = isActive(link.path);
+            return (
+              <button 
+                key={link.path}
+                onClick={() => router.push(link.path)}
+                style={{
+                  background: 'none', border: 'none',
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', gap: 4,
+                  color: active ? 'var(--primary)' : 'var(--text-muted)',
+                  cursor: 'pointer', flex: 1,
+                }}>
+                <Icon size={22} />
+              </button>
+            )
+          })}
+        </nav>
       </main>
     </div>
   );

@@ -82,7 +82,7 @@ export default function LoginPage() {
             'url(https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=800&q=80)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          opacity: 0.15,
+          opacity: 0.25,
         }} />
 
         {/* Overlay gradient */}
@@ -170,14 +170,15 @@ export default function LoginPage() {
 
       {/* DROITE (formulaire blanc) */}
       <div style={{
-        width: 480,
+        flex: 1,
+        maxWidth: '100%',
         display: 'flex', alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'white',
-        padding: 48,
+        padding: '32px 24px',
         minHeight: '100vh',
       }}>
-        <div style={{ width: '100%', maxWidth: 360 }}>
+        <div style={{ width: '100%', maxWidth: 400 }}>
           <h2 style={{
             fontSize: 24, fontWeight: 800,
             color: '#1A1D23', marginBottom: 4,

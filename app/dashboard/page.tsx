@@ -146,8 +146,8 @@ export default function DashboardPage() {
             'url(https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=800&q=80)',
           backgroundSize: 'cover',
           backgroundPosition: 'center top',
-          opacity: 0.06,
-          filter: 'grayscale(50%)',
+          opacity: 0.18,
+          filter: 'grayscale(30%)',
           borderRadius: 24,
         }} />
 
@@ -196,8 +196,10 @@ export default function DashboardPage() {
             Solde actuel
           </p>
           <p style={{
-            fontSize: 42, fontWeight: 900,
+            fontSize: 'clamp(28px, 8vw, 42px)',
+            fontWeight: 900,
             color: 'white', margin: '0 0 20px',
+            lineHeight: 1.1,
           }}>
             {loading ? '...'
               : fmt(solde)}
@@ -240,7 +242,7 @@ export default function DashboardPage() {
       {/* Stat Cards */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(3,1fr)',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
         gap: 16, marginBottom: 20,
       }}>
         {[

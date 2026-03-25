@@ -354,8 +354,8 @@ export default function LandingPage() {
             'url(https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=1920&q=80)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          opacity: 0.07,
-          filter: 'grayscale(100%)',
+          opacity: 0.18,
+          filter: 'grayscale(60%)',
         }} />
 
         {/* Pattern géométrique africain */}
@@ -472,6 +472,7 @@ export default function LandingPage() {
                   <ArrowRight size={16} />
                 </button>
                 <button
+                  className="hidden-mobile"
                   onClick={() => scroll('fonctionnalites')}
                   style={{
                     ...S.btnOutline,
