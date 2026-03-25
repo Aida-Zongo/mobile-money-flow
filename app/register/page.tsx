@@ -66,22 +66,22 @@ export default function RegisterPage() {
   ];
 
   return (
-    <div style={{
+    <div className="auth-grid" style={{
       minHeight: '100vh',
       display: 'flex',
       fontFamily: 'DM Sans, sans-serif',
       backgroundColor: '#F5F7F5',
     }}>
       {/* LEFT */}
-      <div style={{
-        width: '45%',
-        backgroundColor: '#0A7B5E',
-        padding: 48,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-      }}
-        className="hidden lg:flex">
+      <div 
+        className="hidden lg:flex"
+        style={{
+          width: '45%',
+          backgroundColor: '#0A7B5E',
+          padding: 48,
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+        }}>
         <div style={{
           display: 'flex',
           alignItems: 'center', gap: 12,

@@ -129,6 +129,18 @@ input[type="number"]::-webkit-outer-spin-button {
     display: none !important; 
     width: 0 !important;
   }
+  /* Nuclear Enforcers */
+  .responsive-grid, .stats-grid, .summary-grid, .charts-grid, .profile-grid, .auth-grid, .dashboard-root {
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    gap: 16px !important;
+  }
+  .responsive-flex {
+    flex-direction: column !important;
+  }
+  /* Specific Fixes */
   .hero-grid { 
     display: flex !important;
     flex-direction: column !important;
@@ -136,25 +148,17 @@ input[type="number"]::-webkit-outer-spin-button {
     padding: 40px 20px !important;
   }
   .hero-right { display: none !important; }
-  .stats-grid { 
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 24px;
-    text-align: center;
-  }
-  .features-grid { 
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 20px;
-  }
-  .pricing-grid { 
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 24px;
-  }
   .nav-links { display: none !important; }
   .hero-h1 { font-size: 34px !important; text-align: center; }
   .hidden-mobile { display: none !important; }
+  
+  /* Force containers to be full width */
+  div[style*="maxWidth: 1200"], div[style*="max-width: 1200"],
+  div[style*="maxWidth: 800"], div[style*="max-width: 800"] {
+    max-width: 100% !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
 }
 
 @media (max-width: 640px) {

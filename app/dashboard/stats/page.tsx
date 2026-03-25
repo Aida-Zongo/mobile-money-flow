@@ -157,7 +157,7 @@ export default function StatsPage() {
       </div>
 
       {/* Summary Cards */}
-      <div style={{
+      <div className="summary-grid" style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(3,1fr)',
         gap: 16, marginBottom: 24,
@@ -231,7 +231,7 @@ export default function StatsPage() {
       </div>
 
       {/* Charts */}
-      <div style={{
+      <div className="charts-grid" style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
         gap: 16, marginBottom: 24,
@@ -351,7 +351,7 @@ export default function StatsPage() {
 
       {/* Insights */}
       {summary && (
-        <div style={{
+        <div className="stats-grid" style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(3,1fr)',
           gap: 16,

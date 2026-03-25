@@ -216,7 +216,7 @@ export default function ProfilPage() {
         </p>
       </div>
 
-      <div style={{
+      <div className="profile-grid" style={{
         display: 'grid',
         gridTemplateColumns: '280px 1fr',
         gap: 20, alignItems: 'start',

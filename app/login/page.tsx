@@ -55,7 +55,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{
+    <div className="auth-grid" style={{
       minHeight: '100vh',
       display: 'flex',
       fontFamily: 'DM Sans, sans-serif',
@@ -67,7 +67,6 @@ export default function LoginPage() {
         position: 'relative',
         background:
           'linear-gradient(135deg, #0A7B5E, #054d36)',
-        display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
