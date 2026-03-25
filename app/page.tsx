@@ -263,6 +263,7 @@ export default function LandingPage() {
             {isLoggedIn ? (
               <>
                 <button
+                  className="hidden-mobile"
                   onClick={() =>
                     router.push('/dashboard')}
                   style={{
@@ -291,6 +292,7 @@ export default function LandingPage() {
             ) : (
               <>
                 <button
+                  className="hidden-mobile"
                   onClick={() =>
                     router.push('/login')}
                   style={{
