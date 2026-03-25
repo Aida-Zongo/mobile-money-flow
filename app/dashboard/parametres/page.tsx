@@ -1396,7 +1396,7 @@ export default function ParametresPage() {
               fontSize: 13, color: 'var(--text-muted)',
               marginBottom: 8,
             }}>
-              📧 **Contact :** [aida04zng@gmail.com](mailto:aida04zng@gmail.com)
+              📱 **Contact :** [WhatsApp : 66869010](https://wa.me/22666869010)
             </p>
             <p style={{
               fontSize: 13, color: 'var(--text-muted)',

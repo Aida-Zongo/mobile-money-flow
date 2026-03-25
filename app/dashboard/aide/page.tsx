@@ -324,7 +324,7 @@ export default function AidePage() {
         </p>
         <button
           onClick={() => window.open(
-            'mailto:aida04zng@gmail.com?subject=Aide MoneyFlow',
+            'https://wa.me/22666869010',
             '_blank'
           )}
           style={{
@@ -340,14 +340,14 @@ export default function AidePage() {
               '0 4px 14px rgba(10,123,94,0.35)',
           }}>
           <MessageCircle size={16} />
-          Contacter le support
+          Contacter sur WhatsApp
         </button>
         <p style={{
           fontSize: 12,
           color: 'var(--text-muted)',
           marginTop: 10,
         }}>
-          aida04zng@gmail.com
+          WhatsApp : 66869010
         </p>
       </div>
     </div>

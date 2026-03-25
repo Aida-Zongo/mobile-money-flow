@@ -1625,7 +1625,7 @@ export default function LandingPage() {
             },
             {
               title: 'Contact',
-              links: ['aida04zng@gmail.com',
+              links: ['WhatsApp : 66869010',
                 'Koudougou, BF'],
             },
           ].map((col, i) => (
