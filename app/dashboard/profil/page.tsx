@@ -173,6 +173,31 @@ export default function ProfilPage() {
     }
     setSavingPwd(false);
   };
+  
+  const refreshUserFromServer = async () => {
+    try {
+      showToast('Mise à jour du profil...');
+      const token = localStorage.getItem('token');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+      
+      const res = await fetch(`${apiUrl}/auth/me`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.user) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+          setUser(data.user);
+          showToast('Profil synchronisé');
+          // Si le rôle a changé, on recharge pour mettre à jour le layout
+          window.location.reload();
+        }
+      }
+    } catch(e) {
+      showToast('Erreur de synchronisation', true);
+    }
+  };
 
   const getInitials = (n: string) => {
     if (!n) return 'U';
@@ -269,6 +294,23 @@ export default function ProfilPage() {
               ? 'Administrateur'
               : 'Utilisateur'}
           </div>
+          
+          <button
+            onClick={refreshUserFromServer}
+            style={{
+              display: 'block',
+              margin: '12px auto 0',
+              padding: '6px 12px',
+              backgroundColor: 'transparent',
+              border: '1px solid #E2EAE7',
+              borderRadius: 8,
+              fontSize: 11,
+              color: 'var(--text-muted)',
+              cursor: 'pointer',
+              fontWeight: 600,
+            }}>
+            🔄 Synchroniser mon compte
+          </button>
 
           {user?.operator && (
             <div style={{

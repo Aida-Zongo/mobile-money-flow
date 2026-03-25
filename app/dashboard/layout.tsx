@@ -163,18 +163,19 @@ export default function DashboardLayout({
     }} className="dashboard-root">
       <style dangerouslySetInnerHTML={{ __html: `
         @media (max-width: 1024px) {
-          .sidebar { 
-            display: none !important; 
-            width: 0 !important;
-            flex: 0 !important;
-          }
+          .sidebar-desktop { display: none !important; }
+          .main-content { margin-left: 0 !important; }
           .bottom-nav { display: flex !important; }
+        }
+        @media (min-width: 1025px) {
+          .sidebar-desktop { display: flex !important; }
+          .bottom-nav { display: none !important; }
         }
       `}} />
 
       {/* ===== SIDEBAR FIXE ===== */}
       <aside 
-        className="sidebar flex-col"
+        className="sidebar-desktop flex-col"
         style={{
           width: 260,
           flexShrink: 0,
@@ -182,9 +183,12 @@ export default function DashboardLayout({
             'linear-gradient(180deg, #ffffff 0%, #fafcfb 100%)',
           borderRight: '1px solid #E2EAE7',
           height: '100vh',
-          position: 'sticky',
+          position: 'fixed',
           top: 0,
-          overflow: 'visible',
+          left: 0,
+          zIndex: 1000,
+          overflowY: 'auto',
+          overflowX: 'hidden',
         }}>
 
         {/* Accent ligne verte en haut */}
@@ -270,13 +274,13 @@ export default function DashboardLayout({
                   }} />
                 <div style={{
                   position: 'absolute',
-                  top: 44, left: 10,
-                  width: 320, zIndex: 50,
+                  top: 0, left: 50,
+                  width: 300, zIndex: 9999,
                   backgroundColor: 'var(--bg-card)',
                   borderRadius: 16,
                   border: '1px solid var(--border)',
                   boxShadow:
-                    '0 8px 32px rgba(0,0,0,0.15)',
+                    '0 12px 48px rgba(0,0,0,0.25)',
                   overflow: 'hidden',
                 }}>
                   <div style={{
@@ -534,14 +538,29 @@ export default function DashboardLayout({
               {getInitials(user?.name || '')}
             </div>
             <div style={{ flex: 1, overflow: 'hidden' }}>
-              <p style={{
-                fontWeight: 600, fontSize: 13,
-                color: 'var(--text-main)', margin: 0,
-                whiteSpace: 'nowrap', overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}>
-                {user?.name || 'Utilisateur'}
-              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <p style={{
+                  fontWeight: 600, fontSize: 13,
+                  color: 'var(--text-main)', margin: 0,
+                  whiteSpace: 'nowrap', overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}>
+                  {user?.name || 'Utilisateur'}
+                </p>
+                {user?.role === 'admin' && (
+                  <span style={{
+                    backgroundColor: '#E8F5F1',
+                    color: '#0A7B5E',
+                    fontSize: 10,
+                    fontWeight: 800,
+                    padding: '1px 6px',
+                    borderRadius: 4,
+                    textTransform: 'uppercase',
+                  }}>
+                    Admin
+                  </span>
+                )}
+              </div>
               <p style={{
                 fontSize: 11, color: 'var(--text-muted)',
                 margin: 0, whiteSpace: 'nowrap',
@@ -567,10 +586,15 @@ export default function DashboardLayout({
       </aside>
 
       {/* ===== CONTENU SCROLLABLE ===== */}
-      <main style={{
-        flex: 1, overflowY: 'auto',
-        height: '100vh', backgroundColor: 'var(--bg)',
-      }}>
+      <main 
+        className="main-content"
+        style={{
+          flex: 1, 
+          marginLeft: 260,
+          overflowY: 'auto',
+          height: '100vh', 
+          backgroundColor: 'var(--bg)',
+        }}>
         <div style={{
           maxWidth: 1100, margin: '0 auto', 
           padding: '24px clamp(16px, 4vw, 28px)',
@@ -580,7 +604,7 @@ export default function DashboardLayout({
 
         {/* BOTTOM NAV (Mobile Only) */}
         <nav 
-          className="lg:hidden"
+          className="bottom-nav"
           style={{
             position: 'fixed', bottom: 0, left: 0, right: 0,
             height: 64, backgroundColor: 'white',
