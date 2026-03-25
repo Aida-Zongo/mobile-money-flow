@@ -33,6 +33,7 @@ export default function DashboardLayout({
       catch(e) {}
     }
     setReady(true);
+    fetchMe(token);
 
     loadNotifications(token);
     const interval = setInterval(() => {
@@ -41,6 +42,30 @@ export default function DashboardLayout({
 
     return () => clearInterval(interval);
   }, []);
+
+  const fetchMe = async (token: string) => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/auth/me`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.user) {
+          const raw = localStorage.getItem('user');
+          const oldRole = raw ? JSON.parse(raw).role : 'user';
+          
+          localStorage.setItem('user', JSON.stringify(data.user));
+          setUser(data.user);
+
+          // Si passage à admin, recharger pour tout mettre à jour
+          if (oldRole === 'user' && data.user.role === 'admin') {
+            window.location.reload();
+          }
+        }
+      }
+    } catch(e) {}
+  };
 
   const loadNotifications = async (token: string) => {
     try {
@@ -159,7 +184,7 @@ export default function DashboardLayout({
           height: '100vh',
           position: 'sticky',
           top: 0,
-          overflow: 'hidden',
+          overflow: 'visible',
         }}>
 
         {/* Accent ligne verte en haut */}
