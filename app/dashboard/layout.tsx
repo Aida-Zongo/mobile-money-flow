@@ -194,7 +194,7 @@ export default function DashboardLayout({
             <span style={{
               fontWeight: 700, fontSize: 17,
               color: 'var(--text-main)',
-            }}>MoneyFlow (v3)</span>
+            }}>MoneyFlow</span>
           </div>
 
           <div style={{ position: 'relative' }}>
