@@ -203,12 +203,21 @@ export default function LandingPage() {
         @media (max-width: 1024px) {
           .nav-links { display: none !important; }
           .hidden-mobile { display: none !important; }
-          .hero-grid, .stats-grid, .features-grid, .pricing-grid { 
+          .hero-grid, .stats-grid, .features-grid, .pricing-grid, .testimonials-grid, .how-it-works-grid, .footer-grid { 
             display: flex !important; 
             flex-direction: column !important;
             width: 100% !important;
+            padding-left: 16px !important;
+            padding-right: 16px !important;
+            box-sizing: border-box !important;
           }
-          .hero-h1 { font-size: 32px !important; text-align: center; }
+          .footer-bottom {
+            flex-direction: column !important;
+            gap: 12px !important;
+            text-align: center !important;
+          }
+          .hero-h1 { font-size: 30px !important; text-align: center; }
+          .hero-grid { padding-top: 20px !important; }
         }
       `}} />
 
@@ -830,7 +839,7 @@ export default function LandingPage() {
               Comment ça marche ?
             </h2>
           </div>
-          <div style={{
+          <div className="how-it-works-grid" style={{
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'flex-start', gap: 0,
@@ -1349,7 +1358,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div style={{
+          <div className="pricing-grid" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(2,1fr)',
             gap: 24, maxWidth: 720,
@@ -1568,11 +1577,11 @@ export default function LandingPage() {
         backgroundColor: '#1A1D23',
         color: 'white', padding: '60px 32px 32px',
       }}>
-        <div style={{
+        <div className="footer-grid" style={{
           ...S.container,
           display: 'grid',
-          gridTemplateColumns: '2fr 1fr 1fr 1fr',
-          gap: 40, marginBottom: 40,
+          gridTemplateColumns: '1.5fr repeat(3, 1fr)',
+          gap: 40, marginBottom: 64,
         }}>
           <div>
             <div style={{
@@ -1644,7 +1653,7 @@ export default function LandingPage() {
             </div>
           ))}
         </div>
-        <div style={{
+        <div className="footer-bottom" style={{
           borderTop: '1px solid rgba(255,255,255,0.1)',
           paddingTop: 24,
           display: 'flex',
