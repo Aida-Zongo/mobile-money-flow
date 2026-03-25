@@ -217,6 +217,229 @@ const WeeklyReport = () => {
   );
 };
 
+const Toggle = ({
+  value,
+  onChange
+}: {
+  value: boolean;
+  onChange: (v: boolean) => void;
+}) => (
+  <div
+    onClick={() => onChange(!value)}
+    style={{
+      width: 50, height: 28,
+      borderRadius: 50,
+      backgroundColor: value
+        ? '#0A7B5E' : 'var(--border)',
+      position: 'relative',
+      cursor: 'pointer',
+      transition: 'all 0.2s',
+      flexShrink: 0,
+    }}>
+    <div style={{
+      width: 24, height: 24,
+      borderRadius: '50%',
+      backgroundColor: 'var(--bg-card)',
+      position: 'absolute',
+      top: 2,
+      left: value ? 24 : 2,
+      transition: 'left 0.2s',
+      boxShadow:
+        '0 1px 4px rgba(0,0,0,0.25)',
+    }} />
+  </div>
+);
+
+const Section = ({
+  title,
+  children,
+  danger = false
+}: any) => (
+  <div style={{
+    backgroundColor: 'var(--bg-card)',
+    borderRadius: 20, marginBottom: 16,
+    overflow: 'hidden',
+    border: danger
+      ? '1.5px solid #FEE2E2' : 'none',
+    boxShadow:
+      '0 1px 8px rgba(0,0,0,0.05)',
+  }}>
+    <p style={{
+      fontSize: 11, fontWeight: 700,
+      color: danger ? '#F04438' : 'var(--text-muted)',
+      margin: 0,
+      textTransform: 'uppercase',
+      letterSpacing: '0.1em',
+      padding: '14px 20px 10px',
+      borderBottom: danger
+        ? '1px solid #FEE2E2'
+        : '1px solid var(--border)',
+      backgroundColor: danger
+        ? '#FEF2F2' : 'var(--bg-card)',
+    }}>
+      {title}
+    </p>
+    {children}
+  </div>
+);
+
+const Row = ({
+  icon: Icon,
+  iconBg,
+  iconColor,
+  label,
+  desc,
+  right,
+  onClick,
+  last = false,
+  danger = false,
+}: any) => (
+  <div
+    onClick={onClick}
+    style={{
+      display: 'flex',
+      alignItems: 'center', gap: 14,
+      padding: '15px 20px',
+      cursor: onClick ? 'pointer' : 'default',
+      borderBottom: last
+        ? 'none' : '1px solid #F5F7F5',
+      transition: 'background 0.15s',
+    }}
+    onMouseEnter={e => {
+      if (onClick)
+        (e.currentTarget as HTMLElement)
+          .style.backgroundColor = 'var(--bg-input)';
+    }}
+    onMouseLeave={e => {
+      (e.currentTarget as HTMLElement)
+        .style.backgroundColor = 'var(--bg-card)';
+    }}>
+    <div style={{
+      width: 40, height: 40,
+      borderRadius: 12,
+      backgroundColor: iconBg,
+      display: 'flex', alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+    }}>
+      <Icon size={20} color={iconColor} />
+    </div>
+    <div style={{ flex: 1 }}>
+      <p style={{
+        fontSize: 14, fontWeight: 500,
+        color: danger ? '#F04438' : 'var(--text-main)',
+        margin: 0,
+      }}>
+        {label}
+      </p>
+      {desc && (
+        <p style={{
+          fontSize: 12, color: 'var(--text-muted)',
+          margin: '2px 0 0',
+        }}>
+          {desc}
+        </p>
+      )}
+    </div>
+    {right}
+  </div>
+);
+
+const Modal = ({
+  show,
+  onClose,
+  title,
+  children
+}: any) => {
+  if (!show) return null;
+  return (
+    <>
+      <div
+        onClick={onClose}
+        style={{
+          position: 'fixed', inset: 0,
+          zIndex: 40,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+        }} />
+      <div style={{
+        position: 'fixed', inset: 0,
+        zIndex: 50,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 16,
+      }}>
+        <div style={{
+          backgroundColor: 'var(--bg-card)',
+          borderRadius: 24, padding: 24,
+          maxWidth: 400, width: '100%',
+          boxShadow:
+            '0 20px 60px rgba(0,0,0,0.2)',
+        }}>
+          {title && (
+            <h3 style={{
+              fontSize: 17, fontWeight: 700,
+              color: 'var(--text-main)',
+              marginBottom: 16,
+            }}>
+              {title}
+            </h3>
+          )}
+          {children}
+        </div>
+      </div>
+    </>
+  );
+};
+
+const ChoiceItem = ({
+  selected,
+  onClick,
+  left,
+  label,
+  desc,
+}: any) => (
+  <div
+    onClick={onClick}
+    style={{
+      display: 'flex',
+      alignItems: 'center', gap: 14,
+      padding: '14px',
+      borderRadius: 14, cursor: 'pointer',
+      marginBottom: 8,
+      backgroundColor: selected
+        ? '#E8F5F1' : 'var(--bg)',
+      border: selected
+        ? '1.5px solid #0A7B5E'
+        : '1.5px solid transparent',
+      transition: 'all 0.15s',
+    }}>
+    {left}
+    <div style={{ flex: 1 }}>
+      <p style={{
+        fontWeight: selected ? 600 : 400,
+        fontSize: 14,
+        color: selected
+          ? '#0A7B5E' : 'var(--text-main)',
+        margin: 0,
+      }}>
+        {label}
+      </p>
+      {desc && (
+        <p style={{
+          fontSize: 12, color: 'var(--text-muted)',
+          margin: '2px 0 0',
+        }}>
+          {desc}
+        </p>
+      )}
+    </div>
+    {selected && (
+      <Check size={18} color="#0A7B5E" />
+    )}
+  </div>
+);
+
 export default function ParametresPage() {
   const { t, setLang: setGlobalLang } = useLanguage();
   const router = useRouter();
@@ -347,228 +570,6 @@ export default function ParametresPage() {
       desc: 'Suit votre appareil' },
   ];
 
-  const Toggle = ({
-    value,
-    onChange
-  }: {
-    value: boolean;
-    onChange: (v: boolean) => void;
-  }) => (
-    <div
-      onClick={() => onChange(!value)}
-      style={{
-        width: 50, height: 28,
-        borderRadius: 50,
-        backgroundColor: value
-          ? '#0A7B5E' : 'var(--border)',
-        position: 'relative',
-        cursor: 'pointer',
-        transition: 'all 0.2s',
-        flexShrink: 0,
-      }}>
-      <div style={{
-        width: 24, height: 24,
-        borderRadius: '50%',
-        backgroundColor: 'var(--bg-card)',
-        position: 'absolute',
-        top: 2,
-        left: value ? 24 : 2,
-        transition: 'left 0.2s',
-        boxShadow:
-          '0 1px 4px rgba(0,0,0,0.25)',
-      }} />
-    </div>
-  );
-
-  const Section = ({
-    title,
-    children,
-    danger = false
-  }: any) => (
-    <div style={{
-      backgroundColor: 'var(--bg-card)',
-      borderRadius: 20, marginBottom: 16,
-      overflow: 'hidden',
-      border: danger
-        ? '1.5px solid #FEE2E2' : 'none',
-      boxShadow:
-        '0 1px 8px rgba(0,0,0,0.05)',
-    }}>
-      <p style={{
-        fontSize: 11, fontWeight: 700,
-        color: danger ? '#F04438' : 'var(--text-muted)',
-        margin: 0,
-        textTransform: 'uppercase',
-        letterSpacing: '0.1em',
-        padding: '14px 20px 10px',
-        borderBottom: danger
-          ? '1px solid #FEE2E2'
-          : '1px solid var(--border)',
-        backgroundColor: danger
-          ? '#FEF2F2' : 'var(--bg-card)',
-      }}>
-        {title}
-      </p>
-      {children}
-    </div>
-  );
-
-  const Row = ({
-    icon: Icon,
-    iconBg,
-    iconColor,
-    label,
-    desc,
-    right,
-    onClick,
-    last = false,
-    danger = false,
-  }: any) => (
-    <div
-      onClick={onClick}
-      style={{
-        display: 'flex',
-        alignItems: 'center', gap: 14,
-        padding: '15px 20px',
-        cursor: onClick ? 'pointer' : 'default',
-        borderBottom: last
-          ? 'none' : '1px solid #F5F7F5',
-        transition: 'background 0.15s',
-      }}
-      onMouseEnter={e => {
-        if (onClick)
-          (e.currentTarget as HTMLElement)
-            .style.backgroundColor = 'var(--bg-input)';
-      }}
-      onMouseLeave={e => {
-        (e.currentTarget as HTMLElement)
-          .style.backgroundColor = 'var(--bg-card)';
-      }}>
-      <div style={{
-        width: 40, height: 40,
-        borderRadius: 12,
-        backgroundColor: iconBg,
-        display: 'flex', alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0,
-      }}>
-        <Icon size={20} color={iconColor} />
-      </div>
-      <div style={{ flex: 1 }}>
-        <p style={{
-          fontSize: 14, fontWeight: 500,
-          color: danger ? '#F04438' : 'var(--text-main)',
-          margin: 0,
-        }}>
-          {label}
-        </p>
-        {desc && (
-          <p style={{
-            fontSize: 12, color: 'var(--text-muted)',
-            margin: '2px 0 0',
-          }}>
-            {desc}
-          </p>
-        )}
-      </div>
-      {right}
-    </div>
-  );
-
-  const Modal = ({
-    show,
-    onClose,
-    title,
-    children
-  }: any) => {
-    if (!show) return null;
-    return (
-      <>
-        <div
-          onClick={onClose}
-          style={{
-            position: 'fixed', inset: 0,
-            zIndex: 40,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-          }} />
-        <div style={{
-          position: 'fixed', inset: 0,
-          zIndex: 50,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: 16,
-        }}>
-          <div style={{
-            backgroundColor: 'var(--bg-card)',
-            borderRadius: 24, padding: 24,
-            maxWidth: 400, width: '100%',
-            boxShadow:
-              '0 20px 60px rgba(0,0,0,0.2)',
-          }}>
-            {title && (
-              <h3 style={{
-                fontSize: 17, fontWeight: 700,
-                color: 'var(--text-main)',
-                marginBottom: 16,
-              }}>
-                {title}
-              </h3>
-            )}
-            {children}
-          </div>
-        </div>
-      </>
-    );
-  };
-
-  const ChoiceItem = ({
-    selected,
-    onClick,
-    left,
-    label,
-    desc,
-  }: any) => (
-    <div
-      onClick={onClick}
-      style={{
-        display: 'flex',
-        alignItems: 'center', gap: 14,
-        padding: '14px',
-        borderRadius: 14, cursor: 'pointer',
-        marginBottom: 8,
-        backgroundColor: selected
-          ? '#E8F5F1' : 'var(--bg)',
-        border: selected
-          ? '1.5px solid #0A7B5E'
-          : '1.5px solid transparent',
-        transition: 'all 0.15s',
-      }}>
-      {left}
-      <div style={{ flex: 1 }}>
-        <p style={{
-          fontWeight: selected ? 600 : 400,
-          fontSize: 14,
-          color: selected
-            ? '#0A7B5E' : 'var(--text-main)',
-          margin: 0,
-        }}>
-          {label}
-        </p>
-        {desc && (
-          <p style={{
-            fontSize: 12, color: 'var(--text-muted)',
-            margin: '2px 0 0',
-          }}>
-            {desc}
-          </p>
-        )}
-      </div>
-      {selected && (
-        <Check size={18} color="#0A7B5E" />
-      )}
-    </div>
-  );
 
   return (
     <div style={{
