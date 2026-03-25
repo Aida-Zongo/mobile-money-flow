@@ -5,7 +5,9 @@ import {
   Bell, Shield, Globe, Moon, Sun,
   ChevronRight, Trash2, AlertTriangle,
   Check, Lock, Star, HelpCircle,
-  MessageCircle, Info, FileText
+  MessageCircle, Info, FileText,
+  Heart, Sparkles, Rocket, MapPin, Scale,
+  Smartphone, BarChart3
 } from 'lucide-react';
 import { setTheme as applyGlobalTheme, Theme } from '@/lib/theme';
 import { useLanguage } from '@/lib/LanguageContext';
@@ -112,7 +114,7 @@ const WeeklyReport = () => {
         textTransform: 'uppercase',
         letterSpacing: '0.08em',
       }}>
-        📊 Rapport de la semaine
+        <BarChart3 size={14} color="#0A7B5E" style={{ marginRight: 4 }} /> Rapport de la semaine
       </p>
 
       <div style={{
@@ -824,7 +826,11 @@ export default function ParametresPage() {
           iconBg="#E8F5F1"
           iconColor="#0A7B5E"
           label="MoneyFlow"
-          desc="Fait avec ❤️ à Koudougou, BF"
+          desc={
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              Fait avec <Heart size={12} color="#F04438" fill="#F04438" /> à Koudougou, BF
+            </div>
+          }
           onClick={() => setShowAboutModal(true)}
           last
           right={
@@ -932,9 +938,13 @@ export default function ParametresPage() {
               );
             }}
             left={
-              <span style={{ fontSize: 28 }}>
-                {l.flag}
-              </span>
+              <div style={{
+                width: 40, height: 40, borderRadius: 12,
+                backgroundColor: 'var(--bg)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}>
+                <Globe size={24} color={lang === l.code ? "#0A7B5E" : "var(--text-muted)"} />
+              </div>
             }
             label={l.label}
           />
@@ -1073,10 +1083,10 @@ export default function ParametresPage() {
             textAlign: 'center', padding: '8px 0',
           }}>
             <div style={{
-              fontSize: 56, marginBottom: 12,
-              lineHeight: 1,
+              display: 'flex', justifyContent: 'center',
+              marginBottom: 12,
             }}>
-              🎉
+              <Sparkles size={48} color="#0A7B5E" />
             </div>
             <h3 style={{
               fontSize: 20, fontWeight: 800,
@@ -1099,11 +1109,12 @@ export default function ParametresPage() {
               marginBottom: 20,
             }}>
               {[1,2,3,4,5].map(i => (
-                <div key={i} style={{
-                  fontSize: 28,
-                  opacity: i <= appRating ? 1 : 0.3,
-                }}>
-                  ⭐
+                <div key={i}>
+                  <Star 
+                    size={28} 
+                    fill={i <= appRating ? "#F5A623" : "transparent"} 
+                    color={i <= appRating ? "#F5A623" : "#E2E8F0"}
+                  />
                 </div>
               ))}
             </div>
@@ -1196,7 +1207,11 @@ export default function ParametresPage() {
                         : 'grayscale(100%)',
                     padding: 0,
                   }}>
-                  ⭐
+                  <Star 
+                    size={40} 
+                    fill={(hoverRating || appRating) >= star ? "#F5A623" : "transparent"}
+                    color={(hoverRating || appRating) >= star ? "#F5A623" : "#E2E8F0"}
+                  />
                 </button>
               ))}
             </div>
@@ -1216,7 +1231,9 @@ export default function ParametresPage() {
               {(hoverRating || appRating) === 4 &&
                 'Très bien !'}
               {(hoverRating || appRating) === 5 &&
-                'Excellent ! 🚀'}
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  Excellent ! <Rocket size={16} />
+                </span>}
             </p>
 
             {/* Commentaire */}
@@ -1389,20 +1406,21 @@ export default function ParametresPage() {
           }}>
             <p style={{
               fontSize: 13, color: 'var(--text-muted)',
-              marginBottom: 8,
+              marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6
             }}>
-              📍 **Localisation :** Koudougou, Burkina Faso
+              <MapPin size={14} /> **Localisation :** Koudougou, Burkina Faso
             </p>
             <p style={{
               fontSize: 13, color: 'var(--text-muted)',
-              marginBottom: 8,
+              marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6
             }}>
-              📱 **Contact :** [WhatsApp : 66869010](https://wa.me/22666869010)
+              <Smartphone size={14} /> **Contact :** [WhatsApp : 66869010](https://wa.me/22666869010)
             </p>
             <p style={{
               fontSize: 13, color: 'var(--text-muted)',
+              display: 'flex', alignItems: 'center', gap: 6
             }}>
-              ⚖️ **Licence :** Tous droits réservés &copy; 2026
+              <Scale size={14} /> **Licence :** Tous droits réservés &copy; 2026
             </p>
           </div>
           <button

@@ -4,7 +4,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import {
   Home, TrendingDown, Target,
   DollarSign, BarChart3, LogOut,
-  User, Settings, Bell, HelpCircle, Shield
+  User, Settings, Bell, HelpCircle, Shield,
+  Circle
 } from 'lucide-react';
 import { t } from '@/lib/i18n';
 
@@ -351,8 +352,7 @@ export default function DashboardLayout({
                           justifyContent: 'center',
                           fontSize: 16,
                         }}>
-                          {n.type === 'danger'
-                            ? '🔴' : '🟡'}
+                          <Circle size={10} fill={n.type === 'danger' ? '#F04438' : '#F5A623'} color="transparent" />
                         </div>
                         <div style={{ flex: 1 }}>
                           <p style={{

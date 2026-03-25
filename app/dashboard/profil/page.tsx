@@ -4,7 +4,8 @@ import api from '@/lib/api';
 import { useLanguage } from '@/lib/LanguageContext';
 import {
   User, Mail, Phone, Save,
-  Edit2, Lock, Eye, EyeOff, Check
+  Edit2, Lock, Eye, EyeOff, Check,
+  RefreshCw
 } from 'lucide-react';
 
 const OPERATORS = [
@@ -309,7 +310,9 @@ export default function ProfilPage() {
               cursor: 'pointer',
               fontWeight: 600,
             }}>
-            🔄 Synchroniser mon compte
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}>
+              <RefreshCw size={11} /> Synchroniser mon compte
+            </div>
           </button>
 
           {user?.operator && (
