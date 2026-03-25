@@ -129,62 +129,111 @@ export default function DashboardPage() {
 
       {/* Hero Card */}
       <div style={{
+        position: 'relative',
         background:
           'linear-gradient(135deg, #0A7B5E, #0D9B76)',
-        borderRadius: 24, padding: 28,
-        marginBottom: 20, position: 'relative',
+        borderRadius: 24,
+        padding: 28,
+        marginBottom: 20,
         overflow: 'hidden',
       }}>
+
+        {/* Image ville africaine */}
         <div style={{
-          position: 'absolute', top: -40,
-          right: -40, width: 200, height: 200,
-          borderRadius: '50%',
-          backgroundColor: 'rgba(255,255,255,0.06)',
+          position: 'absolute',
+          inset: 0,
+          backgroundImage:
+            'url(https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=800&q=80)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center top',
+          opacity: 0.06,
+          filter: 'grayscale(50%)',
+          borderRadius: 24,
         }} />
-        <p style={{
-          color: 'rgba(255,255,255,0.7)',
-          fontSize: 13, margin: '0 0 6px',
-        }}>
-          Solde actuel
-        </p>
-        <p style={{
-          fontSize: 42, fontWeight: 900,
-          color: 'white', margin: '0 0 20px',
-        }}>
-          {loading ? '...'
-            : fmt(solde)}
-        </p>
+
+        {/* Pattern géométrique */}
         <div style={{
-          display: 'flex', gap: 24,
-        }}>
-          {[
-            { label: 'Revenus',
-              val: fmt(totalIncomes) },
-            { label: 'Dépenses',
-              val: fmt(totalExpenses) },
-            { label: 'Transactions',
-              val: summary?.totalCount || 0 },
-          ].map((s, i) => (
-            <div key={i} style={{
-              paddingRight: 16,
-              borderRight: i < 2
-                ? '1px solid rgba(255,255,255,0.2)'
-                : 'none',
-            }}>
-              <p style={{
-                color: 'rgba(255,255,255,0.6)',
-                fontSize: 11, margin: '0 0 2px',
+          position: 'absolute',
+          inset: 0,
+          backgroundImage:
+            `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
+
+        {/* Cercles décoratifs */}
+        <div style={{
+          position: 'absolute',
+          top: -40, right: -40,
+          width: 200, height: 200,
+          borderRadius: '50%',
+          backgroundColor:
+            'rgba(255,255,255,0.05)',
+        }} />
+        <div style={{
+          position: 'absolute',
+          bottom: -60, right: 60,
+          width: 150, height: 150,
+          borderRadius: '50%',
+          backgroundColor:
+            'rgba(245,166,35,0.1)',
+        }} />
+
+        {/* Ligne décorative dorée */}
+        <div style={{
+          position: 'absolute',
+          top: 0, left: 24, right: 24,
+          height: 2,
+          background:
+            'linear-gradient(90deg, transparent, rgba(245,166,35,0.5), transparent)',
+          borderRadius: 1,
+        }} />
+
+        {/* Contenu existant */}
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <p style={{
+            color: 'rgba(255,255,255,0.7)',
+            fontSize: 13, margin: '0 0 6px',
+          }}>
+            Solde actuel
+          </p>
+          <p style={{
+            fontSize: 42, fontWeight: 900,
+            color: 'white', margin: '0 0 20px',
+          }}>
+            {loading ? '...'
+              : fmt(solde)}
+          </p>
+          <div style={{
+            display: 'flex', gap: 24,
+          }}>
+            {[
+              { label: 'Revenus',
+                val: fmt(totalIncomes) },
+              { label: 'Dépenses',
+                val: fmt(totalExpenses) },
+              { label: 'Transactions',
+                val: summary?.totalCount || 0 },
+            ].map((s, i) => (
+              <div key={i} style={{
+                paddingRight: 16,
+                borderRight: i < 2
+                  ? '1px solid rgba(255,255,255,0.2)'
+                  : 'none',
               }}>
-                {s.label}
-              </p>
-              <p style={{
-                color: 'white', fontWeight: 700,
-                fontSize: 15, margin: 0,
-              }}>
-                {loading ? '...' : String(s.val)}
-              </p>
-            </div>
-          ))}
+                <p style={{
+                  color: 'rgba(255,255,255,0.6)',
+                  fontSize: 11, margin: '0 0 2px',
+                }}>
+                  {s.label}
+                </p>
+                <p style={{
+                  color: 'white', fontWeight: 700,
+                  fontSize: 15, margin: 0,
+                }}>
+                  {loading ? '...' : String(s.val)}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -224,41 +273,66 @@ export default function DashboardPage() {
           const Icon = s.icon;
           return (
             <div key={i} style={{
+              position: 'relative',
               backgroundColor: 'var(--bg-card)',
               borderRadius: 16, padding: 20,
-              borderLeft: `4px solid ${s.border}`,
+              overflow: 'hidden',
               boxShadow:
                 '0 1px 8px rgba(0,0,0,0.05)',
             }}>
+              {/* Pattern micro decoration */}
               <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10, marginBottom: 12,
+                position: 'absolute',
+                bottom: -20, right: -20,
+                width: 100, height: 100,
+                borderRadius: '50%',
+                backgroundColor: s.bg,
+                opacity: 0.5,
+              }} />
+              <div style={{
+                position: 'absolute',
+                bottom: -40, right: -40,
+                width: 120, height: 120,
+                borderRadius: '50%',
+                backgroundColor: s.bg,
+                opacity: 0.3,
+              }} />
+
+              {/* Contenu */}
+              <div style={{
+                position: 'relative',
+                zIndex: 1,
               }}>
                 <div style={{
-                  width: 36, height: 36,
-                  borderRadius: 10,
-                  backgroundColor: s.bg,
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
+                  gap: 10, marginBottom: 12,
                 }}>
-                  <Icon size={18}
-                    color={s.color} />
+                  <div style={{
+                    width: 36, height: 36,
+                    borderRadius: 10,
+                    backgroundColor: s.bg,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <Icon size={18}
+                      color={s.color} />
+                  </div>
+                  <span style={{
+                    fontSize: 13, color: 'var(--text-muted)',
+                    fontWeight: 500,
+                  }}>
+                    {s.label}
+                  </span>
                 </div>
-                <span style={{
-                  fontSize: 13, color: 'var(--text-muted)',
-                  fontWeight: 500,
+                <p style={{
+                  fontSize: 26, fontWeight: 800,
+                  color: 'var(--text-main)', margin: 0,
                 }}>
-                  {s.label}
-                </span>
+                  {s.val}
+                </p>
               </div>
-              <p style={{
-                fontSize: 26, fontWeight: 800,
-                color: 'var(--text-main)', margin: 0,
-              }}>
-                {s.val}
-              </p>
             </div>
           );
         })}

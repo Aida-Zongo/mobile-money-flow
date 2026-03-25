@@ -338,325 +338,313 @@ export default function LandingPage() {
 
       {/* ===== HERO ===== */}
       <section style={{
+        position: 'relative',
         minHeight: '100vh',
-        display: 'flex', alignItems: 'center',
-        paddingTop: 68,
-        backgroundColor: '#F5F7F5',
+        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        background:
+          'linear-gradient(135deg, #0A7B5E 0%, #076548 50%, #054d36 100%)',
       }}>
-        <div style={S.container} className="hero-grid">
-          {/* Left */}
-          <div>
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center', gap: 8,
-              backgroundColor: '#E8F5F1',
-              color: '#0A7B5E',
-              padding: '6px 16px', borderRadius: 50,
-              fontSize: 13, fontWeight: 600,
-              marginBottom: 24,
-            }}>
-              <Shield size={14} />
-              Conçu pour l'Afrique de l'Ouest
-            </div>
+        {/* Image background Afrique subtile */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage:
+            'url(https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=1920&q=80)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          opacity: 0.07,
+          filter: 'grayscale(100%)',
+        }} />
 
-            <h1 style={{
-              fontSize: 56, fontWeight: 900,
-              lineHeight: 1.1, color: '#1A1D23',
-              marginBottom: 20,
-            }}>
-              Maîtrisez vos<br />
-              finances{' '}
-              <span style={{ color: '#0A7B5E' }}>
-                Mobile Money
-              </span><br />
-              comme un pro.
-            </h1>
+        {/* Pattern géométrique africain */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
 
-            <p style={{
-              fontSize: 17, color: '#8A94A6',
-              lineHeight: 1.7, marginBottom: 32,
-              maxWidth: 480,
-            }}>
-              Suivez chaque franc CFA dépensé,
-              créez des budgets intelligents et
-              atteignez vos objectifs financiers.
-              Orange Money, Wave, Moov — tout en un.
-            </p>
+        {/* Cercles décoratifs */}
+        <div style={{
+          position: 'absolute',
+          top: -100, right: -100,
+          width: 500, height: 500,
+          borderRadius: '50%',
+          background: 'rgba(255,255,255,0.04)',
+          animation: 'pulse 4s ease-in-out infinite',
+        }} />
+        <div style={{
+          position: 'absolute',
+          bottom: -150, left: -100,
+          width: 400, height: 400,
+          borderRadius: '50%',
+          background: 'rgba(245,166,35,0.08)',
+          animation: 'pulse 6s ease-in-out infinite',
+        }} />
 
-            <div style={{
-              display: 'flex', gap: 14,
-              marginBottom: 40,
-            }}>
-              <button
-                onClick={() =>
-                  router.push('/register')}
-                style={S.btnPrimary}
-                onMouseEnter={e => {
-                  e.currentTarget.style.transform =
-                    'translateY(-2px)';
-                  e.currentTarget.style.boxShadow =
-                    '0 8px 30px rgba(10,123,94,0.45)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.transform =
-                    'translateY(0)';
-                  e.currentTarget.style.boxShadow =
-                    '0 4px 20px rgba(10,123,94,0.35)';
-                }}>
-                Commencer gratuitement
-                <ArrowRight size={16} />
-              </button>
-              <button
-                onClick={() =>
-                  scroll('fonctionnalites')}
-                style={S.btnOutline}
-                onMouseEnter={e => {
-                  e.currentTarget.style.borderColor =
-                    '#0A7B5E';
-                  e.currentTarget.style.color =
-                    '#0A7B5E';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.borderColor =
-                    '#E2EAE7';
-                  e.currentTarget.style.color =
-                    '#1A1D23';
-                }}>
-                Voir les fonctionnalités
-              </button>
-            </div>
+        {/* Ligne décorative dorée */}
+        <div style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0,
+          height: 3,
+          background: 'linear-gradient(90deg, transparent, #F5A623, transparent)',
+        }} />
 
-            {/* Social proof */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center', gap: 12,
-            }}>
-              <div style={{ display: 'flex' }}>
-                {['AO','FT','IS','KB','MT'].map(
-                  (init, i) => (
-                  <div key={i} style={{
-                    width: 34, height: 34,
-                    borderRadius: '50%',
-                    backgroundColor: [
-                      '#0A7B5E','#F5A623',
-                      '#16A34A','#2563EB','#DB2777',
-                    ][i],
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white', fontSize: 11,
-                    fontWeight: 700,
-                    marginLeft: i > 0 ? -8 : 0,
-                    border: '2px solid white',
-                  }}>{init}</div>
-                ))}
+        <style>{`
+          @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.05); opacity: 1; }
+          }
+          @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+          }
+        `}</style>
+
+        {/* Contenu hero existant */}
+        <div style={{
+          position: 'relative', zIndex: 2,
+          maxWidth: 1280, margin: '0 auto',
+          padding: '0 24px',
+          width: '100%',
+        }}>
+          <div className="hero-grid">
+            {/* Left */}
+            <div>
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center', gap: 8,
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                color: 'white',
+                padding: '6px 16px', borderRadius: 50,
+                fontSize: 13, fontWeight: 600,
+                marginBottom: 24,
+              }}>
+                <Shield size={14} />
+                Conçu pour l'Afrique de l'Ouest
               </div>
-              <div>
-                <div style={{
-                  display: 'flex', gap: 2,
-                  marginBottom: 2,
-                }}>
-                  {[1,2,3,4,5].map(i => (
-                    <Star key={i} size={13}
-                      fill="#F5A623"
-                      color="#F5A623" />
+
+              <h1 style={{
+                fontSize: 56, fontWeight: 900,
+                lineHeight: 1.1, color: 'white',
+                marginBottom: 20,
+              }}>
+                Maîtrisez vos<br />
+                finances{' '}
+                <span style={{ color: '#F5A623' }}>
+                  Mobile Money
+                </span><br />
+                comme un pro.
+              </h1>
+
+              <p style={{
+                fontSize: 17, color: 'rgba(255,255,255,0.8)',
+                lineHeight: 1.7, marginBottom: 32,
+                maxWidth: 480,
+              }}>
+                Suivez chaque franc CFA dépensé,
+                créez des budgets intelligents et
+                atteignez vos objectifs financiers.
+                Orange Money, Wave, Moov — tout en un.
+              </p>
+
+              <div style={{
+                display: 'flex', gap: 14,
+                marginBottom: 40,
+              }}>
+                <button
+                  onClick={() => router.push('/register')}
+                  style={{
+                    ...S.btnPrimary,
+                    backgroundColor: '#F5A623',
+                    boxShadow: '0 4px 20px rgba(245,166,35,0.3)',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 8px 30px rgba(245,166,35,0.5)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(245,166,35,0.3)';
+                  }}>
+                  Commencer gratuitement
+                  <ArrowRight size={16} />
+                </button>
+                <button
+                  onClick={() => scroll('fonctionnalites')}
+                  style={{
+                    ...S.btnOutline,
+                    backgroundColor: 'transparent',
+                    color: 'white',
+                    borderColor: 'rgba(255,255,255,0.3)',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.borderColor = 'white';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
+                  }}>
+                  Voir les fonctionnalités
+                </button>
+              </div>
+
+              {/* Social proof */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center', gap: 12,
+              }}>
+                <div style={{ display: 'flex' }}>
+                  {['AO','FT','IS','KB','MT'].map((init, i) => (
+                    <div key={i} style={{
+                      width: 34, height: 34,
+                      borderRadius: '50%',
+                      backgroundColor: ['#0A7B5E','#F5A623','#16A34A','#2563EB','#DB2777'][i],
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white', fontSize: 11,
+                      fontWeight: 700,
+                      marginLeft: i > 0 ? -8 : 0,
+                      border: '2px solid white',
+                    }}>{init}</div>
                   ))}
                 </div>
-                <span style={{
-                  fontSize: 13, color: '#8A94A6',
-                }}>
-                  +2 400 utilisateurs satisfaits
-                </span>
+                <div>
+                  <div style={{
+                    display: 'flex', gap: 2,
+                    marginBottom: 2,
+                  }}>
+                    {[1,2,3,4,5].map(i => (
+                      <Star key={i} size={13} fill="#F5A623" color="#F5A623" />
+                    ))}
+                  </div>
+                  <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>
+                    +2 400 utilisateurs satisfaits
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Right — Dashboard mockup */}
-          <div style={{ position: 'relative' }} className="hero-right">
-            <div style={{
-              background:
-                'radial-gradient(circle at center, #E8F5F1, #F5F7F5)',
-              borderRadius: 28, padding: 24,
-              boxShadow:
-                '0 20px 60px rgba(10,123,94,0.12)',
-            }}>
-              {/* Mini dashboard */}
+            {/* Right — Dashboard mockup */}
+            <div style={{ position: 'relative' }} className="hero-right">
               <div style={{
-                backgroundColor: 'white',
-                borderRadius: 20, overflow: 'hidden',
-                boxShadow:
-                  '0 8px 32px rgba(0,0,0,0.12)',
+                background: 'radial-gradient(circle at center, rgba(255,255,255,0.2), rgba(255,255,255,0.05))',
+                borderRadius: 28, padding: 24,
+                boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
               }}>
-                {/* Header */}
+                {/* Mini dashboard */}
                 <div style={{
-                  background:
-                    'linear-gradient(135deg, #0A7B5E, #0D9B76)',
-                  padding: '20px 20px 24px',
+                  backgroundColor: 'white',
+                  borderRadius: 20, overflow: 'hidden',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
                 }}>
-                  <p style={{
-                    color: 'rgba(255,255,255,0.7)',
-                    fontSize: 11, margin: '0 0 4px',
-                  }}>
-                    Total dépensé ce mois
-                  </p>
-                  <p style={{
-                    color: 'white', fontWeight: 900,
-                    fontSize: 26, margin: 0,
-                  }}>
-                    127 450 FCFA
-                  </p>
+                  {/* Header */}
                   <div style={{
-                    display: 'flex', gap: 16,
-                    marginTop: 12,
+                    background: 'linear-gradient(135deg, #0A7B5E, #0D9B76)',
+                    padding: '20px 20px 24px',
                   }}>
+                    <p style={{
+                      color: 'rgba(255,255,255,0.7)',
+                      fontSize: 11, margin: '0 0 4px',
+                    }}>Total dépensé ce mois</p>
+                    <p style={{
+                      color: 'white', fontWeight: 900,
+                      fontSize: 26, margin: 0,
+                    }}>127 450 FCFA</p>
+                    <div style={{
+                      display: 'flex', gap: 16,
+                      marginTop: 12,
+                    }}>
+                      {[
+                        { label: 'Revenus', val: '+85K', color: '#4ade80' },
+                        { label: 'Dépenses', val: '-42K', color: '#fca5a5' },
+                        { label: 'Économies', val: '+12K', color: '#fcd34d' },
+                      ].map(s => (
+                        <div key={s.label}>
+                          <p style={{
+                            color: s.color, fontWeight: 700,
+                            fontSize: 14, margin: 0,
+                          }}>{s.val}</p>
+                          <p style={{
+                            color: 'rgba(255,255,255,0.6)',
+                            fontSize: 10, margin: 0,
+                          }}>{s.label}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Transactions */}
+                  <div style={{ padding: '12px 16px' }}>
                     {[
-                      { label: 'Revenus',
-                        val: '+85K',
-                        color: '#4ade80' },
-                      { label: 'Dépenses',
-                        val: '-42K',
-                        color: '#fca5a5' },
-                      { label: 'Économies',
-                        val: '+12K',
-                        color: '#fcd34d' },
-                    ].map(s => (
-                      <div key={s.label}>
-                        <p style={{
-                          color: s.color,
-                          fontWeight: 700,
-                          fontSize: 14, margin: 0,
-                        }}>{s.val}</p>
-                        <p style={{
-                          color: 'rgba(255,255,255,0.6)',
-                          fontSize: 10, margin: 0,
-                        }}>{s.label}</p>
+                      { label: 'Marché Sankariaré', amt: '-15 000', color: '#F04438' },
+                      { label: 'Recharge Orange', amt: '-5 000', color: '#F04438' },
+                      { label: 'Salaire reçu', amt: '+85 000', color: '#16A34A' },
+                    ].map((t, i) => (
+                      <div key={i} style={{
+                        display: 'flex',
+                        alignItems: 'center', gap: 10,
+                        padding: '8px 0',
+                        borderBottom: i < 2 ? '1px solid #F0F2F8' : 'none',
+                      }}>
+                        <div style={{
+                          width: 28, height: 28,
+                          borderRadius: 8,
+                          backgroundColor: '#E8F5F1',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}>
+                          <Smartphone size={12} color="#0A7B5E" />
+                        </div>
+                        <span style={{
+                          flex: 1, fontSize: 11,
+                          color: '#1A1D23', fontWeight: 500,
+                        }}>{t.label}</span>
+                        <span style={{
+                          fontSize: 12, fontWeight: 700,
+                          color: t.color,
+                        }}>{t.amt}</span>
                       </div>
                     ))}
                   </div>
                 </div>
-                {/* Transactions */}
-                <div style={{ padding: '12px 16px' }}>
-                  {[
-                    { label: 'Marché Sankariaré',
-                      amt: '-15 000',
-                      color: '#F04438' },
-                    { label: 'Recharge Orange',
-                      amt: '-5 000',
-                      color: '#F04438' },
-                    { label: 'Salaire reçu',
-                      amt: '+85 000',
-                      color: '#16A34A' },
-                  ].map((t, i) => (
-                    <div key={i} style={{
-                      display: 'flex',
-                      alignItems: 'center', gap: 10,
-                      padding: '8px 0',
-                      borderBottom: i < 2
-                        ? '1px solid #F0F2F8' : 'none',
-                    }}>
-                      <div style={{
-                        width: 28, height: 28,
-                        borderRadius: 8,
-                        backgroundColor: '#E8F5F1',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}>
-                        <Smartphone size={12}
-                          color="#0A7B5E" />
-                      </div>
-                      <span style={{
-                        flex: 1, fontSize: 11,
-                        color: '#1A1D23',
-                        fontWeight: 500,
-                      }}>{t.label}</span>
-                      <span style={{
-                        fontSize: 12, fontWeight: 700,
-                        color: t.color,
-                      }}>{t.amt}</span>
-                    </div>
-                  ))}
-                </div>
               </div>
-            </div>
 
-            {/* Floating badges */}
-            <div style={{
-              position: 'absolute',
-              top: -16, right: -20,
-              backgroundColor: 'white',
-              borderRadius: 16, padding: '10px 14px',
-              boxShadow:
-                '0 8px 24px rgba(0,0,0,0.12)',
-              animation:
-                'float 3s ease-in-out infinite',
-            }}>
-              <p style={{
-                fontWeight: 700, color: '#16A34A',
-                fontSize: 14, margin: 0,
-              }}>+45 000 FCFA</p>
-              <p style={{
-                color: '#8A94A6', fontSize: 11,
-                margin: 0,
-              }}>Économies ce mois</p>
-            </div>
-
-            <div style={{
-              position: 'absolute',
-              bottom: 20, left: -24,
-              backgroundColor: 'white',
-              borderRadius: 16, padding: '10px 14px',
-              boxShadow:
-                '0 8px 24px rgba(0,0,0,0.12)',
-            }}>
-              <p style={{
-                fontWeight: 700, color: '#0A7B5E',
-                fontSize: 13, margin: '0 0 6px',
-                display: 'flex',
-                alignItems: 'center', gap: 4,
-              }}>
-                <Target size={12} />
-                Budget respecté
-              </p>
+              {/* Floating badges */}
               <div style={{
-                width: 120, height: 6,
-                backgroundColor: '#F0F2F8',
-                borderRadius: 50,
+                position: 'absolute',
+                top: -16, right: -20,
+                backgroundColor: 'white',
+                borderRadius: 16, padding: '10px 14px',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                animation: 'float 3s ease-in-out infinite',
               }}>
-                <div style={{
-                  width: '73%', height: 6,
-                  backgroundColor: '#00C48C',
-                  borderRadius: 50,
-                }} />
+                <p style={{ fontWeight: 700, color: '#16A34A', fontSize: 14, margin: 0 }}>+45 000 FCFA</p>
+                <p style={{ color: '#8A94A6', fontSize: 11, margin: 0 }}>Économies ce mois</p>
               </div>
-              <p style={{
-                color: '#8A94A6', fontSize: 10,
-                margin: '4px 0 0',
-              }}>73%</p>
-            </div>
 
-            <div style={{
-              position: 'absolute',
-              top: 80, left: -28,
-              backgroundColor: 'white',
-              borderRadius: 16, padding: '10px 14px',
-              boxShadow:
-                '0 8px 24px rgba(0,0,0,0.12)',
-            }}>
               <div style={{
-                display: 'flex',
-                alignItems: 'center', gap: 6,
+                position: 'absolute',
+                bottom: 20, left: -24,
+                backgroundColor: 'white',
+                borderRadius: 16, padding: '10px 14px',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
               }}>
-                <Bell size={12} color="#F59E0B" />
                 <p style={{
-                  color: '#F59E0B', fontWeight: 600,
-                  fontSize: 12, margin: 0,
-                }}>Alerte budget</p>
+                  fontWeight: 700, color: '#0A7B5E',
+                  fontSize: 13, margin: '0 0 6px',
+                  display: 'flex',
+                  alignItems: 'center', gap: 4,
+                }}>
+                  <Target size={12} />
+                  Budget respecté
+                </p>
+                <div style={{ width: 120, height: 6, backgroundColor: '#F0F2F8', borderRadius: 50 }}>
+                  <div style={{ width: '73%', height: 6, backgroundColor: '#00C48C', borderRadius: 50 }} />
+                </div>
+                <p style={{ color: '#8A94A6', fontSize: 10, margin: '4px 0 0' }}>73%</p>
               </div>
-              <p style={{
-                color: '#8A94A6', fontSize: 11,
-                margin: '2px 0 0',
-              }}>Transport: 85% atteint</p>
             </div>
           </div>
         </div>
@@ -692,10 +680,35 @@ export default function LandingPage() {
       <section
         id="fonctionnalites"
         style={{
-          padding: '80px 32px',
-          backgroundColor: 'white',
+          position: 'relative',
+          padding: '80px 0',
+          backgroundColor: '#F5F7F5',
+          overflow: 'hidden',
         }}>
-        <div style={S.container}>
+        {/* Pattern points discrets */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage:
+            `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%230A7B5E' fill-opacity='0.04' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
+
+        {/* Blob décoratif en haut à droite */}
+        <div style={{
+          position: 'absolute',
+          top: -80, right: -80,
+          width: 300, height: 300,
+          borderRadius: '50%',
+          background:
+            'radial-gradient(circle, rgba(10,123,94,0.06) 0%, transparent 70%)',
+        }} />
+
+        {/* Contenu existant */}
+        <div style={{
+          ...S.container,
+          position: 'relative',
+          zIndex: 1,
+        }}>
           <div style={{
             textAlign: 'center', marginBottom: 48,
           }}>

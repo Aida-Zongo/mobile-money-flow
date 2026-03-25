@@ -141,8 +141,9 @@ export default function DashboardLayout({
       <aside style={{
         width: 260,
         flexShrink: 0,
-        backgroundColor: 'var(--bg-sidebar)',
-        borderRight: '1px solid var(--border)',
+        background:
+          'linear-gradient(180deg, #ffffff 0%, #fafcfb 100%)',
+        borderRight: '1px solid #E2EAE7',
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
@@ -150,6 +151,13 @@ export default function DashboardLayout({
         top: 0,
         overflow: 'hidden',
       }}>
+
+        {/* Accent ligne verte en haut */}
+        <div style={{
+          height: 3,
+          background:
+            'linear-gradient(90deg, #0A7B5E, #F5A623)',
+        }} />
 
         {/* Logo */}
         <div style={{

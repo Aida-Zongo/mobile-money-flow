@@ -59,214 +59,252 @@ export default function LoginPage() {
       minHeight: '100vh',
       display: 'flex',
       fontFamily: 'DM Sans, sans-serif',
-      backgroundColor: '#F5F7F5',
+      backgroundColor: 'white',
     }}>
-      {/* LEFT */}
+      {/* GAUCHE (background image) */}
       <div style={{
-        width: '45%',
-        backgroundColor: '#0A7B5E',
-        padding: 48,
+        flex: 1,
+        position: 'relative',
+        background:
+          'linear-gradient(135deg, #0A7B5E, #054d36)',
         display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-      }}
-        className="hidden lg:flex">
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+        minHeight: '100vh',
+      }} className="hidden lg:flex">
+
+        {/* Image Ouagadougou / BF */}
         <div style={{
-          display: 'flex',
-          alignItems: 'center', gap: 12,
+          position: 'absolute',
+          inset: 0,
+          backgroundImage:
+            'url(https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=800&q=80)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          opacity: 0.15,
+        }} />
+
+        {/* Overlay gradient */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background:
+            'linear-gradient(to bottom, rgba(10,123,94,0.7), rgba(5,77,54,0.9))',
+        }} />
+
+        {/* Pattern africain */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage:
+            `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10zM10 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10S0 25.523 0 20s4.477-10 10-10z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
+
+        {/* Contenu gauche */}
+        <div style={{
+          position: 'relative', zIndex: 2,
+          textAlign: 'center', padding: 40,
+          color: 'white',
         }}>
           <div style={{
-            width: 40, height: 40,
-            borderRadius: 12,
+            width: 72, height: 72,
+            borderRadius: 20,
             backgroundColor: 'white',
             display: 'flex', alignItems: 'center',
             justifyContent: 'center',
-            fontWeight: 800, color: '#0A7B5E',
-            fontSize: 15,
-          }}>MF</div>
-          <span style={{
-            color: 'white', fontWeight: 700,
-            fontSize: 20,
-          }}>MoneyFlow</span>
-        </div>
-        <div>
-          <h1 style={{
-            color: 'white', fontSize: 36,
-            fontWeight: 800, lineHeight: 1.2,
-            marginBottom: 16,
+            margin: '0 auto 20px',
+            fontSize: 24, fontWeight: 800,
+            color: '#0A7B5E',
           }}>
-            Votre argent,<br />sous contrôle.
+            MF
+          </div>
+          <h1 style={{
+            fontSize: 32, fontWeight: 800,
+            marginBottom: 12, color: 'white',
+          }}>
+            MoneyFlow
           </h1>
           <p style={{
-            color: 'rgba(255,255,255,0.7)',
-            fontSize: 15, lineHeight: 1.6,
+            fontSize: 16, opacity: 0.85,
+            lineHeight: 1.6, maxWidth: 300,
+            margin: '0 auto 32px',
+            color: 'white',
           }}>
-            Suivez vos dépenses Mobile Money,
-            gérez vos budgets et comprenez
-            vos habitudes financières.
+            Gérez vos finances Mobile Money<br />
+            au Burkina Faso
           </p>
+
+          {/* Stats */}
           <div style={{
-            display: 'flex', gap: 10,
-            marginTop: 24, flexWrap: 'wrap',
+            display: 'flex', gap: 24,
+            justifyContent: 'center',
           }}>
-            {['Orange Money', 'Wave', 'Moov Money']
-              .map(op => (
-                <span key={op} style={{
-                  backgroundColor: 'rgba(255,255,255,0.15)',
-                  color: 'rgba(255,255,255,0.9)',
-                  padding: '6px 14px', borderRadius: 50,
-                  fontSize: 13,
-                }}>{op}</span>
-              ))}
+            {[
+              { val: '3', label: 'Opérateurs' },
+              { val: '100%', label: 'Sécurisé' },
+              { val: '24/7', label: 'Disponible' },
+            ].map((s, i) => (
+              <div key={i}>
+                <div style={{
+                  fontSize: 22, fontWeight: 800,
+                  color: '#F5A623',
+                }}>{s.val}</div>
+                <div style={{
+                  fontSize: 12, opacity: 0.75,
+                  color: 'white',
+                }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Drapeau BF */}
+          <div style={{
+            marginTop: 40, fontSize: 13,
+            opacity: 0.6, color: 'white',
+          }}>
+            🇧🇫 Fait au Burkina Faso
           </div>
         </div>
-        <p style={{
-          color: 'rgba(255,255,255,0.5)', fontSize: 13,
-        }}>
-          2026 MoneyFlow — Burkina Faso
-        </p>
       </div>
 
-      {/* RIGHT */}
+      {/* DROITE (formulaire blanc) */}
       <div style={{
-        flex: 1, display: 'flex',
-        alignItems: 'center', justifyContent: 'center',
-        padding: 24,
+        width: 480,
+        display: 'flex', alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'white',
+        padding: 48,
+        minHeight: '100vh',
       }}>
-        <div style={{ width: '100%', maxWidth: 400 }}>
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: 24, padding: 32,
-            boxShadow: '0 1px 12px rgba(0,0,0,0.06)',
+        <div style={{ width: '100%', maxWidth: 360 }}>
+          <h2 style={{
+            fontSize: 24, fontWeight: 800,
+            color: '#1A1D23', marginBottom: 4,
           }}>
-            <h2 style={{
-              fontSize: 24, fontWeight: 800,
-              color: '#1A1D23', marginBottom: 4,
-            }}>
-              Bon retour
-            </h2>
-            <p style={{
-              color: '#8A94A6', fontSize: 14,
-              marginBottom: 24,
-            }}>
-              Connectez-vous à votre compte
-            </p>
+            Bon retour
+          </h2>
+          <p style={{
+            color: '#8A94A6', fontSize: 14,
+            marginBottom: 24,
+          }}>
+            Connectez-vous à votre compte
+          </p>
 
-            {error && (
-              <div style={{
-                backgroundColor: '#FEF2F2',
-                color: '#F04438',
-                padding: '12px 16px',
-                borderRadius: 12, fontSize: 14,
-                marginBottom: 16,
-              }}>{error}</div>
-            )}
+          {error && (
+            <div style={{
+              backgroundColor: '#FEF2F2',
+              color: '#F04438',
+              padding: '12px 16px',
+              borderRadius: 12, fontSize: 14,
+              marginBottom: 16,
+            }}>{error}</div>
+          )}
 
-            <form onSubmit={handleSubmit}>
-              <div style={{ marginBottom: 14 }}>
-                <label style={{
-                  display: 'block', fontSize: 13,
-                  fontWeight: 500, color: '#1A1D23',
-                  marginBottom: 6,
-                }}>Email</label>
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: 14 }}>
+              <label style={{
+                display: 'block', fontSize: 13,
+                fontWeight: 500, color: '#1A1D23',
+                marginBottom: 6,
+              }}>Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="vous@exemple.com"
+                style={inputStyle}
+              />
+            </div>
+
+            <div style={{ marginBottom: 10 }}>
+              <label style={{
+                display: 'block', fontSize: 13,
+                fontWeight: 500, color: '#1A1D23',
+                marginBottom: 6,
+              }}>Mot de passe</label>
+              <div style={{ position: 'relative' }}>
                 <input
-                  type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  placeholder="vous@exemple.com"
-                  style={inputStyle}
-                />
-              </div>
-
-              <div style={{ marginBottom: 10 }}>
-                <label style={{
-                  display: 'block', fontSize: 13,
-                  fontWeight: 500, color: '#1A1D23',
-                  marginBottom: 6,
-                }}>Mot de passe</label>
-                <div style={{ position: 'relative' }}>
-                  <input
-                    type={showPwd ? 'text' : 'password'}
-                    value={password}
-                    onChange={e =>
-                      setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    style={{
-                      ...inputStyle,
-                      paddingRight: 44,
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPwd(!showPwd)}
-                    style={{
-                      position: 'absolute',
-                      right: 14,
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      color: '#8A94A6',
-                      display: 'flex',
-                    }}>
-                    {showPwd
-                      ? <EyeOff size={18} />
-                      : <Eye size={18} />}
-                  </button>
-                </div>
-              </div>
-
-              <div style={{
-                textAlign: 'right', marginBottom: 20,
-              }}>
-                <span
-                  onClick={() => router.push('/forgot-password')}
+                  type={showPwd ? 'text' : 'password'}
+                  value={password}
+                  onChange={e =>
+                    setPassword(e.target.value)}
+                  placeholder="••••••••"
                   style={{
-                    color: '#0A7B5E', fontSize: 13,
-                    fontWeight: 500, cursor: 'pointer',
+                    ...inputStyle,
+                    paddingRight: 44,
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPwd(!showPwd)}
+                  style={{
+                    position: 'absolute',
+                    right: 14,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#8A94A6',
+                    display: 'flex',
                   }}>
-                  Mot de passe oublié ?
-                </span>
+                  {showPwd
+                    ? <EyeOff size={18} />
+                    : <Eye size={18} />}
+                </button>
               </div>
+            </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                style={{
-                  width: '100%', padding: '13px',
-                  backgroundColor: loading
-                    ? '#7BBDAD' : '#0A7B5E',
-                  color: 'white', border: 'none',
-                  borderRadius: 50, fontSize: 15,
-                  fontWeight: 600,
-                  cursor: loading
-                    ? 'not-allowed' : 'pointer',
-                  boxShadow: loading ? 'none'
-                    : '0 4px 14px rgba(10,123,94,0.35)',
-                  fontFamily: 'DM Sans, sans-serif',
-                }}>
-                {loading
-                  ? 'Connexion...'
-                  : 'Se connecter'}
-              </button>
-            </form>
-
-            <p style={{
-              textAlign: 'center', marginTop: 20,
-              fontSize: 14, color: '#8A94A6',
+            <div style={{
+              textAlign: 'right', marginBottom: 20,
             }}>
-              Pas encore de compte ?{' '}
               <span
-                onClick={() => router.push('/register')}
+                onClick={() => router.push('/forgot-password')}
                 style={{
-                  color: '#0A7B5E', fontWeight: 600,
-                  cursor: 'pointer',
+                  color: '#0A7B5E', fontSize: 13,
+                  fontWeight: 500, cursor: 'pointer',
                 }}>
-                Créer un compte
+                Mot de passe oublié ?
               </span>
-            </p>
-          </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                width: '100%', padding: '13px',
+                backgroundColor: loading
+                  ? '#7BBDAD' : '#0A7B5E',
+                color: 'white', border: 'none',
+                borderRadius: 50, fontSize: 15,
+                fontWeight: 600,
+                cursor: loading
+                  ? 'not-allowed' : 'pointer',
+                boxShadow: loading ? 'none'
+                  : '0 4px 14px rgba(10,123,94,0.35)',
+                fontFamily: 'DM Sans, sans-serif',
+              }}>
+              {loading
+                ? 'Connexion...'
+                : 'Se connecter'}
+            </button>
+          </form>
+
+          <p style={{
+            textAlign: 'center', marginTop: 24,
+            fontSize: 14, color: '#8A94A6',
+          }}>
+            Pas encore de compte ?{' '}
+            <span
+              onClick={() => router.push('/register')}
+              style={{
+                color: '#0A7B5E', fontWeight: 600,
+                cursor: 'pointer',
+              }}>
+              Créer un compte
+            </span>
+          </p>
         </div>
       </div>
     </div>
