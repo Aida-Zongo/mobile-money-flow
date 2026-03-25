@@ -240,6 +240,8 @@ export default function ParametresPage() {
     useState(false);
   const [deleting, setDeleting] =
     useState(false);
+  const [showAboutModal, setShowAboutModal] =
+    useState(false);
   const [toast, setToast] = useState<any>(null);
 
   const [showRatingModal, setShowRatingModal] =
@@ -820,16 +822,24 @@ export default function ParametresPage() {
           icon={Info}
           iconBg="#E8F5F1"
           iconColor="#0A7B5E"
-          label="MoneyFlow v1.0.0"
-          desc="Fait avec ❤️ au Burkina Faso"
+          label="MoneyFlow"
+          desc="Fait avec ❤️ à Koudougou, BF"
+          onClick={() => setShowAboutModal(true)}
           last
           right={
-            <span style={{
-              fontSize: 12,
-              color: 'var(--text-muted)',
+            <div style={{
+              display: 'flex',
+              alignItems: 'center', gap: 6,
             }}>
-              2026
-            </span>
+              <span style={{
+                fontSize: 12,
+                color: 'var(--text-muted)',
+              }}>
+                2026
+              </span>
+              <ChevronRight size={16}
+                color="#8A94A6" />
+            </div>
           }
         />
       </Section>
@@ -1337,6 +1347,76 @@ export default function ParametresPage() {
             </div>
           </div>
         )}
+      </Modal>
+      {/* MODAL À PROPOS */}
+      <Modal
+        show={showAboutModal}
+        onClose={() => setShowAboutModal(false)}
+        title="À propos de MoneyFlow">
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: 80, height: 80,
+            borderRadius: 20,
+            backgroundColor: '#0A7B5E',
+            display: 'flex', alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 16px',
+            boxShadow: '0 8px 16px rgba(10,123,94,0.2)',
+          }}>
+            <span style={{
+              color: 'white', fontSize: 28,
+              fontWeight: 800,
+            }}>MF</span>
+          </div>
+          <h3 style={{
+            fontSize: 20, fontWeight: 800,
+            color: 'var(--text-main)', marginBottom: 8,
+          }}>MoneyFlow</h3>
+          <p style={{
+            color: 'var(--text-muted)', fontSize: 14,
+            lineHeight: 1.6, marginBottom: 20,
+          }}>
+            MoneyFlow est une plateforme de gestion
+            financière conçue spécifiquement pour le
+            contexte burkinabé. Suivez vos dépenses
+            Mobile Money en toute simplicité.
+          </p>
+          <div style={{
+            backgroundColor: 'var(--bg)',
+            borderRadius: 16, padding: 16,
+            marginBottom: 20, textAlign: 'left',
+          }}>
+            <p style={{
+              fontSize: 13, color: 'var(--text-muted)',
+              marginBottom: 8,
+            }}>
+              📍 **Localisation :** Koudougou, Burkina Faso
+            </p>
+            <p style={{
+              fontSize: 13, color: 'var(--text-muted)',
+              marginBottom: 8,
+            }}>
+              📧 **Contact :** [aida04zng@gmail.com](mailto:aida04zng@gmail.com)
+            </p>
+            <p style={{
+              fontSize: 13, color: 'var(--text-muted)',
+            }}>
+              ⚖️ **Licence :** Tous droits réservés &copy; 2026
+            </p>
+          </div>
+          <button
+            onClick={() => setShowAboutModal(false)}
+            style={{
+              width: '100%', padding: '12px',
+              backgroundColor: '#0A7B5E',
+              color: 'white', border: 'none',
+              borderRadius: 50, fontSize: 14,
+              fontWeight: 600, cursor: 'pointer',
+              fontFamily: 'DM Sans, sans-serif',
+            }}>
+            Fermer
+          </button>
+        </div>
       </Modal>
     </div>
   );

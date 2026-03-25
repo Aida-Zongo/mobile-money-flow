@@ -1626,7 +1626,7 @@ export default function LandingPage() {
             {
               title: 'Contact',
               links: ['aida04zng@gmail.com',
-                'Ouagadougou, BF'],
+                'Koudougou, BF'],
             },
           ].map((col, i) => (
             <div key={i}>

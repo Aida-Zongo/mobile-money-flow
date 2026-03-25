@@ -318,7 +318,7 @@ const menuSections = [
                   <div className="flex-1">
                     <p className="font-semibold text-foreground">Cet appareil</p>
                     <p className="text-xs text-muted-foreground">
-                      Ouagadougou, Burkina Faso
+                      Koudougou, Burkina Faso
                     </p>
                   </div>
                   <span className="text-xs text-success font-semibold bg-success/10 px-2 py-1 rounded-full">
