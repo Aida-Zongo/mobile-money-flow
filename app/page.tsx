@@ -226,9 +226,9 @@ export default function LandingPage() {
               fontSize: 14,
             }}>MF</div>
             <span style={{
-              fontWeight: 700, fontSize: 19,
-              color: '#1A1D23',
-            }}>MoneyFlow</span>
+              fontWeight: 700, fontSize: 17,
+              color: 'var(--text-main)',
+            }}>MoneyFlow (v2)</span>
           </div>
 
           <div className="nav-links">
