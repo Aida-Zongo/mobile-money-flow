@@ -138,12 +138,12 @@ export default function DashboardLayout({
     }} className="dashboard-root">
       <style dangerouslySetInnerHTML={{ __html: `
         @media (max-width: 1024px) {
-          .sidebar { display: none !important; }
+          .sidebar { 
+            display: none !important; 
+            width: 0 !important;
+            flex: 0 !important;
+          }
           .bottom-nav { display: flex !important; }
-        }
-        @media (min-width: 1025px) {
-          .sidebar { display: flex !important; }
-          .bottom-nav { display: none !important; }
         }
       `}} />
 
@@ -194,7 +194,7 @@ export default function DashboardLayout({
             <span style={{
               fontWeight: 700, fontSize: 17,
               color: 'var(--text-main)',
-            }}>MoneyFlow (v2)</span>
+            }}>MoneyFlow (v3)</span>
           </div>
 
           <div style={{ position: 'relative' }}>

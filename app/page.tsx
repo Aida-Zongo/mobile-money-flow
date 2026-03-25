@@ -203,10 +203,12 @@ export default function LandingPage() {
         @media (max-width: 1024px) {
           .nav-links { display: none !important; }
           .hidden-mobile { display: none !important; }
-          .hero-grid { grid-template-columns: 1fr !important; }
-          .stats-grid { grid-template-columns: 1fr !important; }
-          .features-grid { grid-template-columns: 1fr !important; }
-          .pricing-grid { grid-template-columns: 1fr !important; }
+          .hero-grid, .stats-grid, .features-grid, .pricing-grid { 
+            display: flex !important; 
+            flex-direction: column !important;
+            width: 100% !important;
+          }
+          .hero-h1 { font-size: 32px !important; text-align: center; }
         }
       `}} />
 
@@ -238,7 +240,7 @@ export default function LandingPage() {
             <span style={{
               fontWeight: 700, fontSize: 17,
               color: 'var(--text-main)',
-            }}>MoneyFlow (v2)</span>
+            }}>MoneyFlow (v3)</span>
           </div>
 
           <div className="nav-links">
