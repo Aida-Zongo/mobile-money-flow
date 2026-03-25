@@ -135,7 +135,17 @@ export default function DashboardLayout({
       overflow: 'hidden',
       backgroundColor: 'var(--bg)',
       fontFamily: 'DM Sans, sans-serif',
-    }}>
+    }} className="dashboard-root">
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media (max-width: 1024px) {
+          .sidebar { display: none !important; }
+          .bottom-nav { display: flex !important; }
+        }
+        @media (min-width: 1025px) {
+          .sidebar { display: flex !important; }
+          .bottom-nav { display: none !important; }
+        }
+      `}} />
 
       {/* ===== SIDEBAR FIXE ===== */}
       <aside 

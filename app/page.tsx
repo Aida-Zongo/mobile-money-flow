@@ -199,6 +199,16 @@ export default function LandingPage() {
 
   return (
     <div style={S.page}>
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media (max-width: 1024px) {
+          .nav-links { display: none !important; }
+          .hidden-mobile { display: none !important; }
+          .hero-grid { grid-template-columns: 1fr !important; }
+          .stats-grid { grid-template-columns: 1fr !important; }
+          .features-grid { grid-template-columns: 1fr !important; }
+          .pricing-grid { grid-template-columns: 1fr !important; }
+        }
+      `}} />
 
       {/* ===== NAVBAR ===== */}
       <nav style={S.nav}>

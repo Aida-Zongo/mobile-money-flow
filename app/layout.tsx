@@ -2,10 +2,18 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { UserProvider } from '@/contexts/UserContext'
 import { LanguageProvider } from '@/lib/LanguageContext'
+import type { Viewport } from 'next'
 
 export const metadata: Metadata = {
   title: 'MoneyFlow',
   description: 'Expense Tracker Mobile Money',
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 }
 
 export default function RootLayout({
