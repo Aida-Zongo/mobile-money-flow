@@ -191,8 +191,9 @@ export default function DashboardLayout({
           top: 0,
           left: 0,
           zIndex: 1000,
-          overflowY: 'auto',
-          overflowX: 'hidden',
+          overflow: 'visible',
+          display: 'flex',
+          flexDirection: 'column',
         }}>
 
         {/* Accent ligne verte en haut */}
@@ -277,14 +278,14 @@ export default function DashboardLayout({
                     zIndex: 40,
                   }} />
                 <div style={{
-                  position: 'absolute',
-                  top: 0, left: 50,
-                  width: 300, zIndex: 9999,
+                  position: 'fixed',
+                  top: 70, left: 265,
+                  width: 320, zIndex: 10001,
                   backgroundColor: 'var(--bg-card)',
                   borderRadius: 16,
                   border: '1px solid var(--border)',
                   boxShadow:
-                    '0 12px 48px rgba(0,0,0,0.25)',
+                    '0 12px 64px rgba(0,0,0,0.3)',
                   overflow: 'hidden',
                 }}>
                   <div style={{
