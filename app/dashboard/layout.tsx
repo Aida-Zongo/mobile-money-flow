@@ -4,7 +4,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import {
   Home, TrendingDown, Target,
   DollarSign, BarChart3, LogOut,
-  User, Settings, Bell, HelpCircle
+  User, Settings, Bell, HelpCircle, Shield
 } from 'lucide-react';
 import { t } from '@/lib/i18n';
 
@@ -130,6 +130,10 @@ export default function DashboardLayout({
     { label: t('nav.incomes'), icon: DollarSign, path: '/dashboard/revenus' },
     { label: t('nav.stats'), icon: BarChart3, path: '/dashboard/stats' },
   ];
+
+  const adminLinks = user?.role === 'admin' ? [
+    { label: 'Administration', icon: Shield, path: '/dashboard/admin' },
+  ] : [];
 
   const bottomLinks = [
     { label: t('nav.profile'), icon: User, path: '/dashboard/profil' },
@@ -461,6 +465,52 @@ export default function DashboardLayout({
               </button>
             );
           })}
+
+          {adminLinks.length > 0 && (
+            <div style={{ marginTop: 16 }}>
+              <p style={{
+                fontSize: 11, fontWeight: 600,
+                color: 'var(--text-muted)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                padding: '8px 8px 4px', margin: 0,
+              }}>
+                Administration
+              </p>
+              {adminLinks.map(link => {
+                const Icon = link.icon;
+                const active = isActive(link.path);
+                return (
+                  <button
+                    key={link.path}
+                    onClick={() => router.push(link.path)}
+                    style={{
+                      width: '100%', display: 'flex',
+                      alignItems: 'center', gap: 10,
+                      padding: '10px 12px', borderRadius: 12,
+                      border: 'none', cursor: 'pointer',
+                      fontSize: 14,
+                      fontWeight: active ? 600 : 400,
+                      backgroundColor: active ? 'var(--primary-light)' : 'transparent',
+                      color: active ? 'var(--primary)' : 'var(--text-muted)',
+                      marginBottom: 2, textAlign: 'left',
+                      fontFamily: 'DM Sans, sans-serif',
+                      transition: 'all 0.15s',
+                    }}>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: 8,
+                      backgroundColor: active ? 'var(--primary)' : 'var(--bg)',
+                      display: 'flex', alignItems: 'center',
+                      justifyContent: 'center', flexShrink: 0,
+                    }}>
+                      <Icon size={16} color={active ? 'white' : 'var(--text-muted)'} />
+                    </div>
+                    {link.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           <div style={{
             margin: '16px 0 8px', borderTop: '1px solid var(--border)',
