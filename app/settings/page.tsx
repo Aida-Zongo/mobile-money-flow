@@ -27,7 +27,7 @@ export default function SettingsPage() {
   const [securityOpen, setSecurityOpen] = useState(false)
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
   const [budgetAlerts, setBudgetAlerts] = useState(true)
-  const [weeklyReport, setWeeklyReport] = useState(false)
+  const [monthlyReport, setMonthlyReport] = useState(false)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
 
   
@@ -114,10 +114,10 @@ const menuSections = [
         },
         {
           icon: FileText,
-          label: "Rapport hebdomadaire",
+          label: "Rapport Mensuel PDF",
           toggle: true,
-          value: weeklyReport,
-          onChange: setWeeklyReport,
+          value: monthlyReport,
+          onChange: setMonthlyReport,
         },
       ],
     },

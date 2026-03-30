@@ -1,5 +1,6 @@
 const Expense = require('../models/Expense');
 const Budget = require('../models/Budget');
+const Income = require('../models/Income');
 
 const getSummary = async (req, res) => {
   try {
@@ -13,7 +14,7 @@ const getSummary = async (req, res) => {
     const end = new Date(
       year, month, 0, 23, 59, 59);
 
-    const [totalAgg, catAgg, budgetCount] =
+    const [totalAgg, catAgg, budgetCount, incomeAgg] =
       await Promise.all([
         Expense.aggregate([
           {
@@ -48,12 +49,26 @@ const getSummary = async (req, res) => {
         ]),
         Budget.countDocuments({
           userId: uid, month, year
-        })
+        }),
+        Income.aggregate([
+          {
+            $match: {
+              userId: uid, month, year
+            }
+          },
+          {
+            $group: {
+              _id: null,
+              total: { $sum: '$amount' }
+            }
+          }
+        ])
       ]);
 
     const totalMonth = totalAgg[0]?.total || 0;
     const totalCount = totalAgg[0]?.count || 0;
     const topCategory = catAgg[0]?._id || null;
+    const totalRevenues = incomeAgg[0]?.total || 0;
 
     let budgetUsedPercent = 0;
     if (budgetCount > 0) {
@@ -73,6 +88,8 @@ const getSummary = async (req, res) => {
     return res.json({
       success: true,
       totalMonth,
+      totalExpenses: totalMonth,
+      totalRevenues,
       totalCount,
       topCategory,
       budgetCount,

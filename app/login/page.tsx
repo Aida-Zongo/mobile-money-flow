@@ -3,10 +3,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { loginUser } from '@/lib/auth';
 import { Eye, EyeOff } from 'lucide-react';
+import { useLanguage } from '@/lib/LanguageContext';
 
 export default function LoginPage() {
   const router = useRouter();
-  // const { login } = useUser();
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
@@ -16,27 +17,18 @@ export default function LoginPage() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     if (!email || !password) {
-      setError('Remplissez tous les champs');
+      setError(t('login.error_fields'));
       return;
     }
     setLoading(true);
     setError('');
     try {
-      const result = await loginUser(email.trim(), password);
-      
-      console.log('=== LOGIN DEBUG ===');
-      console.log('result:', result);
-      console.log('token:', result?.token);
-      console.log('user:', result?.user);
-      console.log('localStorage token:',
-        localStorage.getItem('token'));
-      console.log('===================');
-
+      await loginUser(email.trim(), password);
       window.location.href = '/dashboard';
     } catch (err: any) {
       setLoading(false);
       setError(
-        err.message || 'Email ou mot de passe incorrect'
+        err.message || t('login.error_auth')
       );
     }
   };
@@ -73,7 +65,6 @@ export default function LoginPage() {
         minHeight: '100vh',
       }} className="hidden lg:flex">
 
-        {/* Image Ouagadougou / BF */}
         <div style={{
           position: 'absolute',
           inset: 0,
@@ -84,7 +75,6 @@ export default function LoginPage() {
           opacity: 0.25,
         }} />
 
-        {/* Overlay gradient */}
         <div style={{
           position: 'absolute',
           inset: 0,
@@ -92,7 +82,6 @@ export default function LoginPage() {
             'linear-gradient(to bottom, rgba(10,123,94,0.7), rgba(5,77,54,0.9))',
         }} />
 
-        {/* Pattern africain */}
         <div style={{
           position: 'absolute',
           inset: 0,
@@ -100,7 +89,6 @@ export default function LoginPage() {
             `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10zM10 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10S0 25.523 0 20s4.477-10 10-10z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }} />
 
-        {/* Contenu gauche */}
         <div style={{
           position: 'relative', zIndex: 2,
           textAlign: 'center', padding: 40,
@@ -130,19 +118,17 @@ export default function LoginPage() {
             margin: '0 auto 32px',
             color: 'white',
           }}>
-            Gérez vos finances Mobile Money<br />
-            au Burkina Faso
+            {t('login.tagline')}
           </p>
 
-          {/* Stats */}
           <div style={{
             display: 'flex', gap: 24,
             justifyContent: 'center',
           }}>
             {[
-              { val: '3', label: 'Opérateurs' },
-              { val: '100%', label: 'Sécurisé' },
-              { val: '24/7', label: 'Disponible' },
+              { val: '3', label: t('login.stat_operators') },
+              { val: '100%', label: t('login.stat_secure') },
+              { val: '24/7', label: t('login.stat_available') },
             ].map((s, i) => (
               <div key={i}>
                 <div style={{
@@ -157,12 +143,11 @@ export default function LoginPage() {
             ))}
           </div>
 
-          {/* Drapeau BF */}
           <div style={{
             marginTop: 40, fontSize: 13,
             opacity: 0.6, color: 'white',
           }}>
-            🇧🇫 Fait au Burkina Faso
+            🇧🇫 {t('login.made_in')}
           </div>
         </div>
       </div>
@@ -182,13 +167,13 @@ export default function LoginPage() {
             fontSize: 24, fontWeight: 800,
             color: '#1A1D23', marginBottom: 4,
           }}>
-            Bon retour
+            {t('login.title')}
           </h2>
           <p style={{
             color: '#8A94A6', fontSize: 14,
             marginBottom: 24,
           }}>
-            Connectez-vous à votre compte
+            {t('login.subtitle')}
           </p>
 
           {error && (
@@ -207,7 +192,7 @@ export default function LoginPage() {
                 display: 'block', fontSize: 13,
                 fontWeight: 500, color: '#1A1D23',
                 marginBottom: 6,
-              }}>Email</label>
+              }}>{t('login.email_label')}</label>
               <input
                 type="email"
                 value={email}
@@ -222,7 +207,7 @@ export default function LoginPage() {
                 display: 'block', fontSize: 13,
                 fontWeight: 500, color: '#1A1D23',
                 marginBottom: 6,
-              }}>Mot de passe</label>
+              }}>{t('login.password_label')}</label>
               <div style={{ position: 'relative' }}>
                 <input
                   type={showPwd ? 'text' : 'password'}
@@ -265,7 +250,7 @@ export default function LoginPage() {
                   color: '#0A7B5E', fontSize: 13,
                   fontWeight: 500, cursor: 'pointer',
                 }}>
-                Mot de passe oublié ?
+                {t('login.forgot_password')}
               </span>
             </div>
 
@@ -286,8 +271,8 @@ export default function LoginPage() {
                 fontFamily: 'DM Sans, sans-serif',
               }}>
               {loading
-                ? 'Connexion...'
-                : 'Se connecter'}
+                ? t('login.submitting')
+                : t('login.submit')}
             </button>
           </form>
 
@@ -295,14 +280,14 @@ export default function LoginPage() {
             textAlign: 'center', marginTop: 24,
             fontSize: 14, color: '#8A94A6',
           }}>
-            Pas encore de compte ?{' '}
+            {t('login.no_account')}{' '}
             <span
               onClick={() => router.push('/register')}
               style={{
                 color: '#0A7B5E', fontWeight: 600,
                 cursor: 'pointer',
               }}>
-              Créer un compte
+              {t('login.create_account')}
             </span>
           </p>
         </div>

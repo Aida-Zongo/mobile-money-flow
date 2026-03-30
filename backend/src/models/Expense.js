@@ -23,5 +23,9 @@ const expenseSchema = new mongoose.Schema({
     date: { type: Date, default: Date.now },
 }, { timestamps: true });
 
+// Index composé pour améliorer les performances des classements et du dashboard
+expenseSchema.index({ userId: 1, date: -1 });
+expenseSchema.index({ userId: 1, category: 1, date: -1 });
+
 module.exports =
     mongoose.model('Expense', expenseSchema);

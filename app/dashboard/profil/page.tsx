@@ -15,7 +15,7 @@ const OPERATORS = [
     color:'#0088FF' },
   { id:'moov_money', label:'Moov Money',
     color:'#00AA44' },
-  { id:'other', label:'Autre',
+  { id:'other', label: 'Autre', // This will be translated in UI
     color:'var(--text-muted)' },
 ];
 
@@ -76,7 +76,7 @@ export default function ProfilPage() {
 
   const saveProfile = async () => {
     if (!name.trim()) {
-      showToast('Le nom est requis', true);
+      showToast(t('register.error_fields'), true);
       return;
     }
     setSaving(true);
@@ -96,11 +96,11 @@ export default function ProfilPage() {
         JSON.stringify(updated));
       setUser(updated);
       setEditing(false);
-      showToast('Profil mis à jour');
+      showToast(t('profile.save_success'));
     } catch(e: any) {
       showToast(
         e.response?.data?.message ||
-        'Erreur lors de la mise à jour',
+        t('profile.save_error'),
         true
       );
     }
@@ -109,17 +109,17 @@ export default function ProfilPage() {
 
   const changePassword = async () => {
     if (!currentPwd || !newPwd || !confirmPwd) {
-      showToast('Remplissez tous les champs', true);
+      showToast(t('register.error_fields'), true);
       return;
     }
     if (newPwd.length < 6) {
-      showToast('Mot de passe trop court (min 6)',
+      showToast(t('register.error_password_length'),
         true);
       return;
     }
     if (newPwd !== confirmPwd) {
       showToast(
-        'Les mots de passe ne correspondent pas',
+        t('register.error_password_match'),
         true
       );
       return;
@@ -155,7 +155,7 @@ export default function ProfilPage() {
 
       if (!res.ok || !data.success) {
         throw new Error(
-          data.message || 'Erreur serveur'
+          data.message || t('profile.password_error')
         );
       }
 
@@ -163,12 +163,12 @@ export default function ProfilPage() {
       setNewPwd('');
       setConfirmPwd('');
       setShowPwd(false);
-      showToast('Mot de passe modifié');
+      showToast(t('profile.password_success'));
 
     } catch(e: any) {
       console.error('changePassword error:', e);
       showToast(
-        e.message || 'Erreur lors du changement',
+        e.message || t('profile.password_error'),
         true
       );
     }
@@ -177,7 +177,7 @@ export default function ProfilPage() {
   
   const refreshUserFromServer = async () => {
     try {
-      showToast('Mise à jour du profil...');
+      showToast(t('profile.sync_start'));
       const token = localStorage.getItem('token');
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
       
@@ -190,13 +190,13 @@ export default function ProfilPage() {
         if (data.success && data.user) {
           localStorage.setItem('user', JSON.stringify(data.user));
           setUser(data.user);
-          showToast('Profil synchronisé');
+          showToast(t('profile.sync_success'));
           // Si le rôle a changé, on recharge pour mettre à jour le layout
           window.location.reload();
         }
       }
     } catch(e) {
-      showToast('Erreur de synchronisation', true);
+      showToast(t('profile.sync_error'), true);
     }
   };
 
@@ -232,13 +232,13 @@ export default function ProfilPage() {
           fontSize: 24, fontWeight: 800,
           color: 'var(--text-main)', margin: 0,
         }}>
-          Mon Profil
+          {t('profile.title')}
         </h1>
         <p style={{
           color: 'var(--text-muted)', fontSize: 14,
           marginTop: 4,
         }}>
-          Gérez vos informations personnelles
+          {t('profile.subtitle')}
         </p>
       </div>
 
@@ -273,7 +273,7 @@ export default function ProfilPage() {
             fontWeight: 700, fontSize: 17,
             color: 'var(--text-main)', margin: 0,
           }}>
-            {user?.name || 'Utilisateur'}
+            {user?.name || t('nav.greeting_default')}
           </p>
           <p style={{
             color: 'var(--text-muted)', fontSize: 13,
@@ -292,8 +292,8 @@ export default function ProfilPage() {
           }}>
             <User size={13} />
             {user?.role === 'admin'
-              ? 'Administrateur'
-              : 'Utilisateur'}
+              ? t('profile.role_admin')
+              : t('profile.role_user')}
           </div>
           
           <button
@@ -311,7 +311,7 @@ export default function ProfilPage() {
               fontWeight: 600,
             }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}>
-              <RefreshCw size={11} /> Synchroniser mon compte
+              <RefreshCw size={11} /> {t('profile.sync_btn')}
             </div>
           </button>
 
@@ -326,7 +326,7 @@ export default function ProfilPage() {
                 margin: '0 0 6px',
                 fontWeight: 500,
               }}>
-                Opérateur principal
+                {t('profile.operator_label')}
               </p>
               <div style={{
                 display: 'flex',
@@ -348,7 +348,9 @@ export default function ProfilPage() {
                 }}>
                   {OPERATORS.find(
                     o => o.id === user.operator
-                  )?.label || 'Autre'}
+                  )?.label === 'Autre' ? t('shared.autre') : (OPERATORS.find(
+                    o => o.id === user.operator
+                  )?.label || t('shared.autre'))}
                 </span>
               </div>
             </div>
@@ -375,7 +377,7 @@ export default function ProfilPage() {
                 fontSize: 16, fontWeight: 700,
                 color: 'var(--text-main)', margin: 0,
               }}>
-                Informations personnelles
+                {t('profile.info_title')}
               </h2>
               {!editing ? (
                 <button
@@ -395,7 +397,7 @@ export default function ProfilPage() {
                       'DM Sans, sans-serif',
                   }}>
                   <Edit2 size={13} />
-                  Modifier
+                  {t('shared.edit')}
                 </button>
               ) : (
                 <div style={{
@@ -423,8 +425,8 @@ export default function ProfilPage() {
                     }}>
                     <Save size={13} />
                     {saving
-                      ? 'Enregistrement...'
-                      : 'Sauvegarder'}
+                      ? t('shared.saving')
+                      : t('shared.save')}
                   </button>
                   <button
                     onClick={() => {
@@ -446,7 +448,7 @@ export default function ProfilPage() {
                       fontFamily:
                         'DM Sans, sans-serif',
                     }}>
-                    Annuler
+                    {t('shared.cancel')}
                   </button>
                 </div>
               )}
@@ -459,7 +461,7 @@ export default function ProfilPage() {
                 fontWeight: 500,
                 color: 'var(--text-main)', marginBottom: 6,
               }}>
-                Nom complet
+                {t('profile.name_label')}
               </label>
               <div style={{
                 position: 'relative',
@@ -492,7 +494,7 @@ export default function ProfilPage() {
                 fontWeight: 500,
                 color: 'var(--text-main)', marginBottom: 6,
               }}>
-                Email
+                {t('login.email_label')}
               </label>
               <div style={{
                 position: 'relative',
@@ -519,7 +521,7 @@ export default function ProfilPage() {
                 fontSize: 11, color: 'var(--text-muted)',
                 margin: '4px 0 0',
               }}>
-                L'email ne peut pas être modifié
+                {t('profile.email_no_edit')}
               </p>
             </div>
 
@@ -530,7 +532,7 @@ export default function ProfilPage() {
                 fontWeight: 500,
                 color: 'var(--text-main)', marginBottom: 6,
               }}>
-                Téléphone
+                {t('profile.phone_label')}
               </label>
               <div style={{
                 position: 'relative',
@@ -547,7 +549,7 @@ export default function ProfilPage() {
                   onChange={e =>
                     setPhone(e.target.value)}
                   disabled={!editing}
-                  placeholder="+226 70 00 00 00"
+                  placeholder="+226 XX XX XX XX"
                   style={{
                     ...inp,
                     paddingLeft: 38,
@@ -566,7 +568,7 @@ export default function ProfilPage() {
                   color: 'var(--text-main)',
                   marginBottom: 10,
                 }}>
-                  Opérateur Mobile Money
+                  {t('register.operator_label')}
                 </label>
                 <div style={{
                   display: 'flex',
@@ -607,7 +609,7 @@ export default function ProfilPage() {
                             op.color,
                           flexShrink: 0,
                         }} />
-                        {op.label}
+                        {op.label === 'Autre' ? t('shared.autre') : op.label}
                         {sel && (
                           <Check size={13}
                             color={op.color} />
@@ -654,13 +656,13 @@ export default function ProfilPage() {
                     fontSize: 15,
                     color: 'var(--text-main)', margin: 0,
                   }}>
-                    Mot de passe
+                    {t('profile.password_section')}
                   </p>
                   <p style={{
                     fontSize: 12,
                     color: 'var(--text-muted)', margin: 0,
                   }}>
-                    Modifier votre mot de passe
+                    {t('profile.password_desc')}
                   </p>
                 </div>
               </div>
@@ -679,7 +681,7 @@ export default function ProfilPage() {
                   fontFamily:
                     'DM Sans, sans-serif',
                 }}>
-                {showPwd ? 'Annuler' : 'Modifier'}
+                {showPwd ? t('shared.cancel') : t('shared.edit')}
               </button>
             </div>
 
@@ -693,7 +695,7 @@ export default function ProfilPage() {
                     color: 'var(--text-main)',
                     marginBottom: 6,
                   }}>
-                    Mot de passe actuel
+                    {t('profile.current_password')}
                   </label>
                   <div style={{
                     position: 'relative',
@@ -741,7 +743,7 @@ export default function ProfilPage() {
                     color: 'var(--text-main)',
                     marginBottom: 6,
                   }}>
-                    Nouveau mot de passe
+                    {t('profile.new_password')}
                   </label>
                   <div style={{
                     position: 'relative',
@@ -752,7 +754,7 @@ export default function ProfilPage() {
                       value={newPwd}
                       onChange={e =>
                         setNewPwd(e.target.value)}
-                      placeholder="Minimum 6 caractères"
+                      placeholder={t('profile.password_min_length')}
                       style={{
                         ...inp,
                         paddingRight: 44,
@@ -787,7 +789,7 @@ export default function ProfilPage() {
                     color: 'var(--text-main)',
                     marginBottom: 6,
                   }}>
-                    Confirmer le nouveau mot de passe
+                    {t('profile.confirm_new_password')}
                   </label>
                   <input
                     type="password"
@@ -803,8 +805,7 @@ export default function ProfilPage() {
                       color: '#F04438',
                       margin: '4px 0 0',
                     }}>
-                      Les mots de passe ne
-                      correspondent pas
+                      {t('profile.password_match_error')}
                     </p>
                   )}
                 </div>
@@ -828,8 +829,8 @@ export default function ProfilPage() {
                   }}>
                   <Lock size={14} />
                   {savingPwd
-                    ? 'Modification...'
-                    : 'Modifier le mot de passe'}
+                    ? t('shared.saving')
+                    : t('profile.password_change_btn')}
                 </button>
               </div>
             )}

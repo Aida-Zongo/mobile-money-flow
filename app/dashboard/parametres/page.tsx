@@ -7,98 +7,68 @@ import {
   Check, Lock, Star, HelpCircle,
   MessageCircle, Info, FileText,
   Heart, Sparkles, Rocket, MapPin, Scale,
-  Smartphone, BarChart3
+  Smartphone, Download, Calendar
 } from 'lucide-react';
 import { setTheme as applyGlobalTheme, Theme } from '@/lib/theme';
 import { useLanguage } from '@/lib/LanguageContext';
+import { generateMonthlyPDF } from '@/lib/pdf-generator';
 
-const WeeklyReport = () => {
-  const [report, setReport] =
-    useState<any>(null);
-  const [loading, setLoading] =
-    useState(true);
+const MONTH_NAMES_FR = [
+  'Janvier','Février','Mars','Avril','Mai','Juin',
+  'Juillet','Août','Septembre','Octobre','Novembre','Décembre',
+];
 
-  useEffect(() => {
-    const loadReport = async () => {
-      try {
-        const token =
-          localStorage.getItem('token');
-        const now = new Date();
-        const month = now.getMonth() + 1;
-        const year = now.getFullYear();
+const MonthlyReportDownloader = () => {
+  const { t } = useLanguage();
+  const now = new Date();
+  const [selMonth, setSelMonth] = useState(now.getMonth() + 1);
+  const [selYear, setSelYear] = useState(now.getFullYear());
+  const [downloading, setDownloading] = useState(false);
+  const [error, setError] = useState('');
 
-        const [statsRes, expensesRes] =
-          await Promise.all([
-            fetch(
-              `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/stats/summary?month=${month}&year=${year}`,
-              { headers: { Authorization: `Bearer ${token}` } }
-            ),
-            fetch(
-              `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/expenses?month=${month}&year=${year}`,
-              { headers: { Authorization: `Bearer ${token}` } }
-            ),
-          ]);
+  const currentYear = now.getFullYear();
+  const years = [currentYear - 1, currentYear];
 
-        const stats = await statsRes.json();
-        const expenses = await expensesRes.json();
+  const handleDownload = async () => {
+    setDownloading(true);
+    setError('');
+    try {
+      const token = localStorage.getItem('token');
+      const userName = localStorage.getItem('userName') ||
+        localStorage.getItem('userEmail') || 'Utilisateur';
+      const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
 
-        // Calcule les dépenses de cette semaine
-        const startOfWeek = new Date();
-        startOfWeek.setDate(
-          startOfWeek.getDate() -
-          startOfWeek.getDay()
-        );
-        startOfWeek.setHours(0, 0, 0, 0);
+      const [statsRes, expensesRes, incomesRes] = await Promise.all([
+        fetch(`${API}/stats/summary?month=${selMonth}&year=${selYear}`,
+          { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API}/expenses?month=${selMonth}&year=${selYear}`,
+          { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API}/incomes?month=${selMonth}&year=${selYear}`,
+          { headers: { Authorization: `Bearer ${token}` } }),
+      ]);
 
-        const weekExpenses = (
-          expenses.expenses || []
-        ).filter((e: any) =>
-          new Date(e.date) >= startOfWeek
-        );
+      const stats = await statsRes.json();
+      const expData = await expensesRes.json();
+      const incData = await incomesRes.json();
 
-        const weekTotal = weekExpenses.reduce(
-          (sum: number, e: any) =>
-            sum + e.amount, 0
-        );
+      const expenses = expData.expenses || expData || [];
+      const incomes = incData.incomes || incData || [];
 
-        setReport({
-          monthTotal: stats.totalMonth || 0,
-          monthCount: stats.totalCount || 0,
-          weekTotal,
-          weekCount: weekExpenses.length,
-          topCategory: stats.topCategory,
-          budgetUsed: stats.budgetUsedPercent,
-        });
-      } catch(e) {
-        console.error(e);
-      }
-      setLoading(false);
-    };
-
-    loadReport();
-  }, []);
-
-  const fmt = (n: number) =>
-    new Intl.NumberFormat('fr-FR').format(n)
-    + ' FCFA';
-
-  if (loading) {
-    return (
-      <div style={{
-        margin: '0 20px 16px',
-        padding: 14,
-        backgroundColor: 'var(--bg)',
-        borderRadius: 12,
-        fontSize: 13,
-        color: 'var(--text-muted)',
-        textAlign: 'center',
-      }}>
-        Chargement du rapport...
-      </div>
-    );
-  }
-
-  if (!report) return null;
+      await generateMonthlyPDF({
+        userName,
+        month: selMonth,
+        year: selYear,
+        totalRevenues: stats.totalRevenues || stats.totalIncome || 0,
+        totalExpenses: stats.totalExpenses || stats.totalMonth || 0,
+        incomes,
+        expenses,
+      });
+    } catch (e: any) {
+      console.error(e);
+      setError('Erreur lors de la génération du PDF');
+    }
+    setDownloading(false);
+  };
 
   return (
     <div style={{
@@ -113,108 +83,67 @@ const WeeklyReport = () => {
         color: '#0A7B5E', margin: '0 0 12px',
         textTransform: 'uppercase',
         letterSpacing: '0.08em',
+        display: 'flex', alignItems: 'center', gap: 6,
       }}>
-        <BarChart3 size={14} color="#0A7B5E" style={{ marginRight: 4 }} /> Rapport de la semaine
+        <Calendar size={14} color="#0A7B5E" />
+        {t('settings.report_select_month')}
       </p>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: 8, marginBottom: 12,
-      }}>
-        {[
-          {
-            label: 'Cette semaine',
-            val: fmt(report.weekTotal),
-            sub: `${report.weekCount} transactions`,
-            color: '#F04438',
-          },
-          {
-            label: 'Ce mois',
-            val: fmt(report.monthTotal),
-            sub: `${report.monthCount} transactions`,
-            color: '#0A7B5E',
-          },
-        ].map((item, i) => (
-          <div key={i} style={{
+      {/* Month + Year selectors */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+        <select
+          value={selMonth}
+          onChange={e => setSelMonth(Number(e.target.value))}
+          style={{
+            flex: 2, padding: '8px 10px', borderRadius: 10,
+            border: '1px solid var(--border)', fontSize: 13,
             backgroundColor: 'var(--bg-card)',
-            borderRadius: 10, padding: 12,
-          }}>
-            <p style={{
-              fontSize: 11,
-              color: 'var(--text-muted)',
-              margin: '0 0 4px',
-            }}>
-              {item.label}
-            </p>
-            <p style={{
-              fontSize: 15, fontWeight: 700,
-              color: item.color, margin: 0,
-            }}>
-              {item.val}
-            </p>
-            <p style={{
-              fontSize: 11,
-              color: 'var(--text-muted)',
-              margin: '2px 0 0',
-            }}>
-              {item.sub}
-            </p>
-          </div>
-        ))}
+            color: 'var(--text-main)', cursor: 'pointer',
+          }}
+        >
+          {MONTH_NAMES_FR.map((m, i) => (
+            <option key={i + 1} value={i + 1}>{m}</option>
+          ))}
+        </select>
+        <select
+          value={selYear}
+          onChange={e => setSelYear(Number(e.target.value))}
+          style={{
+            flex: 1, padding: '8px 10px', borderRadius: 10,
+            border: '1px solid var(--border)', fontSize: 13,
+            backgroundColor: 'var(--bg-card)',
+            color: 'var(--text-main)', cursor: 'pointer',
+          }}
+        >
+          {years.map(y => (
+            <option key={y} value={y}>{y}</option>
+          ))}
+        </select>
       </div>
 
-      {report.topCategory && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '8px 12px',
-          backgroundColor: 'var(--bg-card)',
-          borderRadius: 10, marginBottom: 8,
-        }}>
-          <span style={{
-            fontSize: 13,
-            color: 'var(--text-muted)',
-          }}>
-            Top catégorie
-          </span>
-          <span style={{
-            fontSize: 13, fontWeight: 600,
-            color: '#F5A623',
-          }}>
-            {report.topCategory}
-          </span>
-        </div>
+      {error && (
+        <p style={{ fontSize: 12, color: '#F04438', marginBottom: 8 }}>{error}</p>
       )}
 
-      {report.budgetUsed > 0 && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '8px 12px',
-          backgroundColor:
-            report.budgetUsed >= 90
-              ? '#FEF2F2' : '#E8F5F1',
-          borderRadius: 10,
-        }}>
-          <span style={{
-            fontSize: 13,
-            color: report.budgetUsed >= 90
-              ? '#F04438' : '#0A7B5E',
-          }}>
-            Budget utilisé
-          </span>
-          <span style={{
-            fontSize: 13, fontWeight: 700,
-            color: report.budgetUsed >= 90
-              ? '#F04438' : '#0A7B5E',
-          }}>
-            {report.budgetUsed}%
-          </span>
-        </div>
-      )}
+      {/* Download button */}
+      <button
+        onClick={handleDownload}
+        disabled={downloading}
+        style={{
+          width: '100%',
+          display: 'flex', alignItems: 'center',
+          justifyContent: 'center', gap: 8,
+          padding: '11px 16px',
+          borderRadius: 12, border: 'none',
+          backgroundColor: downloading ? '#6B7280' : '#0A7B5E',
+          color: '#fff', fontWeight: 700,
+          fontSize: 14, cursor: downloading ? 'not-allowed' : 'pointer',
+          transition: 'background 0.2s',
+        }}
+      >
+        <Download size={16} />
+        {downloading ? t('settings.report_downloading') : t('settings.report_download')}
+      </button>
     </div>
   );
 };
@@ -448,7 +377,7 @@ export default function ParametresPage() {
 
   const [budgetAlert, setBudgetAlert] =
     useState(true);
-  const [weeklyReport, setWeeklyReport] =
+  const [monthlyReport, setMonthlyReport] =
     useState(false);
   const [theme, setTheme] =
     useState<'light'|'dark'|'system'>('light');
@@ -486,8 +415,8 @@ export default function ParametresPage() {
       );
       if (p.budgetAlert !== undefined)
         setBudgetAlert(p.budgetAlert);
-      if (p.weeklyReport !== undefined)
-        setWeeklyReport(p.weeklyReport);
+      if (p.monthlyReport !== undefined)
+        setMonthlyReport(p.monthlyReport);
       if (p.theme) setTheme(p.theme);
       if (p.lang) setLang(p.lang);
       if (p.currency) setCurrency(p.currency);
@@ -533,11 +462,11 @@ export default function ParametresPage() {
           'token=; path=/; max-age=0';
         window.location.href = '/login';
       } else {
-        throw new Error('Erreur serveur');
+        throw new Error(t('settings.server_error'));
       }
-    } catch(e) {
+    } catch(e: any) {
       showToast(
-        'Erreur lors de la suppression', true
+        e.message || t('settings.delete_error'), true
       );
       setDeleting(false);
       setShowDeleteModal(false);
@@ -563,13 +492,13 @@ export default function ParametresPage() {
   ];
 
   const themes = [
-    { code: 'light', label: 'Clair',
-      icon: Sun, desc: 'Fond blanc' },
-    { code: 'dark', label: 'Sombre',
-      icon: Moon, desc: 'Fond sombre' },
-    { code: 'system', label: 'Automatique',
+    { code: 'light', label: t('theme.light'),
+      icon: Sun, desc: t('theme.light_desc') },
+    { code: 'dark', label: t('theme.dark'),
+      icon: Moon, desc: t('theme.dark_desc') },
+    { code: 'system', label: t('theme.system'),
       icon: Globe,
-      desc: 'Suit votre appareil' },
+      desc: t('theme.system_desc') },
   ];
 
 
@@ -601,7 +530,7 @@ export default function ParametresPage() {
           fontSize: 24, fontWeight: 800,
           color: 'var(--text-main)', margin: 0,
         }}>
-          Paramètres
+          {t('nav.settings')}
         </h1>
         <p style={{
           color: 'var(--text-muted)', fontSize: 14,
@@ -626,8 +555,8 @@ export default function ParametresPage() {
                 setBudgetAlert(v);
                 save({ budgetAlert: v });
                 showToast(v
-                  ? 'Alertes activées'
-                  : 'Alertes désactivées');
+                  ? t('settings.alerts_enabled')
+                  : t('settings.alerts_disabled'));
               }}
             />
           }
@@ -641,19 +570,19 @@ export default function ParametresPage() {
           last
           right={
             <Toggle
-              value={weeklyReport}
+              value={monthlyReport}
               onChange={v => {
-                setWeeklyReport(v);
-                save({ weeklyReport: v });
+                setMonthlyReport(v);
+                save({ monthlyReport: v });
                 showToast(v
-                  ? 'Rapport activé'
-                  : 'Rapport désactivé');
+                  ? t('settings.report_enabled')
+                  : t('settings.report_disabled'));
               }}
             />
           }
         />
-        {weeklyReport && (
-          <WeeklyReport />
+        {monthlyReport && (
+          <MonthlyReportDownloader />
         )}
       </Section>
 
@@ -668,7 +597,7 @@ export default function ParametresPage() {
           desc={
             themes.find(t =>
               t.code === theme
-            )?.label || 'Clair'
+            )?.label || t('settings.theme_light')
           }
           onClick={() =>
             setShowThemeModal(true)}
@@ -828,7 +757,7 @@ export default function ParametresPage() {
           label="MoneyFlow"
           desc={
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              Fait avec <Heart size={12} color="#F04438" fill="#F04438" /> à Koudougou, BF
+              {t('settings.made_with')} <Heart size={12} color="#F04438" fill="#F04438" /> {t('settings.at')} Koudougou, BF
             </div>
           }
           onClick={() => setShowAboutModal(true)}
@@ -876,22 +805,22 @@ export default function ParametresPage() {
         show={showThemeModal}
         onClose={() =>
           setShowThemeModal(false)}
-        title="Choisir le thème">
-        {themes.map(t => {
-          const Icon = t.icon;
+        title={t('settings.choose_theme')}>
+        {themes.map(tm => {
+          const Icon = tm.icon;
           return (
             <ChoiceItem
-              key={t.code}
-              selected={theme === t.code}
+              key={tm.code}
+              selected={theme === tm.code}
               onClick={() => {
                 setTheme(
-                  t.code as typeof theme
+                  tm.code as typeof theme
                 );
-                applyGlobalTheme(t.code as Theme);
-                save({ theme: t.code });
+                applyGlobalTheme(tm.code as Theme);
+                save({ theme: tm.code });
                 setShowThemeModal(false);
                 showToast(
-                  `Thème "${t.label}" sélectionné`
+                  t('settings.theme_selected').replace('{theme}', tm.label)
                 );
               }}
               left={
@@ -899,7 +828,7 @@ export default function ParametresPage() {
                   width: 40, height: 40,
                   borderRadius: 12,
                   backgroundColor:
-                    theme === t.code
+                    theme === tm.code
                       ? '#0A7B5E' : 'var(--bg-card)',
                   display: 'flex',
                   alignItems: 'center',
@@ -907,12 +836,12 @@ export default function ParametresPage() {
                   border: '1px solid var(--border)',
                 }}>
                   <Icon size={20}
-                    color={theme === t.code
+                    color={theme === tm.code
                       ? 'var(--bg-card)' : 'var(--text-muted)'} />
                 </div>
               }
-              label={t.label}
-              desc={t.desc}
+              label={tm.label}
+              desc={tm.desc}
             />
           );
         })}
@@ -923,7 +852,7 @@ export default function ParametresPage() {
         show={showLangModal}
         onClose={() =>
           setShowLangModal(false)}
-        title="Choisir la langue">
+        title={t('settings.choose_lang')}>
         {languages.map(l => (
           <ChoiceItem
             key={l.code}
@@ -934,7 +863,7 @@ export default function ParametresPage() {
               save({ lang: l.code });
               setShowLangModal(false);
               showToast(
-                `Langue : ${l.label}`
+                t('settings.lang_selected').replace('{lang}', l.label)
               );
             }}
             left={
@@ -956,7 +885,7 @@ export default function ParametresPage() {
         show={showCurrencyModal}
         onClose={() =>
           setShowCurrencyModal(false)}
-        title="Choisir la devise">
+        title={t('settings.choose_currency')}>
         {currencies.map(c => (
           <ChoiceItem
             key={c.code}
@@ -966,7 +895,7 @@ export default function ParametresPage() {
               save({ currency: c.code });
               setShowCurrencyModal(false);
               showToast(
-                `Devise : ${c.label}`
+                t('settings.currency_selected').replace('{currency}', c.label)
               );
             }}
             left={
@@ -1015,16 +944,13 @@ export default function ParametresPage() {
             fontSize: 18, fontWeight: 800,
             color: 'var(--text-main)', marginBottom: 8,
           }}>
-            Supprimer le compte ?
+            {t('settings.confirm_delete_title')}
           </h3>
           <p style={{
             color: 'var(--text-muted)', fontSize: 14,
             lineHeight: 1.6, marginBottom: 24,
           }}>
-            Toutes vos dépenses, budgets et
-            revenus seront définitivement
-            supprimés. Cette action ne peut
-            pas être annulée.
+            {t('settings.confirm_delete_desc')}
           </p>
           <div style={{
             display: 'flex', gap: 10,
@@ -1042,7 +968,7 @@ export default function ParametresPage() {
                 fontFamily:
                   'DM Sans, sans-serif',
               }}>
-              Annuler
+              {t('rate.cancel')}
             </button>
             <button
               onClick={deleteAccount}
@@ -1060,8 +986,8 @@ export default function ParametresPage() {
                   'DM Sans, sans-serif',
               }}>
               {deleting
-                ? 'Suppression...'
-                : 'Confirmer'}
+                ? t('settings.deleting')
+                : t('settings.confirm')}
             </button>
           </div>
         </div>
@@ -1093,15 +1019,14 @@ export default function ParametresPage() {
               color: 'var(--text-main)',
               marginBottom: 8,
             }}>
-              Merci beaucoup !
+              {t('rate.success_title')}
             </h3>
             <p style={{
               color: 'var(--text-muted)',
               fontSize: 14, lineHeight: 1.6,
               marginBottom: 20,
             }}>
-              Votre avis nous aide à améliorer
-              MoneyFlow pour toute la communauté.
+              {t('rate.success_desc')}
             </p>
             <div style={{
               display: 'flex',
@@ -1135,7 +1060,7 @@ export default function ParametresPage() {
                 boxShadow:
                   '0 4px 14px rgba(10,123,94,0.3)',
               }}>
-              Fermer
+              {t('rate.close')}
             </button>
           </div>
         ) : (
@@ -1162,13 +1087,13 @@ export default function ParametresPage() {
                 color: 'var(--text-main)',
                 marginBottom: 4,
               }}>
-                Noter MoneyFlow
+                {t('rate.title')}
               </h3>
               <p style={{
                 color: 'var(--text-muted)',
                 fontSize: 13,
               }}>
-                Votre avis compte vraiment pour nous
+                {t('rate.subtitle')}
               </p>
             </div>
 
@@ -1223,16 +1148,16 @@ export default function ParametresPage() {
               color: '#0A7B5E', minHeight: 20,
             }}>
               {(hoverRating || appRating) === 1 &&
-                'Mauvais'}
+                t('rate.star_poor')}
               {(hoverRating || appRating) === 2 &&
-                'Passable'}
+                t('rate.star_fair')}
               {(hoverRating || appRating) === 3 &&
-                'Bien'}
+                t('rate.star_good')}
               {(hoverRating || appRating) === 4 &&
-                'Très bien !'}
+                t('rate.star_very_good')}
               {(hoverRating || appRating) === 5 &&
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                  Excellent ! <Rocket size={16} />
+                  {t('rate.star_excellent')} <Rocket size={16} />
                 </span>}
             </p>
 
@@ -1244,14 +1169,14 @@ export default function ParametresPage() {
                 color: 'var(--text-main)',
                 marginBottom: 6,
               }}>
-                Commentaire (optionnel)
+                {t('rate.comment_label')}
               </label>
               <textarea
                 value={ratingComment}
                 onChange={e => setRatingComment(
                   e.target.value.slice(0, 200)
                 )}
-                placeholder="Qu'est-ce que vous aimez ? Qu'est-ce qu'on peut améliorer ?"
+                placeholder={t('rate.comment_placeholder')}
                 rows={3}
                 style={{
                   width: '100%',
@@ -1291,7 +1216,7 @@ export default function ParametresPage() {
                   cursor: 'pointer', fontSize: 14,
                   fontFamily: 'DM Sans, sans-serif',
                 }}>
-                Annuler
+                {t('rate.cancel')}
               </button>
               <button
                 onClick={async () => {
@@ -1322,7 +1247,7 @@ export default function ParametresPage() {
                         body: JSON.stringify({
                           rating: appRating,
                           comment: ratingComment,
-                          userName: userData.name || 'Utilisateur',
+                          userName: userData.name || t('nav.greeting_default'),
                         }),
                       }
                     );
@@ -1335,7 +1260,7 @@ export default function ParametresPage() {
                       });
                       setRatingSubmitted(true);
                     } else {
-                      throw new Error('Erreur serveur');
+                      throw new Error(t('settings.server_error'));
                     }
                   } catch(e) {
                     // Même si le backend échoue,
@@ -1360,7 +1285,7 @@ export default function ParametresPage() {
                   fontFamily: 'DM Sans, sans-serif',
                   transition: 'all 0.2s',
                 }}>
-                Publier mon avis
+                {t('rate.publish')}
               </button>
             </div>
           </div>
@@ -1370,7 +1295,7 @@ export default function ParametresPage() {
       <Modal
         show={showAboutModal}
         onClose={() => setShowAboutModal(false)}
-        title="À propos de MoneyFlow">
+        title={t('settings.about_title')}>
         <div style={{ textAlign: 'center' }}>
           <div style={{
             width: 80, height: 80,
@@ -1394,10 +1319,7 @@ export default function ParametresPage() {
             color: 'var(--text-muted)', fontSize: 14,
             lineHeight: 1.6, marginBottom: 20,
           }}>
-            MoneyFlow est une plateforme de gestion
-            financière conçue spécifiquement pour le
-            contexte burkinabé. Suivez vos dépenses
-            Mobile Money en toute simplicité.
+            {t('settings.about_desc')}
           </p>
           <div style={{
             backgroundColor: 'var(--bg)',
@@ -1408,19 +1330,19 @@ export default function ParametresPage() {
               fontSize: 13, color: 'var(--text-muted)',
               marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6
             }}>
-              <MapPin size={14} /> **Localisation :** Koudougou, Burkina Faso
+              <MapPin size={14} /> **{t('settings.location')} :** Koudougou, Burkina Faso
             </p>
             <p style={{
               fontSize: 13, color: 'var(--text-muted)',
               marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6
             }}>
-              <Smartphone size={14} /> **Contact :** [WhatsApp : 66869010](https://wa.me/22666869010)
+              <Smartphone size={14} /> **{t('settings.contact_label')} :** [WhatsApp : 66869010](https://wa.me/22666869010)
             </p>
             <p style={{
               fontSize: 13, color: 'var(--text-muted)',
               display: 'flex', alignItems: 'center', gap: 6
             }}>
-              <Scale size={14} /> **Licence :** Tous droits réservés &copy; 2026
+              <Scale size={14} /> **{t('settings.licence')} :** {t('settings.rights')} &copy; 2026
             </p>
           </div>
           <button
@@ -1433,7 +1355,7 @@ export default function ParametresPage() {
               fontWeight: 600, cursor: 'pointer',
               fontFamily: 'DM Sans, sans-serif',
             }}>
-            Fermer
+            {t('rate.close')}
           </button>
         </div>
       </Modal>

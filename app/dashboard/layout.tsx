@@ -7,7 +7,7 @@ import {
   User, Settings, Bell, HelpCircle, Shield,
   Circle
 } from 'lucide-react';
-import { t } from '@/lib/i18n';
+import { useLanguage } from '@/lib/LanguageContext';
 
 export default function DashboardLayout({
   children,
@@ -21,6 +21,7 @@ export default function DashboardLayout({
   const [notifCount, setNotifCount] = useState(0);
   const [showNotifs, setShowNotifs] = useState(false);
   const [notifs, setNotifs] = useState<any[]>([]);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -133,13 +134,13 @@ export default function DashboardLayout({
   ];
 
   const adminLinks = user?.role === 'admin' ? [
-    { label: 'Administration', icon: Shield, path: '/dashboard/admin' },
+    { label: t('nav.admin'), icon: Shield, path: '/dashboard/admin' },
   ] : [];
 
   const bottomLinks = [
     { label: t('nav.profile'), icon: User, path: '/dashboard/profil' },
     { label: t('nav.settings'), icon: Settings, path: '/dashboard/parametres' },
-    { label: 'Aide', icon: HelpCircle, path: '/dashboard/aide' },
+    { label: t('nav.help'), icon: HelpCircle, path: '/dashboard/aide' },
   ];
 
   const isActive = (path: string) =>
@@ -300,7 +301,7 @@ export default function DashboardLayout({
                       fontWeight: 700, fontSize: 14,
                       color: 'var(--text-main)', margin: 0,
                     }}>
-                      Notifications
+                      {t('nav.notifs')}
                     </p>
                     {notifCount > 0 && (
                       <span style={{
@@ -310,7 +311,7 @@ export default function DashboardLayout({
                         padding: '2px 8px',
                         borderRadius: 50,
                       }}>
-                        {notifCount} non lues
+                        {notifCount} {t('nav.unread')}
                       </span>
                     )}
                   </div>
@@ -324,7 +325,7 @@ export default function DashboardLayout({
                         color: 'var(--text-muted)',
                         fontSize: 14,
                       }}>
-                        Aucune notification
+                        {t('nav.no_notifs')}
                       </div>
                     ) : notifs.slice(0, 10).map(
                       (n: any, i: number) => (
@@ -398,7 +399,7 @@ export default function DashboardLayout({
                           fontWeight: 600, cursor: 'pointer',
                           fontFamily: 'DM Sans, sans-serif',
                         }}>
-                        Tout marquer comme lu
+                        {t('nav.mark_all_read')}
                       </button>
                     </div>
                   )}
@@ -419,7 +420,7 @@ export default function DashboardLayout({
             letterSpacing: '0.08em',
             padding: '8px 8px 4px', margin: 0,
           }}>
-            Menu principal
+            {t('nav.cat_main')}
           </p>
 
           {navLinks.map(link => {
@@ -476,7 +477,7 @@ export default function DashboardLayout({
                 letterSpacing: '0.08em',
                 padding: '8px 8px 4px', margin: 0,
               }}>
-                Administration
+                {t('nav.cat_admin')}
               </p>
               {adminLinks.map(link => {
                 const Icon = link.icon;
@@ -524,7 +525,7 @@ export default function DashboardLayout({
               letterSpacing: '0.08em',
               padding: '0 8px 4px', margin: 0,
             }}>
-              Compte
+              {t('nav.cat_account')}
             </p>
 
             {bottomLinks.map(link => {
@@ -596,7 +597,7 @@ export default function DashboardLayout({
                   whiteSpace: 'nowrap', overflow: 'hidden',
                   textOverflow: 'ellipsis',
                 }}>
-                  {user?.name || 'Utilisateur'}
+                  {user?.name || t('nav.greeting_default')}
                 </p>
                 {user?.role === 'admin' && (
                   <span style={{

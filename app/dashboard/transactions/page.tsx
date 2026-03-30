@@ -10,26 +10,26 @@ import {
   TrendingDown, Check
 } from 'lucide-react';
 
-const CATS = [
-  { id:'alimentation', label:'Alimentation',
+const getCats = (t: any) => [
+  { id:'alimentation', label: t('shared.alimentation'),
     Icon:ShoppingBag, color:'#D97706',
     bg:'#FEF3E2' },
-  { id:'transport', label:'Transport',
+  { id:'transport', label: t('shared.transport'),
     Icon:Car, color:'#0A7B5E', bg:'#E8F5F1' },
-  { id:'sante', label:'Santé',
+  { id:'sante', label: t('shared.sante'),
     Icon:Heart, color:'#16A34A', bg:'#F0FDF4' },
-  { id:'shopping', label:'Shopping',
+  { id:'shopping', label: t('shared.shopping'),
     Icon:ShoppingCart, color:'#DB2777',
     bg:'#FDF2F8' },
-  { id:'logement', label:'Logement',
+  { id:'logement', label: t('shared.logement'),
     Icon:Home, color:'#2563EB', bg:'#EFF6FF' },
-  { id:'telecom', label:'Télécom',
+  { id:'telecom', label: t('shared.telecom'),
     Icon:Smartphone, color:'#0369A1',
     bg:'#F0F9FF' },
-  { id:'education', label:'Éducation',
+  { id:'education', label: t('shared.education'),
     Icon:BookOpen, color:'#CA8A04',
     bg:'#FEFCE8' },
-  { id:'autre', label:'Autre',
+  { id:'autre', label: t('shared.autre'),
     Icon:Package, color:'#6B7280',
     bg:'var(--bg)' },
 ];
@@ -45,19 +45,24 @@ const OPS = [
     color:'var(--text-muted)' },
 ];
 
-const MONTHS = ['Janvier','Février','Mars',
-  'Avril','Mai','Juin','Juillet','Août',
-  'Septembre','Octobre','Novembre','Décembre'];
-
-const fmt = (n:number) =>
-  new Intl.NumberFormat('fr-FR').format(n||0)
-  +' FCFA';
-
-const getCat = (id:string) =>
-  CATS.find(c=>c.id===id) || CATS[7];
+const getMonths = (t: any) => [
+  t('shared.january'), t('shared.february'), t('shared.march'),
+  t('shared.april'), t('shared.may'), t('shared.june'),
+  t('shared.july'), t('shared.august'), t('shared.september'),
+  t('shared.october'), t('shared.november'), t('shared.december')
+];
 
 export default function TransactionsPage() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const CATS = getCats(t);
+  const MONTHS = getMonths(t);
+
+  const fmt = (n: number) =>
+    new Intl.NumberFormat(lang === 'en' ? 'en-US' : 'fr-FR').format(n || 0)
+    + ' FCFA';
+
+  const getCat = (id: string) =>
+    CATS.find(c => c.id === id) || CATS[7];
   const [expenses, setExpenses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [drawer, setDrawer] = useState(false);
@@ -118,7 +123,7 @@ export default function TransactionsPage() {
 
   const save = async() => {
     if (!form.amount) {
-      showToast('Montant requis', true); return;
+      showToast(t('budget.amount_required'), true); return;
     }
     setSaving(true);
     try {
@@ -128,10 +133,10 @@ export default function TransactionsPage() {
       };
       if (editing) {
         await api.put('/expenses/'+id, body);
-        showToast('Dépense modifiée');
+        showToast(t('tx.updated'));
       } else {
         await api.post('/expenses', body);
-        showToast('Dépense ajoutée');
+        showToast(t('tx.added'));
       }
       setDrawer(false);
       load();
@@ -144,11 +149,11 @@ export default function TransactionsPage() {
   const del = async() => {
     try {
       await api.delete('/expenses/'+delId);
-      showToast('Supprimé');
+      showToast(t('shared.delete'));
       setDelId(null);
       load();
     } catch(e) {
-      showToast('Erreur', true);
+      showToast(t('tx.error'), true);
     }
   };
 
@@ -197,8 +202,7 @@ export default function TransactionsPage() {
           <p style={{
             color:'var(--text-muted)', fontSize:14, marginTop:4
           }}>
-            {expenses.length} transaction
-            {expenses.length!==1?'s':''}
+            {expenses.length} transaction{expenses.length !== 1 ? 's' : ''}
           </p>
         </div>
         <button onClick={openAdd} style={{
@@ -234,7 +238,7 @@ export default function TransactionsPage() {
           onChange={e=>setCatFilter(e.target.value)}
           style={{...inp, width:'auto',
             cursor:'pointer'}}>
-          <option value=''>Toutes catégories</option>
+          <option value=''>{t('shared.all_cats')}</option>
           {CATS.map(c=>(
             <option key={c.id} value={c.id}>
               {c.label}
@@ -254,7 +258,7 @@ export default function TransactionsPage() {
             padding:40, textAlign:'center',
             color:'var(--text-muted)'
           }}>
-            Chargement...
+            {t('shared.loading')}
           </div>
         ) : expenses.length===0 ? (
           <div style={{
@@ -281,7 +285,7 @@ export default function TransactionsPage() {
               color:'var(--text-muted)', fontSize:14,
               marginBottom:20
             }}>
-              Ajoutez votre première dépense
+              {t('tx.none_desc')}
             </p>
             <button onClick={openAdd} style={{
               backgroundColor:'#0A7B5E',
@@ -291,7 +295,7 @@ export default function TransactionsPage() {
               fontWeight:600,
               fontFamily:'DM Sans, sans-serif'
             }}>
-              Ajouter
+              {t('shared.add')}
             </button>
           </div>
         ) : expenses.map((exp, i) => {
@@ -335,7 +339,7 @@ export default function TransactionsPage() {
                   margin:'2px 0 0'
                 }}>
                   {new Date(exp.date)
-                    .toLocaleDateString('fr-FR',{
+                    .toLocaleDateString(lang === 'en' ? 'en-US' : 'fr-FR',{
                       day:'numeric',
                       month:'short',
                       year:'numeric'
@@ -405,7 +409,7 @@ export default function TransactionsPage() {
               color:'var(--text-main)', margin:0
             }}>
               {editing
-                ?'Modifier la dépense'
+                ? t('shared.edit')
                 : t('tx.new')}
             </h2>
             <button onClick={()=>setDrawer(false)} style={{
@@ -505,7 +509,7 @@ export default function TransactionsPage() {
             <label style={{
               display:'block', fontSize:13,
               color:'var(--text-muted)', marginBottom:6
-            }}>Description (optionnel)</label>
+            }}>{t('shared.description')} ({t('shared.optional')})</label>
             <input type='text'
               value={form.description}
               onChange={e=>setForm({
@@ -589,11 +593,11 @@ export default function TransactionsPage() {
               display:'flex', alignItems:'center',
               justifyContent:'center', gap:8
             }}>
-            {saving ? 'Enregistrement...' : <>
+            {saving ? t('shared.saving') : <>
               <Check size={16} />
               {editing
-                ?'Modifier'
-                :'Enregistrer la dépense'}
+                ? t('shared.edit')
+                : t('tx.save')}
             </>}
           </button>
         </div>
@@ -630,13 +634,13 @@ export default function TransactionsPage() {
               fontWeight:700, color:'var(--text-main)',
               marginBottom:8
             }}>
-              Supprimer ?
+              {t('shared.confirm')}?
             </h3>
             <p style={{
               color:'var(--text-muted)', fontSize:14,
               marginBottom:24
             }}>
-              Cette action est irréversible.
+              {t('settings.confirm_delete_desc_short')}
             </p>
             <div style={{display:'flex', gap:10}}>
               <button
@@ -649,7 +653,7 @@ export default function TransactionsPage() {
                   fontWeight:600,
                   fontFamily:'DM Sans, sans-serif'
                 }}>
-                Annuler
+                {t('shared.cancel')}
               </button>
               <button onClick={del} style={{
                 flex:1, padding:'12px',
@@ -659,7 +663,7 @@ export default function TransactionsPage() {
                 fontWeight:600,
                 fontFamily:'DM Sans, sans-serif'
               }}>
-                Supprimer
+                {t('shared.delete')}
               </button>
             </div>
           </div>

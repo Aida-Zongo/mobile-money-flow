@@ -20,5 +20,8 @@ const incomeSchema = new mongoose.Schema({
     note: { type: String, default: '' },
 }, { timestamps: true });
 
+// Index composé pour améliorer les extractions mensuelles/annuelles
+incomeSchema.index({ userId: 1, year: -1, month: -1 });
+
 module.exports =
     mongoose.model('Income', incomeSchema);

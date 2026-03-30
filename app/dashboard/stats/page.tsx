@@ -18,18 +18,9 @@ const COLORS = [
   '#CA8A04','#6B7280'
 ];
 
-const MONTHS = [
-  'Janvier','Février','Mars','Avril','Mai',
-  'Juin','Juillet','Août','Septembre',
-  'Octobre','Novembre','Décembre'
-];
-
-const fmt = (n: number) =>
-  new Intl.NumberFormat('fr-FR').format(n || 0)
-  + ' FCFA';
 
 export default function StatsPage() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [month, setMonth] =
     useState(new Date().getMonth());
   const [year, setYear] =
@@ -42,6 +33,11 @@ export default function StatsPage() {
     useState<any[]>([]);
   const [loading, setLoading] =
     useState(true);
+
+  const fmt = (n: number) => {
+    const locale = lang === 'en' ? 'en-US' : 'fr-FR';
+    return new Intl.NumberFormat(locale).format(n || 0) + ' FCFA';
+  };
 
   const load = async () => {
     setLoading(true);
@@ -82,10 +78,16 @@ export default function StatsPage() {
   };
 
   const pieData = cats.map((c, i) => ({
-    name: c._id,
+    name: t(`shared.${c._id.toLowerCase()}`) || c._id,
     value: c.total,
     color: COLORS[i % COLORS.length],
   }));
+
+  const monthNames = [
+    t('shared.january'), t('shared.february'), t('shared.march'), t('shared.april'),
+    t('shared.may'), t('shared.june'), t('shared.july'), t('shared.august'),
+    t('shared.september'), t('shared.october'), t('shared.november'), t('shared.december')
+  ];
 
   return (
     <div style={{
@@ -107,13 +109,13 @@ export default function StatsPage() {
             fontSize: 24, fontWeight: 800,
             color: 'var(--text-main)', margin: 0,
           }}>
-            Statistiques
+            {t('stats.transactions')}
           </h1>
           <p style={{
-            color: 'var(--text-muted)', fontSize: 14,
+            color: 'var(--text-muted)', fontSize: 13,
             marginTop: 4,
           }}>
-            Analysez vos habitudes financières
+            {t('stats.desc')}
           </p>
         </div>
 
@@ -133,14 +135,14 @@ export default function StatsPage() {
             justifyContent: 'center',
           }}>
             <ChevronLeft size={18}
-              color="#1A1D23" />
+              color="var(--text-main)" />
           </button>
           <span style={{
             fontWeight: 600, fontSize: 14,
             color: 'var(--text-main)', minWidth: 130,
             textAlign: 'center',
           }}>
-            {MONTHS[month]} {year}
+            {monthNames[month]} {year}
           </span>
           <button onClick={next} style={{
             width: 32, height: 32,
@@ -151,7 +153,7 @@ export default function StatsPage() {
             justifyContent: 'center',
           }}>
             <ChevronRight size={18}
-              color="#1A1D23" />
+              color="var(--text-main)" />
           </button>
         </div>
       </div>
@@ -168,24 +170,24 @@ export default function StatsPage() {
             label: t('stats.total'),
             val: loading ? '...'
               : fmt(summary?.totalMonth || 0),
-            bg: '#FEF2F2',
-            color: '#F04438',
+            bg: 'var(--bg-red-soft)',
+            color: 'var(--red)',
           },
           {
             icon: BarChart3,
-            label: 'Transactions',
+            label: t('stats.transactions'),
             val: loading ? '...'
               : String(summary?.totalCount || 0),
-            bg: '#E8F5F1',
-            color: '#0A7B5E',
+            bg: 'var(--bg-green-soft)',
+            color: 'var(--green)',
           },
           {
             icon: Tag,
-            label: 'Top catégorie',
+            label: t('stats.top'),
             val: loading ? '...'
-              : (summary?.topCategory || '—'),
-            bg: '#F0FDF4',
-            color: '#16A34A',
+              : (t(`shared.${summary?.topCategory?.toLowerCase()}`) || summary?.topCategory || '—'),
+            bg: 'var(--bg-blue-soft)',
+            color: 'var(--blue)',
           },
         ].map((item, i) => {
           const Icon = item.icon;
@@ -254,7 +256,7 @@ export default function StatsPage() {
               textAlign: 'center', padding: 40,
               color: 'var(--text-muted)',
             }}>
-              Aucune donnée
+              {t('shared.none')}
             </div>
           ) : (
             <>
@@ -275,8 +277,10 @@ export default function StatsPage() {
                     ))}
                   </Pie>
                   <Tooltip
+                    contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px' }}
+                    itemStyle={{ color: 'var(--text-main)' }}
                     formatter={(v: any) =>
-                      [fmt(v), 'Montant']} />
+                      [fmt(v), t('shared.amount')]} />
                 </PieChart>
               </ResponsiveContainer>
               <div style={{
@@ -317,7 +321,7 @@ export default function StatsPage() {
               textAlign: 'center', padding: 40,
               color: 'var(--text-muted)',
             }}>
-              Aucune donnée
+              {t('shared.none')}
             </div>
           ) : (
             <ResponsiveContainer
@@ -338,10 +342,12 @@ export default function StatsPage() {
                   axisLine={false}
                   tickLine={false} />
                 <Tooltip
+                  contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px' }}
+                  itemStyle={{ color: 'var(--text-main)' }}
                   formatter={(v: any) =>
-                    [fmt(v), 'Dépenses']} />
+                    [fmt(v), t('dashboard.depenses')]} />
                 <Bar dataKey="total"
-                  fill="#0A7B5E"
+                  fill="var(--primary)"
                   radius={[6,6,0,0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -359,21 +365,21 @@ export default function StatsPage() {
           {[
             {
               icon: Tag,
-              bg: '#E8F5F1',
-              color: '#0A7B5E',
-              text: `Principale: ${summary.topCategory || '—'}`,
+              bg: 'var(--bg-green-soft)',
+              color: 'var(--green)',
+              text: `${t('stats.main')}: ${t(`shared.${summary.topCategory?.toLowerCase()}`) || summary.topCategory || '—'}`,
             },
             {
               icon: BarChart3,
-              bg: '#F0FDF4',
-              color: '#16A34A',
-              text: `${summary.totalCount || 0} transactions`,
+              bg: 'var(--bg-blue-soft)',
+              color: 'var(--blue)',
+              text: `${summary.totalCount || 0} ${t('stats.transactions').toLowerCase()}`,
             },
             {
               icon: TrendingUp,
-              bg: '#FFFBEB',
-              color: '#D97706',
-              text: `Moy/jour: ${fmt(
+              bg: 'var(--bg-orange-soft)',
+              color: 'var(--orange)',
+              text: `${t('stats.average_day')}: ${fmt(
                 Math.round(
                   (summary.totalMonth || 0) /
                   new Date(year, month+1, 0)
@@ -394,7 +400,7 @@ export default function StatsPage() {
                 <Icon size={22}
                   color={ins.color} />
                 <p style={{
-                  fontSize: 13, fontWeight: 500,
+                  fontSize: 13, fontWeight: 600,
                   color: ins.color, margin: 0,
                   lineHeight: 1.5,
                 }}>

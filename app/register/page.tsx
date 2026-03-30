@@ -3,10 +3,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { registerUser } from '@/lib/auth';
 import { Eye, EyeOff } from 'lucide-react';
+import { useLanguage } from '@/lib/LanguageContext';
 
 export default function RegisterPage() {
   const router = useRouter();
-  // const { register } = useUser();
+  const { t } = useLanguage();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -20,15 +21,15 @@ export default function RegisterPage() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     if (!name || !email || !password) {
-      setError('Remplissez tous les champs');
+      setError(t('register.error_fields'));
       return;
     }
     if (password !== confirmPassword) {
-      setError('Mots de passe différents');
+      setError(t('register.error_password_match'));
       return;
     }
     if (password.length < 6) {
-      setError('Mot de passe trop court');
+      setError(t('register.error_password_length'));
       return;
     }
     setLoading(true);
@@ -41,7 +42,7 @@ export default function RegisterPage() {
       window.location.href = '/onboarding';
     } catch (err: any) {
       setLoading(false);
-      setError(err.message || 'Erreur inscription');
+      setError(err.message || t('register.error_generic'));
     }
   };
 
@@ -62,7 +63,7 @@ export default function RegisterPage() {
     { id: 'orange', label: 'Orange Money' },
     { id: 'wave', label: 'Wave' },
     { id: 'moov', label: 'Moov Money' },
-    { id: 'other', label: 'Autre' }
+    { id: 'other', label: t('shared.autre') }
   ];
 
   return (
@@ -106,15 +107,13 @@ export default function RegisterPage() {
             fontWeight: 800, lineHeight: 1.2,
             marginBottom: 16,
           }}>
-            Rejoignez<br />MoneyFlow.
+            {t('register.left_title')}
           </h1>
           <p style={{
             color: 'rgba(255,255,255,0.7)',
             fontSize: 15, lineHeight: 1.6,
           }}>
-            Créez votre compte en quelques secondes
-            et commencez à suivre vos finances
-            Mobile Money dès aujourd'hui.
+            {t('register.left_desc')}
           </p>
           <div style={{
             display: 'flex', gap: 10,
@@ -154,13 +153,13 @@ export default function RegisterPage() {
               fontSize: 24, fontWeight: 800,
               color: '#1A1D23', marginBottom: 4,
             }}>
-              Créer un compte
+              {t('register.title')}
             </h2>
             <p style={{
               color: '#8A94A6', fontSize: 14,
               marginBottom: 24,
             }}>
-              Rejoignez MoneyFlow gratuitement
+              {t('register.subtitle')}
             </p>
 
             {error && (
@@ -179,12 +178,12 @@ export default function RegisterPage() {
                   display: 'block', fontSize: 13,
                   fontWeight: 500, color: '#1A1D23',
                   marginBottom: 6,
-                }}>Nom complet</label>
+                }}>{t('register.name_label')}</label>
                 <input
                   type="text"
                   value={name}
                   onChange={e => setName(e.target.value)}
-                  placeholder="Votre nom"
+                  placeholder={t('register.name_placeholder')}
                   style={inputStyle}
                 />
               </div>
@@ -194,7 +193,7 @@ export default function RegisterPage() {
                   display: 'block', fontSize: 13,
                   fontWeight: 500, color: '#1A1D23',
                   marginBottom: 6,
-                }}>Téléphone</label>
+                }}>{t('register.phone_label')}</label>
                 <input
                   type="tel"
                   value={phone}
@@ -209,7 +208,7 @@ export default function RegisterPage() {
                   display: 'block', fontSize: 13,
                   fontWeight: 500, color: '#1A1D23',
                   marginBottom: 6,
-                }}>Email</label>
+                }}>{t('register.email_label')}</label>
                 <input
                   type="email"
                   value={email}
@@ -224,7 +223,7 @@ export default function RegisterPage() {
                   display: 'block', fontSize: 13,
                   fontWeight: 500, color: '#1A1D23',
                   marginBottom: 6,
-                }}>Opérateur Mobile Money</label>
+                }}>{t('register.operator_label')}</label>
                 <div style={{
                   display: 'flex', gap: 8,
                   flexWrap: 'wrap',
@@ -258,7 +257,7 @@ export default function RegisterPage() {
                   display: 'block', fontSize: 13,
                   fontWeight: 500, color: '#1A1D23',
                   marginBottom: 6,
-                }}>Mot de passe</label>
+                }}>{t('register.password_label')}</label>
                 <div style={{ position: 'relative' }}>
                   <input
                     type={showPwd ? 'text' : 'password'}
@@ -296,7 +295,7 @@ export default function RegisterPage() {
                   display: 'block', fontSize: 13,
                   fontWeight: 500, color: '#1A1D23',
                   marginBottom: 6,
-                }}>Confirmer le mot de passe</label>
+                }}>{t('register.confirm_password_label')}</label>
                 <input
                   type="password"
                   value={confirmPassword}
@@ -323,8 +322,8 @@ export default function RegisterPage() {
                   fontFamily: 'DM Sans, sans-serif',
                 }}>
                 {loading
-                  ? 'Création...'
-                  : 'Créer mon compte'}
+                  ? t('register.submitting')
+                  : t('register.submit')}
               </button>
             </form>
 
@@ -332,14 +331,14 @@ export default function RegisterPage() {
               textAlign: 'center', marginTop: 20,
               fontSize: 14, color: '#8A94A6',
             }}>
-              Déjà un compte ?{' '}
+              {t('register.already_account')}{' '}
               <span
                 onClick={() => router.push('/login')}
                 style={{
                   color: '#0A7B5E', fontWeight: 600,
                   cursor: 'pointer',
                 }}>
-                Se connecter
+                {t('register.login_link')}
               </span>
             </p>
           </div>

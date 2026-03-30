@@ -8,80 +8,6 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-const faqs = [
-  {
-    q: 'Comment ajouter une dépense ?',
-    a: 'Allez dans "Transactions" puis cliquez sur "+ Nouvelle dépense". Renseignez le montant, la catégorie, la date et l\'opérateur (Orange Money, Wave, Moov ou Espèces).',
-  },
-  {
-    q: 'Comment créer un budget ?',
-    a: 'Allez dans "Budgets" puis cliquez sur "+ Créer un budget". Choisissez une catégorie, définissez un montant limite et le mois concerné.',
-  },
-  {
-    q: 'Quand est-ce que je reçois une alerte budget ?',
-    a: 'Vous recevez une notification quand vous atteignez 80% de votre budget (alerte orange) et quand vous le dépassez à 100% (alerte rouge). La cloche en haut affiche le nombre d\'alertes non lues.',
-  },
-  {
-    q: 'Comment enregistrer mon salaire ?',
-    a: 'Allez dans "Revenus" puis cliquez sur "+ Ajouter un revenu". Sélectionnez la source (Salaire, Freelance, Commerce...) et entrez le montant.',
-  },
-  {
-    q: 'Comment voir mes statistiques ?',
-    a: 'Allez dans "Statistiques". Vous verrez un graphique en donut avec la répartition par catégorie et un graphique en barres des dépenses journalières. Utilisez les flèches pour naviguer entre les mois.',
-  },
-  {
-    q: 'Comment modifier mon profil ?',
-    a: 'Allez dans "Profil" (menu Compte dans la sidebar). Cliquez sur "Modifier" pour changer votre nom et téléphone. Vous pouvez aussi changer votre mot de passe dans la même page.',
-  },
-  {
-    q: 'Comment changer la langue ?',
-    a: 'Allez dans "Paramètres" puis "Langue de l\'application". Vous pouvez choisir entre Français, English, Mooré et Dioula.',
-  },
-  {
-    q: 'Mes données sont-elles sécurisées ?',
-    a: 'Oui. Vos données sont stockées de façon sécurisée dans une base de données MongoDB Atlas avec chiffrement. Votre mot de passe est hashé (crypté) et jamais stocké en clair.',
-  },
-  {
-    q: 'Comment supprimer mon compte ?',
-    a: 'Allez dans "Paramètres" puis faites défiler jusqu\'à "Zone dangereuse". Cliquez sur "Supprimer mon compte" et confirmez. Cette action supprime définitivement toutes vos données.',
-  },
-  {
-    q: 'L\'application fonctionne-t-elle hors connexion ?',
-    a: 'Non, MoneyFlow nécessite une connexion internet pour synchroniser vos données avec le serveur et les retrouver sur tous vos appareils.',
-  },
-];
-
-const guides = [
-  {
-    icon: TrendingDown,
-    color: '#F04438',
-    bg: '#FEF2F2',
-    title: 'Gérer ses dépenses',
-    desc: 'Ajoutez, modifiez et supprimez vos transactions facilement',
-  },
-  {
-    icon: Target,
-    color: '#0A7B5E',
-    bg: '#E8F5F1',
-    title: 'Créer des budgets',
-    desc: 'Définissez des limites par catégorie et suivez votre consommation',
-  },
-  {
-    icon: DollarSign,
-    color: '#16A34A',
-    bg: '#F0FDF4',
-    title: 'Suivre ses revenus',
-    desc: 'Enregistrez votre salaire et autres sources de revenus',
-  },
-  {
-    icon: BarChart3,
-    color: '#2563EB',
-    bg: '#EFF6FF',
-    title: 'Analyser ses finances',
-    desc: 'Comprenez vos habitudes avec les statistiques et graphiques',
-  },
-];
-
 import { useLanguage } from '@/lib/LanguageContext';
 
 export default function AidePage() {
@@ -89,6 +15,50 @@ export default function AidePage() {
   const { t } = useLanguage();
   const [openFaq, setOpenFaq] =
     useState<number | null>(null);
+
+  const guides = [
+    {
+      icon: TrendingDown,
+      color: '#F04438',
+      bg: '#FEF2F2',
+      title: t('help.guide1_title'),
+      desc: t('help.guide1_desc'),
+    },
+    {
+      icon: Target,
+      color: '#0A7B5E',
+      bg: '#E8F5F1',
+      title: t('help.guide2_title'),
+      desc: t('help.guide2_desc'),
+    },
+    {
+      icon: DollarSign,
+      color: '#16A34A',
+      bg: '#F0FDF4',
+      title: t('help.guide3_title'),
+      desc: t('help.guide3_desc'),
+    },
+    {
+      icon: BarChart3,
+      color: '#2563EB',
+      bg: '#EFF6FF',
+      title: t('help.guide4_title'),
+      desc: t('help.guide4_desc'),
+    },
+  ];
+
+  const faqs = [
+    { q: t('help.faq1_q'), a: t('help.faq1_a') },
+    { q: t('help.faq2_q'), a: t('help.faq2_a') },
+    { q: t('help.faq3_q'), a: t('help.faq3_a') },
+    { q: t('help.faq4_q'), a: t('help.faq4_a') },
+    { q: t('help.faq5_q'), a: t('help.faq5_a') },
+    { q: t('help.faq6_q'), a: t('help.faq6_a') },
+    { q: t('help.faq7_q'), a: t('help.faq7_a') },
+    { q: t('help.faq8_q'), a: t('help.faq8_a') },
+    { q: t('help.faq9_q'), a: t('help.faq9_a') },
+    { q: t('help.faq10_q'), a: t('help.faq10_a') },
+  ];
 
   return (
     <div style={{
@@ -147,7 +117,7 @@ export default function AidePage() {
             fontSize: 16, fontWeight: 700,
             color: 'var(--text-main)', margin: 0,
           }}>
-            Guides rapides
+            {t('help.guides_title')}
           </h2>
         </div>
         <div style={{
@@ -222,7 +192,7 @@ export default function AidePage() {
             fontSize: 16, fontWeight: 700,
             color: 'var(--text-main)', margin: 0,
           }}>
-            Questions fréquentes
+            {t('help.faq_title')}
           </h2>
         </div>
 
@@ -312,15 +282,14 @@ export default function AidePage() {
           color: 'var(--text-main)',
           marginBottom: 6,
         }}>
-          Vous n'avez pas trouvé votre réponse ?
+          {t('help.contact_title')}
         </h3>
         <p style={{
           color: 'var(--text-muted)',
           fontSize: 14, marginBottom: 16,
           lineHeight: 1.5,
         }}>
-          Notre équipe est disponible pour
-          vous aider.
+          {t('help.contact_desc')}
         </p>
         <button
           onClick={() => window.open(
@@ -340,7 +309,7 @@ export default function AidePage() {
               '0 4px 14px rgba(10,123,94,0.35)',
           }}>
           <MessageCircle size={16} />
-          Contacter sur WhatsApp
+          {t('help.contact_btn')}
         </button>
         <p style={{
           fontSize: 12,

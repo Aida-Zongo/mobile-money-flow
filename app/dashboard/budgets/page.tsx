@@ -10,40 +10,45 @@ import {
   Smartphone, BookOpen, Package, Check
 } from 'lucide-react';
 
-const CATS = [
-  { id:'alimentation', label:'Alimentation',
+const getCats = (t: any) => [
+  { id:'alimentation', label: t('shared.alimentation'),
     Icon:ShoppingBag, color:'#D97706',
     bg:'#FEF3E2' },
-  { id:'transport', label:'Transport',
+  { id:'transport', label: t('shared.transport'),
     Icon:Car, color:'#0A7B5E', bg:'#E8F5F1' },
-  { id:'sante', label:'Santé',
+  { id:'sante', label: t('shared.sante'),
     Icon:Heart, color:'#16A34A', bg:'#F0FDF4' },
-  { id:'shopping', label:'Shopping',
+  { id:'shopping', label: t('shared.shopping'),
     Icon:ShoppingCart, color:'#DB2777',
     bg:'#FDF2F8' },
-  { id:'logement', label:'Logement',
+  { id:'logement', label: t('shared.logement'),
     Icon:Home, color:'#2563EB', bg:'#EFF6FF' },
-  { id:'telecom', label:'Télécom',
+  { id:'telecom', label: t('shared.telecom'),
     Icon:Smartphone, color:'#0369A1',
     bg:'#F0F9FF' },
-  { id:'education', label:'Éducation',
+  { id:'education', label: t('shared.education'),
     Icon:BookOpen, color:'#CA8A04',
     bg:'#FEFCE8' },
-  { id:'autre', label:'Autre',
+  { id:'autre', label: t('shared.autre'),
     Icon:Package, color:'#6B7280',
     bg:'var(--bg)' },
 ];
 
-const MONTHS = ['Janvier','Février','Mars',
-  'Avril','Mai','Juin','Juillet','Août',
-  'Septembre','Octobre','Novembre','Décembre'];
-
-const fmt = (n:number) =>
-  new Intl.NumberFormat('fr-FR').format(n||0)
-  +' FCFA';
+const getMonths = (t: any) => [
+  t('shared.january'), t('shared.february'), t('shared.march'),
+  t('shared.april'), t('shared.may'), t('shared.june'),
+  t('shared.july'), t('shared.august'), t('shared.september'),
+  t('shared.october'), t('shared.november'), t('shared.december')
+];
 
 export default function BudgetsPage() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const CATS = getCats(t);
+  const MONTHS = getMonths(t);
+
+  const fmt = (n: number) =>
+    new Intl.NumberFormat(lang === 'en' ? 'en-US' : 'fr-FR').format(n || 0)
+    + ' FCFA';
   const [budgets, setBudgets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(false);
@@ -84,7 +89,7 @@ export default function BudgetsPage() {
 
   const save = async() => {
     if (!form.limitAmount) {
-      showToast('Montant requis', true); return;
+      showToast(t('budget.amount_required'), true); return;
     }
     setSaving(true);
     try {
@@ -95,10 +100,10 @@ export default function BudgetsPage() {
       const id = editing?.id || editing?._id;
       if (editing) {
         await api.put('/budgets/'+id, body);
-        showToast('Budget modifié');
+        showToast(t('budget.updated'));
       } else {
         await api.post('/budgets', body);
-        showToast('Budget créé');
+        showToast(t('budget.created'));
       }
       setModal(false);
       load();
@@ -111,10 +116,10 @@ export default function BudgetsPage() {
   const del = async(id:string) => {
     try {
       await api.delete('/budgets/'+id);
-      showToast('Budget supprimé');
+      showToast(t('budget.deleted'));
       load();
     } catch(e) {
-      showToast('Erreur', true);
+      showToast(t('tx.error'), true);
     }
   };
 
@@ -161,7 +166,7 @@ export default function BudgetsPage() {
             color:'var(--text-muted)', fontSize:14,
             marginTop:4
           }}>
-            Gérez vos limites par catégorie
+            {t('budget.manage_desc')}
           </p>
         </div>
         <button onClick={openAdd} style={{
@@ -175,7 +180,7 @@ export default function BudgetsPage() {
           boxShadow:'0 4px 14px rgba(10,123,94,0.35)'
         }}>
           <Plus size={16} />
-          Créer un budget
+          {t('budget.create')}
         </button>
       </div>
 
@@ -183,7 +188,7 @@ export default function BudgetsPage() {
         <div style={{
           textAlign:'center', padding:40,
           color:'var(--text-muted)'
-        }}>Chargement...</div>
+        }}>{t('shared.loading')}</div>
       ) : budgets.length===0 ? (
         <div style={{
           backgroundColor:'var(--bg-card)', borderRadius:16,
@@ -208,8 +213,7 @@ export default function BudgetsPage() {
             color:'var(--text-muted)', fontSize:14,
             marginBottom:20
           }}>
-            Créez des budgets pour maîtriser
-            vos dépenses
+            {t('budget.none_desc')}
           </p>
           <button onClick={openAdd} style={{
             backgroundColor:'#0A7B5E',
@@ -219,7 +223,7 @@ export default function BudgetsPage() {
             fontWeight:600,
             fontFamily:'DM Sans, sans-serif'
           }}>
-            Créer un budget
+            {t('budget.create')}
           </button>
         </div>
       ) : (
@@ -285,7 +289,7 @@ export default function BudgetsPage() {
                       fontWeight:600
                     }}>
                       <AlertTriangle size={11} />
-                      Dépassé
+                      {t('budget.exceeded')}
                     </span>
                   )}
                   {pct>=80 && pct<100 && (
@@ -299,7 +303,7 @@ export default function BudgetsPage() {
                       fontWeight:600
                     }}>
                       <Bell size={11} />
-                      Attention
+                      {t('budget.warning')}
                     </span>
                   )}
                 </div>
@@ -387,7 +391,7 @@ export default function BudgetsPage() {
                     fontFamily:'DM Sans, sans-serif'
                   }}>
                     <Edit2 size={13} />
-                    Modifier
+                    {t('shared.edit')}
                   </button>
                   <button onClick={()=>del(id)}
                     style={{
@@ -402,7 +406,7 @@ export default function BudgetsPage() {
                       fontFamily:'DM Sans, sans-serif'
                   }}>
                     <Trash2 size={13} />
-                    Supprimer
+                    {t('shared.delete')}
                   </button>
                 </div>
               </div>
@@ -510,7 +514,7 @@ export default function BudgetsPage() {
               <label style={{
                 display:'block', fontSize:13,
                 color:'var(--text-muted)', marginBottom:6
-              }}>Montant limite (FCFA)</label>
+              }}>{t('budget.limit_label')} (FCFA)</label>
               <input type='number'
                 value={form.limitAmount}
                 onChange={e=>setForm({
@@ -529,7 +533,9 @@ export default function BudgetsPage() {
                 <label style={{
                   display:'block', fontSize:13,
                   color:'var(--text-muted)', marginBottom:6
-                }}>Mois</label>
+                }}>
+                  {t('settings.report_month')}
+                </label>
                 <select value={form.month}
                   onChange={e=>setForm({
                     ...form,
@@ -546,7 +552,9 @@ export default function BudgetsPage() {
                 <label style={{
                   display:'block', fontSize:13,
                   color:'var(--text-muted)', marginBottom:6
-                }}>Année</label>
+                }}>
+                  {t('settings.report_year') || 'Année'}
+                </label>
                 <input type='number'
                   value={form.year}
                   onChange={e=>setForm({
@@ -571,11 +579,11 @@ export default function BudgetsPage() {
                 alignItems:'center',
                 justifyContent:'center', gap:8
               }}>
-              {saving ? 'Enregistrement...' : <>
+              {saving ? t('shared.saving') : <>
                 <Check size={16} />
                 {editing
-                  ?'Modifier'
-                  :'Créer le budget'}
+                  ? t('shared.edit')
+                  : t('budget.create')}
               </>}
             </button>
           </div>
