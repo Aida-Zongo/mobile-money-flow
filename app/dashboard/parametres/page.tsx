@@ -47,25 +47,36 @@ const MonthlyReportDownloader = () => {
           { headers: { Authorization: `Bearer ${token}` } }),
       ]);
 
+      if (!statsRes.ok || !expensesRes.ok || !incomesRes.ok) {
+        throw new Error('Erreur lors de la récupération des données');
+      }
+
       const stats = await statsRes.json();
       const expData = await expensesRes.json();
       const incData = await incomesRes.json();
 
-      const expenses = expData.expenses || expData || [];
-      const incomes = incData.incomes || incData || [];
+      const expenses = (expData.expenses || (Array.isArray(expData) ? expData : [])).map((e: any) => ({
+        ...e,
+        date: e.date || e.createdAt || new Date().toISOString()
+      }));
+
+      const incomes = (incData.incomes || (Array.isArray(incData) ? incData : [])).map((i: any) => ({
+        ...i,
+        date: i.createdAt || `${i.year}-${String(i.month).padStart(2, '0')}-01`
+      }));
 
       await generateMonthlyPDF({
         userName,
         month: selMonth,
         year: selYear,
-        totalRevenues: stats.totalRevenues || stats.totalIncome || 0,
-        totalExpenses: stats.totalExpenses || stats.totalMonth || 0,
+        totalRevenues: Number(stats.totalRevenues || stats.totalIncome || 0),
+        totalExpenses: Number(stats.totalExpenses || stats.totalMonth || 0),
         incomes,
         expenses,
       });
     } catch (e: any) {
-      console.error(e);
-      setError('Erreur lors de la génération du PDF');
+      console.error('PDF Generation Error:', e);
+      setError(e.message || 'Erreur lors de la génération du PDF');
     }
     setDownloading(false);
   };

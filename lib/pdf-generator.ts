@@ -25,6 +25,7 @@ export async function generateMonthlyPDF(data: {
   const TEXT_LIGHT = '#9CA3AF';  // Gray 400
   const BG_LIGHT = '#F9FAFB';    // Gray 50
   const WHITE = '#FFFFFF';
+  const BORDER = '#E5E7EB';      // Gray 200
   
   const PAGE_W = 210;
   const MARGIN = 18;
@@ -35,27 +36,28 @@ export async function generateMonthlyPDF(data: {
     'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
   ];
 
-  const fmt = (n: number) =>
-    new Intl.NumberFormat('fr-FR').format(Math.round(n)) + ' FCFA';
+  const fmt = (n: any) => {
+    const val = typeof n === 'number' ? n : parseFloat(n) || 0;
+    return new Intl.NumberFormat('fr-FR').format(Math.round(val)) + ' FCFA';
+  };
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr: any) => {
     if (!dateStr || dateStr === '-') return '-';
     try {
       const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return String(dateStr);
       return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
-    } catch { return dateStr; }
+    } catch { return String(dateStr); }
   };
 
-  const solde = data.totalRevenues - data.totalExpenses;
+  const solde = (Number(data.totalRevenues) || 0) - (Number(data.totalExpenses) || 0);
   const today = new Date();
-  const todayStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(4, '0')}/${today.getFullYear()}`;
+  const todayStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
 
   // ——— 1. HEADER section ———
-  // Background header bar
   doc.setFillColor(PRIMARY);
   doc.rect(0, 0, PAGE_W, 45, 'F');
 
-  // Logo stylized
   doc.setTextColor(WHITE);
   doc.setFontSize(26);
   doc.setFont('helvetica', 'bold');
@@ -63,10 +65,9 @@ export async function generateMonthlyPDF(data: {
 
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.setTextColor('#E5E7EB');
+  doc.setTextColor('#E5E7EB'); // Light gray for subtitle
   doc.text('VOTRE COMPAGNON FINANCIER', MARGIN, 28);
 
-  // Report details (top right)
   doc.setFontSize(14);
   doc.setTextColor(WHITE);
   doc.setFont('helvetica', 'bold');
@@ -74,13 +75,13 @@ export async function generateMonthlyPDF(data: {
 
   doc.setFontSize(11);
   doc.setFont('helvetica', 'normal');
-  const periodLabel = `${monthNamesFr[data.month - 1]} ${data.year}`;
+  const periodLabel = `${monthNamesFr[(data.month || 1) - 1]} ${data.year || today.getFullYear()}`;
   doc.text(periodLabel.toUpperCase(), PAGE_W - MARGIN, 29, { align: 'right' });
 
   // ——— 2. USER INFO CARD ———
   let cursorY = 55;
   doc.setFillColor(WHITE);
-  doc.setDrawColor('#E5E7EB');
+  doc.setDrawColor(BORDER);
   doc.roundedRect(MARGIN, cursorY, CONTENT_W, 20, 3, 3, 'FD');
 
   doc.setFontSize(9);
@@ -90,7 +91,7 @@ export async function generateMonthlyPDF(data: {
   doc.setFontSize(12);
   doc.setTextColor(TEXT_DARK);
   doc.setFont('helvetica', 'bold');
-  doc.text(data.userName.toUpperCase(), MARGIN + 6, cursorY + 14);
+  doc.text((data.userName || 'Utilisateur').toUpperCase(), MARGIN + 6, cursorY + 14);
 
   doc.setFontSize(9);
   doc.setTextColor(TEXT_GRAY);
@@ -115,7 +116,6 @@ export async function generateMonthlyPDF(data: {
     doc.setFillColor(s.bg);
     doc.roundedRect(x, cursorY, cardW, cardH, 3, 3, 'F');
 
-    // Accent line on top
     doc.setFillColor(s.color);
     doc.rect(x + 5, cursorY, cardW - 10, 1.5, 'F');
 
@@ -137,15 +137,14 @@ export async function generateMonthlyPDF(data: {
   doc.setTextColor(PRIMARY);
   doc.text('Détail des Revenus', MARGIN, cursorY);
   
-  // Underline
   doc.setDrawColor(PRIMARY);
   doc.setLineWidth(0.8);
   doc.line(MARGIN, cursorY + 2, MARGIN + 40, cursorY + 2);
   cursorY += 8;
 
-  const incomeRows = data.incomes.length > 0
+  const incomeRows = (data.incomes || []).length > 0
     ? data.incomes.map((inc) => [
-        formatDate(inc.date || '-'),
+        formatDate(inc.date),
         (inc.source || '-').toUpperCase(),
         inc.note || '—',
         `+${fmt(inc.amount)}`,
@@ -157,7 +156,7 @@ export async function generateMonthlyPDF(data: {
     head: [['Date', 'Source', 'Note', 'Montant']],
     body: incomeRows,
     margin: { left: MARGIN, right: MARGIN },
-    styles: { fontSize: 9, cellPadding: 4, textColor: TEXT_DARK, lineColor: '#E5E7EB', lineWidth: 0.1 },
+    styles: { fontSize: 9, cellPadding: 4, textColor: TEXT_DARK, lineColor: BORDER, lineWidth: 0.1 },
     headStyles: { fillColor: PRIMARY, textColor: WHITE, fontStyle: 'bold', halign: 'center', fontSize: 10 },
     columnStyles: {
       0: { halign: 'center', cellWidth: 28 },
@@ -165,12 +164,11 @@ export async function generateMonthlyPDF(data: {
       2: { textColor: TEXT_GRAY },
       3: { halign: 'right', cellWidth: 38, textColor: PRIMARY, fontStyle: 'bold' },
     },
-    alternateRowStyles: { fillColor: '#F9FAFB' },
+    alternateRowStyles: { fillColor: BG_LIGHT },
   });
 
   cursorY = (doc as any).lastAutoTable.finalY + 15;
 
-  // Check if we need a new page for expenses
   if (cursorY > 230) {
     doc.addPage();
     cursorY = 25;
@@ -186,9 +184,9 @@ export async function generateMonthlyPDF(data: {
   doc.line(MARGIN, cursorY + 2, MARGIN + 45, cursorY + 2);
   cursorY += 8;
 
-  const expenseRows = data.expenses.length > 0
+  const expenseRows = (data.expenses || []).length > 0
     ? data.expenses.map((exp) => [
-        formatDate(exp.date || '-'),
+        formatDate(exp.date),
         (exp.category || '-').toUpperCase(),
         exp.description || '—',
         `-${fmt(exp.amount)}`,
@@ -200,7 +198,7 @@ export async function generateMonthlyPDF(data: {
     head: [['Date', 'Catégorie', 'Description', 'Montant']],
     body: expenseRows,
     margin: { left: MARGIN, right: MARGIN },
-    styles: { fontSize: 9, cellPadding: 4, textColor: TEXT_DARK, lineColor: '#E5E7EB', lineWidth: 0.1 },
+    styles: { fontSize: 9, cellPadding: 4, textColor: TEXT_DARK, lineColor: BORDER, lineWidth: 0.1 },
     headStyles: { fillColor: RED, textColor: WHITE, fontStyle: 'bold', halign: 'center', fontSize: 10 },
     columnStyles: {
       0: { halign: 'center', cellWidth: 28 },
@@ -218,7 +216,6 @@ export async function generateMonthlyPDF(data: {
     cursorY = 25;
   }
 
-  // "Verified by MoneyFlow" Badge
   doc.setFillColor('#F3F4F6');
   doc.roundedRect(MARGIN, cursorY, 50, 15, 2, 2, 'F');
   doc.setFontSize(8);
@@ -228,7 +225,6 @@ export async function generateMonthlyPDF(data: {
   doc.setTextColor(PRIMARY);
   doc.text('MONEYFLOW SECURE', MARGIN + 25, cursorY + 11, { align: 'center' });
 
-  // Final Summary on the right
   doc.setTextColor(TEXT_GRAY);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
@@ -249,8 +245,7 @@ export async function generateMonthlyPDF(data: {
   const totalPages = (doc as any).internal.getNumberOfPages();
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p);
-    // Dark footer line
-    doc.setDrawColor('#E5E7EB');
+    doc.setDrawColor(BORDER);
     doc.setLineWidth(0.2);
     doc.line(MARGIN, 282, PAGE_W - MARGIN, 282);
     
@@ -258,13 +253,12 @@ export async function generateMonthlyPDF(data: {
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(TEXT_LIGHT);
     doc.text(
-      `Document officiel MoneyFlow - Identiant unique: MF-${data.year}${data.month}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+      `Document officiel MoneyFlow - Identifiant unique: MF-${data.year || today.getFullYear()}${data.month || 1}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
       MARGIN, 287
     );
     doc.text(`Page ${p} / ${totalPages}`, PAGE_W - MARGIN, 287, { align: 'right' });
   }
 
-  // ——— 8. SAVE ———
-  const filename = `MoneyFlow_Rapport_${monthNamesFr[data.month - 1]}_${data.year}.pdf`;
+  const filename = `MoneyFlow_Rapport_${monthNamesFr[(data.month || 1) - 1]}_${data.year || today.getFullYear()}.pdf`;
   doc.save(filename);
 }
