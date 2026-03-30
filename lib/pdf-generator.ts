@@ -63,7 +63,7 @@ export async function generateMonthlyPDF(data: {
 
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.setTextColor('rgba(255,255,255,0.8)');
+  doc.setTextColor('#E5E7EB');
   doc.text('VOTRE COMPAGNON FINANCIER', MARGIN, 28);
 
   // Report details (top right)
